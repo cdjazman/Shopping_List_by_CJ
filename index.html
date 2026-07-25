@@ -271,6 +271,14 @@ header{
   align-items:center;
   gap:2px;
 }
+.pin-btn{
+  background:none;
+  border:none;
+  font-size:0.9rem;
+  cursor:pointer;
+  padding:4px 6px;
+  opacity:.8;
+}
 .edit-btn{
   background:none;
   border:none;
@@ -705,8 +713,8 @@ header{
     
     <div style="background:var(--paper-dim); padding:16px; border-radius:12px; border:1px solid var(--line); margin-bottom:16px;">
       <div style="font-weight:700; margin-bottom:6px; color:var(--rust);">Danger Zone</div>
-      <p style="font-size:0.8125rem; color:var(--ink-soft); margin:0 0 14px;">Delete your entire product catalogue permanently and clear all saved items.</p>
-      <button type="button" id="deleteCatalogBtn" class="clear-all-btn" style="margin-bottom:0; border-color:var(--rust); color:var(--rust);">🗑️ Delete Entire Catalogue</button>
+      <p style="font-size:0.8125rem; color:var(--ink-soft); margin:0 0 14px;">Delete all unpinned items permanently and reset catalog.</p>
+      <button type="button" id="deleteCatalogBtn" class="clear-all-btn" style="margin-bottom:0; border-color:var(--rust); color:var(--rust);">🗑️ Delete Unpinned Catalogue</button>
     </div>
 
     <div class="footer-actions">
@@ -862,7 +870,7 @@ function load(){
   }catch(e){ catalog = []; }
 
   if(!catalog || catalog.length===0){
-    catalog = DEFAULT_ITEMS.map(([name,aisle,qty,store,price])=>({id:uid(),name,aisle,qty,store,price,inList:false,checked:false}));
+    catalog = DEFAULT_ITEMS.map(([name,aisle,qty,store,price])=>({id:uid(),name,aisle,qty,store,price,inList:false,checked:false,pinned:false}));
     save();
   } else {
     let updated = false;
@@ -874,6 +882,7 @@ function load(){
       if(item.aisle === "Drinks") { item.aisle = "Drinks & Beverages"; updated = true; }
       if(item.aisle === "Household & Other") { item.aisle = "Household & Personal Care"; updated = true; }
       if(item.qty == null) { item.qty = 1; updated = true; }
+      if(item.pinned == null) { item.pinned = false; updated = true; }
     });
     if(updated) save();
   }
@@ -906,7 +915,8 @@ function addItem(){
       store: selectedStore,
       price: isNaN(price) ? null : price,
       inList:false,
-      checked:false
+      checked:false,
+      pinned:false
     });
   }
 
@@ -977,7 +987,20 @@ function cycleStore(id){
   renderShop();
 }
 
+function togglePin(id){
+  const item = catalog.find(i=>i.id===id);
+  if(!item) return;
+  item.pinned = !item.pinned;
+  save();
+  renderMain();
+}
+
 function removeFromCatalog(id){
+  const item = catalog.find(i=>i.id===id);
+  if(item && item.pinned) {
+    alert("This item is pinned and cannot be deleted.");
+    return;
+  }
   catalog = catalog.filter(i=>i.id!==id);
   save();
   renderMain();
@@ -989,7 +1012,7 @@ function toggleInList(id){
   item.inList = !item.inList;
   if(!item.inList) {
     item.checked = false;
-    item.qty = 1; // Reset qty to 1 when unselected
+    item.qty = 1;
   }
   save();
   renderMain();
@@ -1056,6 +1079,10 @@ function renderMain(){
       </div>
     ` : '';
 
+    const removeOrLock = item.pinned 
+      ? `<span title="Pinned item (protected)" style="padding:4px 6px; font-size:0.85rem; opacity:0.6;">🔒</span>`
+      : `<button class="remove-btn" data-remove="${item.id}" title="Delete Product">✕</button>`;
+
     row.innerHTML = `
       <div class="catalog-left" data-id="${item.id}">
         <div class="checkbox">
@@ -1073,8 +1100,9 @@ function renderMain(){
       <div style="display:flex; align-items:center;">
         ${qtyMod}
         <div class="action-btns" style="margin-left:6px;">
+          <button class="pin-btn" data-pin="${item.id}" title="${item.pinned ? 'Unpin item' : 'Pin item'}">${item.pinned ? '📌' : '📍'}</button>
           <button class="edit-btn" data-edit="${item.id}" title="Edit Product">✎</button>
-          <button class="remove-btn" data-remove="${item.id}" title="Delete Product">✕</button>
+          ${removeOrLock}
         </div>
       </div>
     `;
@@ -1083,6 +1111,12 @@ function renderMain(){
 
   catalogWrap.querySelectorAll('.catalog-left').forEach(el=>{
     el.addEventListener('click', ()=> toggleInList(el.dataset.id));
+  });
+  catalogWrap.querySelectorAll('[data-pin]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      togglePin(btn.dataset.pin);
+    });
   });
   catalogWrap.querySelectorAll('[data-inc]').forEach(btn=>{
     btn.addEventListener('click', ()=> changeQty(btn.dataset.inc, 1));
@@ -1213,7 +1247,7 @@ tabMain.addEventListener('click', showMain);
 tabShop.addEventListener('click', ()=>{ if(catalog.some(i=>i.inList)) showShop(); });
 tabSettings.addEventListener('click', showSettings);
 
-// UX Safe Clear All Button Listener (Resets qty to 1 as well)
+// Clear All Selected Items Listener
 clearAllBtn.addEventListener('click', () => {
   if(confirm("Are you sure you want to unselect all items from this week's list?")) {
     catalog.forEach(i => { i.inList = false; i.checked = false; i.qty = 1; });
@@ -1222,10 +1256,10 @@ clearAllBtn.addEventListener('click', () => {
   }
 });
 
-// Delete Entire Catalogue Listener
+// Delete Unpinned Catalogue Listener (Keeps Pinned Items Safe)
 deleteCatalogBtn.addEventListener('click', () => {
-  if(confirm("⚠️ DANGER: This will permanently delete your entire product catalogue and all saved items. Are you completely sure?")) {
-    catalog = [];
+  if(confirm("⚠️ This will permanently delete all unpinned items in your catalogue. Pinned items will be kept safe. Continue?")) {
+    catalog = catalog.filter(i => i.pinned);
     save();
     showMain();
   }
