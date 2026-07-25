@@ -1313,7 +1313,7 @@ newRunBtn.addEventListener('click', async ()=>{
   }
 });
 
-// Export Catalog (Smart Mobile Share + Desktop Download)
+// Export Catalog (Prompts user to choose save location via File System Access API)
 async function exportCatalog() {
   if (!catalog || catalog.length === 0) {
     alert("Your catalogue is empty, nothing to export!");
@@ -1322,15 +1322,23 @@ async function exportCatalog() {
 
   const dataStr = JSON.stringify(catalog, null, 2);
   const fileName = `shopping-list-backup-${new Date().toISOString().slice(0, 10)}.json`;
-  const file = new File([dataStr], fileName, { type: 'application/json' });
 
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  if (window.showSaveFilePicker) {
     try {
-      await navigator.share({
-        files: [file],
-        title: 'Shopping List Backup',
-        text: 'Here is your shopping list catalogue backup file.'
-      });
+      const options = {
+        suggestedName: fileName,
+        types: [{
+          description: 'JSON Backup Files',
+          accept: { 'application/json': ['.json'] },
+        }],
+      };
+      
+      const handle = await window.showSaveFilePicker(options);
+      const writable = await handle.createWritable();
+      await writable.write(dataStr);
+      await writable.close();
+      
+      alert("Backup saved successfully!");
       return;
     } catch (err) {
       if (err.name === 'AbortError') return;
