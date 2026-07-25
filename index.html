@@ -712,6 +712,18 @@ header{
     <div class="aisle-heading" style="margin-bottom: 16px;">App Settings</div>
     
     <div style="background:var(--paper-dim); padding:16px; border-radius:12px; border:1px solid var(--line); margin-bottom:16px;">
+      <div style="font-weight:700; margin-bottom:6px; color:var(--ink);">Backup & Restore</div>
+      <p style="font-size:0.8125rem; color:var(--ink-soft); margin:0 0 14px;">Download a backup file of your catalogue or restore a previous list.</p>
+      <div style="display:flex; gap:8px;">
+        <button type="button" id="exportBtn" class="ghost-btn" style="background:#fff; flex:1;">📤 Export</button>
+        <label class="ghost-btn" style="background:#fff; flex:1; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          📥 Import
+          <input type="file" id="importFile" accept=".json" style="display:none;">
+        </label>
+      </div>
+    </div>
+
+    <div style="background:var(--paper-dim); padding:16px; border-radius:12px; border:1px solid var(--line); margin-bottom:16px;">
       <div style="font-weight:700; margin-bottom:6px; color:var(--rust);">Danger Zone</div>
       <p style="font-size:0.8125rem; color:var(--ink-soft); margin:0 0 14px;">Delete all unpinned items permanently and reset catalog.</p>
       <button type="button" id="deleteCatalogBtn" class="clear-all-btn" style="margin-bottom:0; border-color:var(--rust); color:var(--rust);">🗑️ Delete Unpinned Catalogue</button>
@@ -723,6 +735,9 @@ header{
   </div>
 
 </div>
+
+<!-- LOAD DEFAULT ITEMS FROM EXTERNAL FILE -->
+<script src="defaults.js"></script>
 
 <script>
 const AISLES = [
@@ -742,79 +757,6 @@ let catalog = [];
 let currentStoreFilter = "ALL";
 let editingItemId = null;
 let selectedSearchStore = "Aldi";
-
-const DEFAULT_ITEMS = [
-  ["Bananas","Fresh & Produce",1,"Aldi",5.00],
-  ["Capsicum Green","Fresh & Produce",1,"Aldi",2.00],
-  ["Capsicum Red","Fresh & Produce",2,"Aldi",2.00],
-  ["Cherry Tomatoes 250g","Fresh & Produce",1,"Aldi",2.49],
-  ["Cos Lettuce 2 Pack","Fresh & Produce",1,"Aldi",2.99],
-  ["Lebanese Cucumbers Loose","Fresh & Produce",1,"Aldi",1.15],
-  ["Salad Leaf Mix 300g","Fresh & Produce",1,"Aldi",3.99],
-  ["Spudlite Potatoes 1.5kg","Fresh & Produce",1,"Aldi",5.99],
-  ["Beef chuck","Meat & Seafood",1,"Aldi",18.99],
-  ["Beef Mince 500g","Meat & Seafood",2,"Aldi",10.49],
-  ["Brisket","Meat & Seafood",1,"Aldi",20.99],
-  ["Chicken Breast Value Pack","Meat & Seafood",1,"Aldi",20.88],
-  ["Free Range Marinated Chicken Breast","Meat & Seafood",1,"Aldi",9.50],
-  ["Short Cut Bacon 500g","Meat & Seafood",1,"Aldi",6.99],
-  ["Leg Ham Thinly Sliced 4 Pack 400g","Meat & Seafood",1,"Aldi",5.39],
-  ["DIEGO'S Street Tacos 10 Pack 300g","Bakery",1,"Aldi",3.29],
-  ["Large White Wraps 8 Pack 560g","Bakery",1,"Aldi",3.49],
-  ["Turkish Rolls 4 Pack 400g","Bakery",1,"Aldi",2.39],
-  ["White Extra Soft Bread Rolls 6 Pack 450g","Bakery",1,"Aldi",2.69],
-  ["Apple Cider Vinegar","Pantry & Dry Goods",1,"Aldi",3.29],
-  ["Baked Beans","Pantry & Dry Goods",1,"Aldi",3.99],
-  ["BAKERS LIFE Lower Carb Higher Protein Bread 600g","Bakery",1,"Aldi",5.49],
-  ["Coconut Milk Light 400ml","Pantry & Dry Goods",1,"Aldi",1.69],
-  ["Dijon Mustard","Pantry & Dry Goods",1,"Aldi",2.29],
-  ["English Muffins 6 Pack 400g","Bakery",1,"Aldi",2.79],
-  ["Evaporated Milk","Pantry & Dry Goods",1,"Woolworths",5.00],
-  ["Extra Virgin Olive Oil Spray 225g","Pantry & Dry Goods",1,"Aldi",4.49],
-  ["Green Curry Simmer Sauce 500g","Pantry & Dry Goods",1,"Aldi",1.99],
-  ["Killer Coffee Co Beans Darkerside","Pantry & Dry Goods",1,"Woolworths",24.00],
-  ["LA COSTENA Chipotle in Adobo Sauce 230g","Pantry & Dry Goods",1,"Aldi",4.99],
-  ["Light Tasty Shredded Cheese 500g","Dairy, Eggs & Fridge",1,"Aldi",5.99],
-  ["Pasta Penne 500g","Pantry & Dry Goods",1,"Aldi",1.00],
-  ["Premium Carbonara Pasta Sauce 500g","Pantry & Dry Goods",1,"Aldi",2.69],
-  ["Protein Bars Salted Caramel","Pantry & Dry Goods",1,"Aldi",3.99],
-  ["Salted Popcorn Multipack 10 Pack 200g","Pantry & Dry Goods",1,"Aldi",2.39],
-  ["Sanitarium Weet-bix Bites Wild Berry Breakfast Cereal","Pantry & Dry Goods",1,"Woolworths",4.00],
-  ["Tomato Sauce 2L","Pantry & Dry Goods",1,"Aldi",4.99],
-  ["Wheat Biscuits Value Pack 1.12kg","Pantry & Dry Goods",1,"Aldi",5.09],
-  ["Worcestershire Sauce","Pantry & Dry Goods",1,"Aldi",1.89],
-  ["Dr Pepper","Drinks & Beverages",1,"Aldi",3.00],
-  ["Bath & Shower Cleaner 750ml","Household & Personal Care",1,"Aldi",2.69],
-  ["Flushable Wipes 40 Pack","Household & Personal Care",1,"Aldi",2.69],
-  ["POWER FORCE Assorted Genie Wand Accessories","Household & Personal Care",1,"Aldi",2.79],
-  ["Thick Sponges 4 Pack","Household & Personal Care",1,"Aldi",3.69],
-  ["Toilet Blocks 2 Pack 2x50g","Household & Personal Care",1,"Aldi",1.89],
-  ["Toilet Tissue 3 Ply 24 Pack","Household & Personal Care",1,"Aldi",8.49],
-  ["Body Wash","Household & Personal Care",1,"Aldi",4.49],
-  ["HEDAFEN Ibuprofen Tablets 24 Pack 200mg","Household & Personal Care",1,"Aldi",1.39],
-  ["HEDANOL Paracetamol Tablet 16 Pack","Household & Personal Care",1,"Aldi",1.89],
-  ["Tissues 2ply 224 Pack","Household & Personal Care",1,"Aldi",1.89],
-  ["Vitamins B+C Effervescent Tablets 15 Pack","Household & Personal Care",1,"Aldi",5.29],
-  ["Brancourts Low Fat Cottage Cheese 200g","Dairy, Eggs & Fridge",1,"Woolworths",4.20],
-  ["Butter 250g","Dairy, Eggs & Fridge",2,"Aldi",4.99],
-  ["COLWAY Smokey Chipotle Mayonnaise 252g","Dairy, Eggs & Fridge",1,"Aldi",1.99],
-  ["Cottage Cheese 500g","Dairy, Eggs & Fridge",1,"Aldi",5.49],
-  ["Greek Style Strained Yogurt Plain 900g","Dairy, Eggs & Fridge",1,"Aldi",5.89],
-  ["Milk 3L","Dairy, Eggs & Fridge",1,"Aldi",5.15],
-  ["Parmesan Cheese Block 200g","Dairy, Eggs & Fridge",1,"Aldi",6.29],
-  ["Pauls Plus Chocolate Yoghurt","Dairy, Eggs & Fridge",2,"Woolworths",2.10],
-  ["Pauls Plus Protein Chocolate Dessert","Dairy, Eggs & Fridge",1,"Woolworths",2.10],
-  ["Pauls Plus Protein Yoghurt Pouch Lemon Cheesecake","Dairy, Eggs & Fridge",2,"Woolworths",2.10],
-  ["Pizza Shredded Cheese 500g","Dairy, Eggs & Fridge",1,"Aldi",6.29],
-  ["Tasty Cheese Slices 500g","Dairy, Eggs & Fridge",1,"Aldi",6.99],
-  ["WICKED SISTER Banana Pudding 170g","Dairy, Eggs & Fridge",3,"Aldi",2.69],
-  ["WICKED SISTER Chocolate Pudding 170g","Dairy, Eggs & Fridge",3,"Aldi",2.69],
-  ["YOGURI Protein Yogurt Salted Caramel 160g","Dairy, Eggs & Fridge",5,"Aldi",2.19],
-  ["YOGURI Protein Yogurt Vanilla 160g","Dairy, Eggs & Fridge",5,"Aldi",2.19],
-  ["Eggs 700g","Dairy, Eggs & Fridge",1,"Aldi",6.19],
-  ["Chicken Breast Tenders Southern Style 1kg","Freezer",1,"Aldi",9.99],
-  ["Winter Vegetables 1kg","Freezer",1,"Aldi",3.69]
-];
 
 const itemInput = document.getElementById('itemInput');
 const aisleSelect = document.getElementById('aisleSelect');
@@ -1045,7 +987,6 @@ function renderMain(){
   goShopBtn.disabled = selectedCount===0;
   goShopBtn.textContent = selectedCount===0 ? "Start Shopping →" : `Start Shopping (${selectedCount}) →`;
 
-  // Calculate Estimated Total Cost Counter
   let estimatedTotal = 0;
   selectedItems.forEach(item => {
     if(item.price != null && !isNaN(item.price)) {
@@ -1070,7 +1011,6 @@ function renderMain(){
     const priceStr = (item.price!=null && !isNaN(item.price)) ? `<span class="price-tag">$${Number(item.price).toFixed(2)}</span>` : '';
     const storeStr = item.store ? `<span class="store-badge" data-store="${escapeHtml(item.store)}">${STORE_LETTER[item.store]||'?'}</span>` : '';
     
-    // Quick quantity modifier buttons if selected
     const qtyMod = item.inList ? `
       <div style="display:flex; align-items:center; gap:6px; margin-left:10px;" onclick="event.stopPropagation()">
         <button type="button" class="ghost-btn" style="padding:2px 8px; font-size:0.75rem;" data-dec="${item.id}">-</button>
@@ -1256,7 +1196,7 @@ clearAllBtn.addEventListener('click', () => {
   }
 });
 
-// Delete Unpinned Catalogue Listener (Keeps Pinned Items Safe)
+// Delete Unpinned Catalogue Listener
 deleteCatalogBtn.addEventListener('click', () => {
   if(confirm("⚠️ This will permanently delete all unpinned items in your catalogue. Pinned items will be kept safe. Continue?")) {
     catalog = catalog.filter(i => i.pinned);
@@ -1283,7 +1223,6 @@ newRunBtn.addEventListener('click', async ()=>{
         }
       });
       save();
-      // If no items remain in list across any store, head back to main list automatically
       if(!catalog.some(i => i.inList)) {
         showMain();
       } else {
@@ -1292,6 +1231,71 @@ newRunBtn.addEventListener('click', async ()=>{
     }
   }
 });
+
+// Export Catalog (Smart Mobile Share + Desktop Download)
+async function exportCatalog() {
+  if (!catalog || catalog.length === 0) {
+    alert("Your catalogue is empty, nothing to export!");
+    return;
+  }
+
+  const dataStr = JSON.stringify(catalog, null, 2);
+  const fileName = `shopping-list-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  const file = new File([dataStr], fileName, { type: 'application/json' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Shopping List Backup',
+        text: 'Here is your shopping list catalogue backup file.'
+      });
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
+
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.href = url;
+  downloadAnchor.download = fileName;
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Import Catalog from a JSON file
+function importCatalog(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedData = JSON.parse(e.target.result);
+      if (Array.isArray(importedData)) {
+        if (confirm("This will overwrite your current catalogue with the backup file. Continue?")) {
+          catalog = importedData;
+          save();
+          showMain();
+          alert("Catalogue successfully restored!");
+        }
+      } else {
+        alert("Invalid backup file format.");
+      }
+    } catch (err) {
+      alert("Could not parse the backup file.");
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('exportBtn').addEventListener('click', exportCatalog);
+document.getElementById('importFile').addEventListener('change', importCatalog);
 
 // Search Store Toggle Listener
 document.querySelectorAll('#searchStoreSelect .filter-btn').forEach(btn => {
