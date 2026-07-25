@@ -589,6 +589,7 @@ header{
   <div class="tabs">
     <button class="tab-btn active" id="tabMain">Main List</button>
     <button class="tab-btn" id="tabShop">Shop</button>
+    <button class="tab-btn" id="tabSettings">Settings</button>
   </div>
 
   <!-- MAIN LIST VIEW -->
@@ -596,7 +597,7 @@ header{
     <button id="openAddBtn" class="add-product-btn">+ Add Product</button>
     <p class="hint">Tap any item below to add or remove it from this week's run.</p>
 
-    <!-- ESTIMATED TOTAL COST COUNTER & CLEAR ALL (Moved to top) -->
+    <!-- ESTIMATED TOTAL COST COUNTER & CLEAR ALL -->
     <div id="costSummaryBox" class="list-summary-footer hidden">
       <span class="cost-counter-label">Estimated Total:</span>
       <span id="estimatedTotalAmount" class="cost-counter-amount">$0.00</span>
@@ -695,6 +696,21 @@ header{
     <div class="footer-actions">
       <button class="ghost-btn" id="backToListBtn">← Edit List</button>
       <button class="ghost-btn" id="newRunBtn">Shop Done</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS VIEW -->
+  <div id="settingsView" class="hidden">
+    <div class="aisle-heading" style="margin-bottom: 16px;">App Settings</div>
+    
+    <div style="background:var(--paper-dim); padding:16px; border-radius:12px; border:1px solid var(--line); margin-bottom:16px;">
+      <div style="font-weight:700; margin-bottom:6px; color:var(--rust);">Danger Zone</div>
+      <p style="font-size:0.8125rem; color:var(--ink-soft); margin:0 0 14px;">Delete your entire product catalogue permanently and clear all saved items.</p>
+      <button type="button" id="deleteCatalogBtn" class="clear-all-btn" style="margin-bottom:0; border-color:var(--rust); color:var(--rust);">🗑️ Delete Entire Catalogue</button>
+    </div>
+
+    <div class="footer-actions">
+      <button class="ghost-btn" id="backFromSettingsBtn">← Back to List</button>
     </div>
   </div>
 
@@ -806,18 +822,22 @@ const emptyState = document.getElementById('emptyState');
 const goShopBtn = document.getElementById('goShopBtn');
 const tabMain = document.getElementById('tabMain');
 const tabShop = document.getElementById('tabShop');
+const tabSettings = document.getElementById('tabSettings');
 const mainView = document.getElementById('mainView');
 const shopView = document.getElementById('shopView');
+const settingsView = document.getElementById('settingsView');
 const aisleGroups = document.getElementById('aisleGroups');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
 const progressPct = document.getElementById('progressPct');
 const doneBanner = document.getElementById('doneBanner');
 const backToListBtn = document.getElementById('backToListBtn');
+const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
 const newRunBtn = document.getElementById('newRunBtn');
 const storeFilterBar = document.getElementById('storeFilterBar');
 const checkUpdateBtn = document.getElementById('checkUpdateBtn');
 const clearAllBtn = document.getElementById('clearAllBtn');
+const deleteCatalogBtn = document.getElementById('deleteCatalogBtn');
 const costSummaryBox = document.getElementById('costSummaryBox');
 const estimatedTotalAmount = document.getElementById('estimatedTotalAmount');
 
@@ -905,6 +925,7 @@ function openAddView(){
   updateStoreToggleUI();
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
+  settingsView.classList.add('hidden');
   addView.classList.remove('hidden');
   setTimeout(()=> itemInput.focus(), 50);
 }
@@ -926,6 +947,7 @@ function openEditView(id){
 
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
+  settingsView.classList.add('hidden');
   addView.classList.remove('hidden');
   setTimeout(()=> itemInput.focus(), 50);
 }
@@ -965,7 +987,10 @@ function toggleInList(id){
   const item = catalog.find(i=>i.id===id);
   if(!item) return;
   item.inList = !item.inList;
-  if(!item.inList) item.checked = false;
+  if(!item.inList) {
+    item.checked = false;
+    item.qty = 1; // Reset qty to 1 when unselected
+  }
   save();
   renderMain();
 }
@@ -1151,17 +1176,30 @@ function showMain(){
   mainView.classList.remove('hidden');
   shopView.classList.add('hidden');
   addView.classList.add('hidden');
+  settingsView.classList.add('hidden');
   tabMain.classList.add('active');
   tabShop.classList.remove('active');
+  tabSettings.classList.remove('active');
   renderMain();
 }
 function showShop(){
   mainView.classList.add('hidden');
   shopView.classList.remove('hidden');
   addView.classList.add('hidden');
+  settingsView.classList.add('hidden');
   tabMain.classList.remove('active');
   tabShop.classList.add('active');
+  tabSettings.classList.remove('active');
   renderShop();
+}
+function showSettings(){
+  mainView.classList.add('hidden');
+  shopView.classList.add('hidden');
+  addView.classList.add('hidden');
+  settingsView.classList.remove('hidden');
+  tabMain.classList.remove('active');
+  tabShop.classList.remove('active');
+  tabSettings.classList.add('active');
 }
 
 openAddBtn.addEventListener('click', openAddView);
@@ -1170,21 +1208,32 @@ saveProductBtn.addEventListener('click', addItem);
 itemInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addItem(); });
 goShopBtn.addEventListener('click', showShop);
 backToListBtn.addEventListener('click', showMain);
+backFromSettingsBtn.addEventListener('click', showMain);
 tabMain.addEventListener('click', showMain);
 tabShop.addEventListener('click', ()=>{ if(catalog.some(i=>i.inList)) showShop(); });
+tabSettings.addEventListener('click', showSettings);
 
-// UX Safe Clear All Button Listener
+// UX Safe Clear All Button Listener (Resets qty to 1 as well)
 clearAllBtn.addEventListener('click', () => {
   if(confirm("Are you sure you want to unselect all items from this week's list?")) {
-    catalog.forEach(i => { i.inList = false; i.checked = false; });
+    catalog.forEach(i => { i.inList = false; i.checked = false; i.qty = 1; });
     save();
     renderMain();
   }
 });
 
+// Delete Entire Catalogue Listener
+deleteCatalogBtn.addEventListener('click', () => {
+  if(confirm("⚠️ DANGER: This will permanently delete your entire product catalogue and all saved items. Are you completely sure?")) {
+    catalog = [];
+    save();
+    showMain();
+  }
+});
+
 newRunBtn.addEventListener('click', async ()=>{
-  if(confirm("Reset the list? This will unselect and uncheck everything ready for next time.")){
-    catalog.forEach(i=>{ i.inList=false; i.checked=false; });
+  if(confirm("Reset the list? This will unselect, uncheck, and reset all quantities to 1 ready for next time.")){
+    catalog.forEach(i=>{ i.inList=false; i.checked=false; i.qty=1; });
     save();
   }
   showMain();
