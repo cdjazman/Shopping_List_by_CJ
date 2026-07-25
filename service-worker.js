@@ -1,70 +1,50 @@
-const CACHE_NAME = "shopping-list-v4";
-const ASSETS = [
-  "./index.html",
-  "./manifest.json",
-  "./icon-48.png",
-  "./icon-72.png",
-  "./icon-96.png",
-  "./icon-128.png",
-  "./icon-144.png",
-  "./icon-152.png",
-  "./icon-192.png",
-  "./icon-384.png",
-  "./icon-512.png",
-  "./icon-512-maskable.png"
-];
+const CACHE_NAME = 'shopping-list-v1';
 
-// Install: Cache static assets
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
+// Install event - cache core assets once
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
 });
 
-// Activate: Clean up old caches & claim clients
-self.addEventListener("activate", (event) => {
+// Activate event - clean up old caches immediately
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch: Direct GitHub sync requests to network, Network-First for HTML (so updates hit mobile immediately)
-self.addEventListener("fetch", (event) => {
-  if (event.request.url.includes("api.github.com")) {
-    return; // Sync requests go straight to network
-  }
-
-  // Network-first strategy for navigation / HTML page requests
-  if (event.request.mode === 'navigate' || event.request.url.endsWith('index.html')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
         })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // Cache-first strategy for static assets (icons, etc.)
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
-      }).catch(() => cached);
-    })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
-// Listen for message from app to immediately activate new version
+// Fetch event: Always try the network first for HTML/app files, fall back to cache if offline
+self.addEventListener('fetch', (event) => {
+  // Skip cross-origin requests like API calls
+  if (!event.request.url.startsWith(self.location.origin)) return;
+
+  event.respondWith(
+    fetch(event.request)
+      .then((networkResponse) => {
+        // If we got a successful response from the network, clone it and update the cache
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // If the network fails (offline), fall back to the cached version
+        return caches.match(event.request);
+      })
+  );
+});
+
+// Listen for message from app to skip waiting when a new version is found
 self.addEventListener('message', (event) => {
   if (event.data && event.data.action === 'skipWaiting') {
     self.skipWaiting();
