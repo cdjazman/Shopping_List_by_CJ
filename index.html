@@ -182,14 +182,14 @@ header{
 #itemInput:focus{outline:none; border-color:var(--sage);}
 
 #aisleSelect{
-  padding:12px 10px;
+  padding:12px 14px;
   border:1px solid var(--line);
   border-radius:10px;
-  font-size:0.8125rem;
+  font-size:0.9375rem;
   font-family:'DM Sans', sans-serif;
   background:#fff;
   color:var(--ink);
-  max-width:145px;
+  width:100%;
 }
 
 .hint{
@@ -1265,12 +1265,32 @@ deleteCatalogBtn.addEventListener('click', () => {
   }
 });
 
+// Store-Specific or Global Shop Done Listener
 newRunBtn.addEventListener('click', async ()=>{
-  if(confirm("Reset the list? This will unselect, uncheck, and reset all quantities to 1 ready for next time.")){
-    catalog.forEach(i=>{ i.inList=false; i.checked=false; i.qty=1; });
-    save();
+  if(currentStoreFilter === 'ALL') {
+    if(confirm("Reset the list? This will unselect, uncheck, and reset all quantities to 1 ready for next time.")){
+      catalog.forEach(i=>{ i.inList=false; i.checked=false; i.qty=1; });
+      save();
+      showMain();
+    }
+  } else {
+    if(confirm(`Finish shopping for ${currentStoreFilter}? This will clear only the ${currentStoreFilter} items from your current run.`)){
+      catalog.forEach(i=>{
+        if(i.store === currentStoreFilter) {
+          i.inList = false;
+          i.checked = false;
+          i.qty = 1;
+        }
+      });
+      save();
+      // If no items remain in list across any store, head back to main list automatically
+      if(!catalog.some(i => i.inList)) {
+        showMain();
+      } else {
+        renderShop();
+      }
+    }
   }
-  showMain();
 });
 
 // Search Store Toggle Listener
