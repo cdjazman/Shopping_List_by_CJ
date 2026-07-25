@@ -564,19 +564,18 @@ h1{
 
   <!-- ADD / EDIT PRODUCT VIEW -->
   <div id="addView" class="hidden">
-    <!-- LIVE SEARCH BAR -->
+    <!-- DIRECT WEB SEARCH BAR -->
     <div class="form-field">
-      <label>Search Store Catalog</label>
+      <label>Search Store Page Direct</label>
       <div style="display:flex; gap:6px; margin-bottom:8px;" id="searchStoreSelect">
         <button type="button" class="filter-btn active" data-searchstore="Aldi">Aldi</button>
         <button type="button" class="filter-btn" data-searchstore="Coles">Coles</button>
         <button type="button" class="filter-btn" data-searchstore="Woolworths">Woolworths</button>
       </div>
       <div style="display:flex; gap:8px;">
-        <input type="text" id="liveSearchInput" placeholder="Search any item (e.g. Sourdough)">
-        <button type="button" class="ghost-btn" id="searchApiBtn" style="padding:0 14px; font-weight:700;">🔍 Search</button>
+        <input type="text" id="liveSearchInput" placeholder="Enter search term (e.g. Chicken Chips)">
+        <button type="button" class="ghost-btn" id="searchApiBtn" style="padding:0 14px; font-weight:700; background:var(--paper-dim);">↗ Search Web</button>
       </div>
-      <div id="searchResults" style="margin-top:8px; display:flex; flex-direction:column; gap:6px;"></div>
     </div>
 
     <div class="form-field">
@@ -651,7 +650,6 @@ h1{
 <script>
 const AISLES = ["Fruit & Veg","Bakery","Meat & Deli","Pantry","Drinks","Household & Other","Dairy & Eggs","Freezer"];
 const STORAGE_KEY = "grocery-catalog";
-const API_URL = "https://shopping-list-ivory-three.vercel.app/api/search";
 
 let catalog = [];
 let currentStoreFilter = "ALL";
@@ -824,7 +822,6 @@ function openAddView(){
   priceInput.value = '';
   qtyInput.value = '1';
   document.getElementById('liveSearchInput').value = '';
-  document.getElementById('searchResults').innerHTML = '';
   selectedStore = "Aldi";
   saveProductBtn.textContent = "Save Product";
   updateStoreToggleUI();
@@ -845,7 +842,6 @@ function openEditView(id){
   qtyInput.value = item.qty || 1;
   selectedStore = item.store || "Aldi";
   document.getElementById('liveSearchInput').value = '';
-  document.getElementById('searchResults').innerHTML = '';
   
   saveProductBtn.textContent = "Update Product";
   updateStoreToggleUI();
@@ -1070,53 +1066,28 @@ document.querySelectorAll('#searchStoreSelect .filter-btn').forEach(btn => {
   });
 });
 
-// Live Search Execution
-document.getElementById('searchApiBtn').addEventListener('click', async () => {
+// Direct Web Search Handler
+document.getElementById('searchApiBtn').addEventListener('click', () => {
   const query = document.getElementById('liveSearchInput').value.trim();
-  const resultsContainer = document.getElementById('searchResults');
   
   if(!query) {
-    alert("Please enter a product name to search.");
+    alert("Please enter a search term first.");
     return;
   }
 
-  resultsContainer.innerHTML = `<p style="font-size:0.8rem; color:var(--ink-soft);">Searching ${selectedSearchStore}...</div>`;
+  let searchUrl = '';
+  const encodedQuery = encodeURIComponent(query);
 
-  try {
-    const res = await fetch(`${API_URL}?q=${encodeURIComponent(query)}&store=${encodeURIComponent(selectedSearchStore)}`);
-    const data = await res.json();
+  if (selectedSearchStore === 'Woolworths') {
+    searchUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${encodedQuery}`;
+  } else if (selectedSearchStore === 'Coles') {
+    searchUrl = `https://www.coles.com.au/search?q=${encodedQuery}`;
+  } else if (selectedSearchStore === 'Aldi') {
+    searchUrl = `https://www.aldi.com.au/en/search/?text=${encodedQuery}`;
+  }
 
-    if(!data.results || data.results.length === 0) {
-      resultsContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--ink-soft);">No matching products found.</p>';
-      return;
-    }
-
-    resultsContainer.innerHTML = `<p style="font-size:0.8rem; color:var(--sage-dark); font-weight:700;">Showing ${data.results.length} of ${data.totalResults || data.results.length} products on ${selectedSearchStore}</p>`;
-
-    data.results.forEach(item => {
-      const card = document.createElement('div');
-      card.style.cssText = "padding:10px; border:1px solid var(--line); border-radius:10px; cursor:pointer; background:#fff; font-size:0.875rem;";
-      
-      const priceDisplay = item.price != null ? `$${Number(item.price).toFixed(2)}` : 'Set Price';
-      card.innerHTML = `<strong>${escapeHtml(item.name)}</strong> — ${priceDisplay} <span class="aisle-tag">${escapeHtml(item.store)}</span>`;
-      
-      card.addEventListener('click', () => {
-        itemInput.value = item.name;
-        priceInput.value = item.price || '';
-        selectedStore = item.store || selectedSearchStore;
-
-        if (item.aisle && AISLES.includes(item.aisle)) {
-          aisleSelect.value = item.aisle;
-        }
-
-        updateStoreToggleUI();
-        resultsContainer.innerHTML = '';
-      });
-      
-      resultsContainer.appendChild(card);
-    });
-  } catch (err) {
-    resultsContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--rust);">Search offline or error connecting to API.</p>';
+  if (searchUrl) {
+    window.open(searchUrl, '_blank');
   }
 });
 
