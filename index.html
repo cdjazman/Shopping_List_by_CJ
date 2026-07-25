@@ -97,42 +97,14 @@ header{
   margin-bottom:12px;
 }
 
-/* Custom Brand Glasses Logo */
-.brand-logo-container {
-  background: #FF6600;
-  padding: 16px 24px;
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 14px rgba(255, 102, 0, 0.25);
+/* Real Image Logo Styling */
+.brand-logo-img {
   width: 100%;
-}
-
-.brand-glasses {
-  width: 90px;
+  max-width: 100%;
   height: auto;
-  fill: #000;
-  margin-bottom: 8px;
-}
-
-.brand-title-top {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 800;
-  font-size: 1.125rem;
-  color: #000;
-  letter-spacing: 3px;
-  line-height: 1.1;
-}
-
-.brand-title-bottom {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 800;
-  font-size: 1.375rem;
-  color: #000;
-  letter-spacing: 4px;
-  line-height: 1.1;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(255, 102, 0, 0.25);
+  display: block;
 }
 
 .check-update-btn{
@@ -559,16 +531,7 @@ header{
   </div>
 
   <header>
-    <div class="brand-logo-container">
-      <svg class="brand-glasses" viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
-        <path d="M -150 -60 C -140 -75 -115 -80 -90 -80 C -50 -80 -25 -65 -15 -55 C -5 -65 20 -80 60 -80 C 85 -80 110 -75 120 -60 C 135 -35 130 15 120 40 C 115 55 95 65 75 65 C 45 65 25 50 15 35 C 5 25 -5 25 -15 35 C -25 50 -45 65 -75 65 C -95 65 -115 55 -120 40 C -130 15 -135 -35 -150 -60 Z 
-                 M -90 -45 C -105 -45 -110 -25 -110 -5 C -110 20 -100 35 -85 35 C -70 35 -60 20 -60 -5 C -60 -30 -75 -45 -90 -45 Z
-                 M 60 -45 C 45 -45 30 -30 30 -5 C 30 20 40 35 55 35 C 70 35 80 20 80 -5 C 80 -25 75 -45 60 -45 Z
-                 M -25 -55 C -20 -55 -10 -40 -10 -25 C -10 -15 -15 -5 -25 -5 C -35 -5 -40 -15 -40 -25 C -40 -40 -30 -55 -25 -55 Z" transform="translate(150, 75) scale(0.9)" />
-      </svg>
-      <div class="brand-title-top">SHOPPING LIST</div>
-      <div class="brand-title-bottom">BY CJ</div>
-    </div>
+    <img src="LOGO.png" alt="Shopping List by CJ" class="brand-logo-img">
     <button id="checkUpdateBtn" class="check-update-btn">🔄 Check for updates</button>
   </header>
   <p class="tagline">tick it, shop it</p>
