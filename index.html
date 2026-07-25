@@ -195,7 +195,7 @@ header{
 .hint{
   font-size:0.75rem;
   color:var(--ink-soft);
-  margin:0 0 18px;
+  margin:0 0 14px;
 }
 
 .aisle-group{
@@ -307,11 +307,10 @@ header{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 16px;
+  padding: 12px 16px;
   background: var(--paper-dim);
   border-radius: 12px;
-  margin-top: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   border: 1px solid var(--line);
 }
 .cost-counter-label {
@@ -330,7 +329,7 @@ header{
 
 .clear-all-btn {
   width: 100%;
-  padding: 10px;
+  padding: 9px;
   background: transparent;
   border: 1px dashed var(--rust);
   color: var(--rust);
@@ -487,7 +486,7 @@ header{
   font-size:0.9375rem;
   font-family:'DM Sans', sans-serif;
   cursor:pointer;
-  margin-bottom:16px;
+  margin-bottom:12px;
 }
 
 .form-field{
@@ -597,21 +596,19 @@ header{
     <button id="openAddBtn" class="add-product-btn">+ Add Product</button>
     <p class="hint">Tap any item below to add or remove it from this week's run.</p>
 
+    <!-- ESTIMATED TOTAL COST COUNTER & CLEAR ALL (Moved to top) -->
+    <div id="costSummaryBox" class="list-summary-footer hidden">
+      <span class="cost-counter-label">Estimated Total:</span>
+      <span id="estimatedTotalAmount" class="cost-counter-amount">$0.00</span>
+    </div>
+    <button id="clearAllBtn" class="clear-all-btn hidden">Clear All Selected Items</button>
+
     <div id="catalogWrap"></div>
 
     <div id="emptyState" class="empty-state hidden">
       <div class="big">Your main list is empty</div>
       <div>Tap "Add Product" above to get started.</div>
     </div>
-
-    <!-- ESTIMATED TOTAL COST COUNTER -->
-    <div id="costSummaryBox" class="list-summary-footer hidden">
-      <span class="cost-counter-label">Estimated Total:</span>
-      <span id="estimatedTotalAmount" class="cost-counter-amount">$0.00</span>
-    </div>
-
-    <!-- CLEAR ALL BUTTON -->
-    <button id="clearAllBtn" class="clear-all-btn hidden">Clear All Selected Items</button>
 
     <div class="go-shop-wrap">
       <button class="go-shop-btn" id="goShopBtn" disabled>Start Shopping →</button>
