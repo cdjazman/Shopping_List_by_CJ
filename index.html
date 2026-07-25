@@ -97,7 +97,6 @@ header{
   margin-bottom:12px;
 }
 
-/* Real Image Logo Styling */
 .brand-logo-img {
   width: 100%;
   max-width: 100%;
@@ -1107,6 +1106,10 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js').then(reg => {
       swRegistration = reg;
+      
+      // Check for updates on load
+      reg.update();
+
       reg.addEventListener('updatefound', () => {
         newWorker = reg.installing;
         newWorker.addEventListener('statechange', () => {
