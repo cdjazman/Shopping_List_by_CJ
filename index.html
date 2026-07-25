@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Shopping List</title>
+<title>Shopping List by CJ</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#C1622D">
+<meta name="theme-color" content="#FF6600">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@
   --ink-soft:#6B6558;
   --sage:#6E8763;
   --sage-dark:#4F6647;
-  --rust:#C1622D;
+  --rust:#FF6600;
   --line:#D8D0BC;
   --gold:#D9A441;
 }
@@ -93,18 +93,50 @@ header{
   align-items:center;
   justify-content:center;
   flex-direction:column;
-  gap:4px;
-  margin-bottom:6px;
+  gap:8px;
+  margin-bottom:12px;
 }
 
-.brand-mark{
-  height:42px;
-  width:auto;
-  display:block;
+/* Custom Brand Glasses Logo */
+.brand-logo-container {
+  background: #FF6600;
+  padding: 16px 24px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(255, 102, 0, 0.25);
+  width: 100%;
+}
+
+.brand-glasses {
+  width: 90px;
+  height: auto;
+  fill: #000;
+  margin-bottom: 8px;
+}
+
+.brand-title-top {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: #000;
+  letter-spacing: 3px;
+  line-height: 1.1;
+}
+
+.brand-title-bottom {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.375rem;
+  color: #000;
+  letter-spacing: 4px;
+  line-height: 1.1;
 }
 
 .check-update-btn{
-  margin-top:6px;
+  margin-top:2px;
   font-size:0.6875rem;
   font-family:'DM Sans', sans-serif;
   font-weight:700;
@@ -121,20 +153,13 @@ header{
   background:var(--line);
 }
 
-h1{
-  font-family:'Fraunces', serif;
-  font-weight:600;
-  font-size:2rem;
-  margin:0;
-  letter-spacing:-0.5px;
-}
-
 .tagline{
   font-size:0.8125rem;
   color:var(--ink-soft);
-  margin:0 0 22px;
+  margin:4px 0 20px;
   font-style:italic;
   font-family:'Fraunces', serif;
+  text-align: center;
 }
 
 .tabs{
@@ -187,7 +212,7 @@ h1{
   font-family:'DM Sans', sans-serif;
   background:#fff;
   color:var(--ink);
-  max-width:130px;
+  max-width:145px;
 }
 
 .hint{
@@ -316,7 +341,7 @@ h1{
   font-size:0.9375rem;
   font-family:'DM Sans', sans-serif;
   cursor:pointer;
-  box-shadow:0 6px 16px rgba(193,98,45,0.3);
+  box-shadow:0 6px 16px rgba(255,102,0,0.3);
 }
 .go-shop-btn:disabled{
   background:var(--line);
@@ -534,8 +559,16 @@ h1{
   </div>
 
   <header>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOwAAABxCAYAAADWK0+JAABe/0lEQVR4nO29x49kSZrg9zN70mVonRGRkbKyqjKzdFd3T/cMRuxQYAFyl2cCBHjggQB5IY8ECWJBgvfl8h8grwvsLg/c5WKnlzPd1d3V3SW6qlJrGTrCw9UTZjyYvefPPTxEVkZ1Z1XNl/AMF0/Ys88++/T3Ca01Lwcve/63DcQfewDfcvj79XIoHDE97tcfSHb17xkCNJwo0X6v6P97uF4APYDkfSgfNiUHTNNLEuwRV//OwfeKur5B+P6sl2yLKq6cvs+DU6EPeG8udzIEe1LT//fk8P2A7+N6OZBoBf0TUvw8+BsnQLCD7P67Dd+nZ/1m4Pu4XjLi/NpEW4CXIlhdGNBJwauNTvGqD/CVhu/jejlM4u0j4sOItvCdeBkr8TdhQpAnfL1vAr6PIt1JwPdtvWj6n3kYvsVBv32TRqeTXMCDYsOrBie54F71Z/2m4Pu0XoowhGEeKC7nHwa47glZib9v8P0R6v4eTgKOt14GJeL+Nwb+nmBfGE5SsPt7Yv3uw9dbL8PPECdDsCe17AS80i66LGZCWwFm8Ln1EYPPztD2f1H45dsOmS1EiP3P0rOTiBO12wle7TUzZCqGwmFifXFNCY7JYbXWOSK01j3kSIlWGq0NorIBFgea4UpYQV3p4jXsws/PFahUGURk3xWuu+8ps6c4dPAvcNwBx2hlxqx0Cg4Ikc2HKJxu/ynzVwhh56Y3V450cpJVWqEVuI73rSdXrTVRICFlxHEcpOyZgpRSKKVI0xStwXEcEBIhBFIegNt91+9fR/k6gx4DO6l1cMC5Olu3aAQC6Yh9v5nxZes2u91+DlskQp3/L4cyAKXN/Kafu0oJ34m3dYtGq1/P3q3b7Ha6qR3XoX99A41vP3432/3fO/663/x4C7933f7G/1+Oa3u4a3/e/Gz974N3dYfX38P96pM/6zfdA/1/E1vvefOzh13I7rC3j/9O3/I2m/+/Lz/X333z56m38P0S4sA7fH9i2x/m89vvef38j4e3P//fT3eI+yHq3j30/9bC98P3w/fD/2/4vt/wveC2/f0N3yvcfA+2LzX302/X49uO/R5230/2h0T/eL/v+8+3H3YfDx/yXv/fDx3qPv1s+G331vBff/D60R/u7892S/ffx0fcfu8192A/+K6/+/aH4dse9vOvv9b3ve3nL9ze/u7f3942Cze33v714ebbh/34hff1m+/p33939/Hw0B++N/zeq095fU/0ve63fe9/709++d3A8R7fFz3eN/334/f2L3pAft49/r33075eL/i1vvf90f239fHh/24I91vDffn5+7vf++OvvP33e/jXh3ve139//+4v//s339cf338PvfX1B1/327320b33033/ve7X2y3efS9+4f3x7d87fH/y/f3/sPv3+eUvvu7vvd4/fL/fH/reL73//f23+z/d4fvftz9e/7bvv+27/e++3zD+vv3vfeO/eNf33R8/d2/33uGvPzz/tve/09s++6Ovh/vvh3/d337w0x991fveftv33/bx8B1+P3yvffh9P38Xf/r6t74/uO0Pvf7x2+/mvd7+/Ld9f2/zff/3veve/6334Yf132++v++vfxv2Hw8/eI1f943f9x/S2197/5+/e+85fNf13f+e27/uE17vFz3sNz133/X424eX9x736Xvvv/+e1/323287/m7YvP32+w+7388fvf7+0Vfv//qL3/f7x8Pf4v8//sD3/XvfdNsf7/f0E/p4fMdtH/ve+w3v+I7v8e1f57ce3/419xfev7vhvvv45657j/fvh9/308+G28Pd+Onh/x8A4mFh38/4e90P+P5/eI8ffg0/5/qD24e/+vbvff/0w++v148//lXv+sN33+3p+/sN3yvcf/A6P33N8P/ve3xft3/6Efe2A/7wreE+/O4f4O/j+3/f/e7f1x9+x9e/C19/84O/+S9vv+/3j3/wN+5xP//sE+734f/7D+/veX/o+/6/L/ve+z3u4fe3r+/3gXf+8X0P9/y4a+/29fe3p/14b3s4v9/29X5331f4N1x7+P3N4e933eP7q4+/f/uA9w+v88mvhuvvd4vv3y/I/zL9IezX3p5ePnx+v6cf5/fX9N+/338PvA95v29f/+1333//358Of+/hvn/7S9/7H37Pz7/G8A4f4vt5iMvX4/67e2A+eK3v/dMfbPfvv4fvvP0H8+6Pffj37fvfrx7e70ee/0aL93u+v/72LffwXf8bf0/Xp9+H23/vea34fD7D3v4+/d396+/3w3cf3/71l3x/83eHn4fv3d4fvv5Xf/mfePv+89fe/9L3+P4/f+m+e4334fvg+/6/X/P2974+vv2m93/4/e++3393b3f2v7//13v+e/S9p53fH/50b98f2vN2Nvf9/m/v7T7d/++P38v0B/q012/65Ovb3s/3u/fe72m//8cO3/v//9229x/y8v0x9sN2/w35/L5vev/3p58f/mB+b//f/j++vv8e4vv58Pvvvvb6A/+pP+f5r8p73P/y6S++/0//+/f++8P/ff2n5+fv//e374f3uO/3D+m2+11+7+fvb7//31/85p+x37/ffn/X33/zN/6/uL//v5/873f/3fe/4fv94fvff/j7fe/33wfvcf/8+P3ve+/r7+/513v7Xv9L3/2ff31/O3zv/fXm09+/Dff/8//15d+H658ffm9/i/7a+/Cnvv4D759+87v+4u33+m33u93/0/f/+4fvh/+D2+/vvvv6ffh/79++1y91v0v3f393+P+j6y/56ff+j+L//O//3f/a/39+v9++v/6+X/r9v33/Pvz/+d/v+08353/v4dfd97/5A9/vL33vvf46b//iX//e7/76T5+m2f4e3Nf/f3//f3/+/v3vf/f1ff/7S9+H+33/v194/fC/H/732v/6Tf//358/eO8/x3/3u//2ff3t3v91f8Xv7fe+/v+/m99fv+/v/X//a//x//f/N/+P/+23f4a3v++939/+fe//L9/919f3+8Xbf+D993vvL/2//vD63/7+43d37S/v94uv7/d+4eN3d9e///H2ve/++d03v+/rf5vX1/vv4/3f//L1/d7vvhfe/+GvvP72S1+/+7uf8/3S193++uP/v/70+e/N/73fv8T/8O1Xv+794es/vff8u/A1/+fvftvbL/4y//y+L+7Xn99//vvL3/s/fv+//8ePv33/d1+//+e33fvh2//7m7+/fe3vh0/8/L/7y/+A15v47X9/S59/3z/5qf/d7/37m5vvb3/vf/v+5utv/9u3d19f///3m9/75vv9f7j96dfXf3/0e1/742/575344336fnn/259ff28N/f5v30I/b/D+e/H2ve6/L99fefvv//zW04e/8v/73V/ffP9f//v3+3v33X9///Xfv//+f399fP8D/yXve/i3/0v9+/+/H+eP39Pfv3919v0v/d/8t3X6q/P7a/r+/j//A///fX/43f3+/rf+/94/3f/3a3/7j//53y++/+ePf/f3v//e6+Pv/7//5fD7/++/Sffp+/ve/z08f3v32ff+r3/+/3+6+/r3///9v6e3//N/2P/4f+/pT8/+fP3117fe/9X3v///7q+/vv4fD///7f//t+/93///f8j95e/+r6f3/vv//vT16y/3i0//1e/9y/X+19/v/f3v/+ffv99/9yff8fvv79/4d/9/v/fP//t4+P4ffv1258ef94c/2S9+6u++vf+e+y9///u//36/93/8vv/w1/33/vf/9tf9//90//3///+H///vv/tfj/4/8P/3///vv/+f3/v+x7fvv/+eH9/v/Xvv+/d+56//d//1//j2l359u/s/Xv/tf++//9/f33/83eHv/S+//3f/8v/3Xv/+9x+/v9/313v3/t/9/3313v/e+/3f///77///vv//f398eP31/vf++/m74u//81//3v///+3X99ff3tffv53eL3298ffm+//++Xv//7/ff/73/++//9/f/9feXf/vf//t/+3f/+///57f/8vv3//vfXf///f/33//f3//e+/3f9e9/3+3/329///+/v31/3//9ffX3f1//9fXf/fe3X11/fX///ff9/2+P/fX/73/++/m+9vf/v9/f9/f+3/97f//eX9/fvf/X+///9f/199f//d+/m78u9/vfffe+//e3v/ev/+N3f/9vf/3tX/39//u//33///vfX/fe+//eX/fX+//97d/fe+//vTff///fff/vv33++/r//r7/X11/fXf3/f/f/9//98m3/v1///fe//d+//3/+f7ffX+//+/v9///3//vX/f3f33f3/+///79//f9fe3Xvv/f///v/+v/+v//f7fXvf///eX//ff9fe3/f/3vvX//+9+/fe+f/8N+v1e/vv+35vfv3ff//f/2++vf3f3f/ffffff/fe///3t//vf2/ff///3t//f394Pvvf1/ff//ffvffe9/7fe+//eX24v/f///3f3f////+/vfvv//f2//f//f/3d3d82yPfe+//vf29f/1+9e933f///f1e////fff3X//d8+d//1ffXf///e/e/vf2/v3v/+N/3X18f/f3e3ff2/v3fff9fe11///v///fe/+vff+1e3ff2/v/e98218e8m6E+3d4/9f//7d7df2/e/eff9f0ff9v/Xfe+f/f/dfm3/99vf//v/d/vf/4Pvv////e/e9ef//fe13f1/+/e9++" alt="" class="brand-mark">
-    <h1>Shopping List</h1>
+    <div class="brand-logo-container">
+      <svg class="brand-glasses" viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+        <path d="M -150 -60 C -140 -75 -115 -80 -90 -80 C -50 -80 -25 -65 -15 -55 C -5 -65 20 -80 60 -80 C 85 -80 110 -75 120 -60 C 135 -35 130 15 120 40 C 115 55 95 65 75 65 C 45 65 25 50 15 35 C 5 25 -5 25 -15 35 C -25 50 -45 65 -75 65 C -95 65 -115 55 -120 40 C -130 15 -135 -35 -150 -60 Z 
+                 M -90 -45 C -105 -45 -110 -25 -110 -5 C -110 20 -100 35 -85 35 C -70 35 -60 20 -60 -5 C -60 -30 -75 -45 -90 -45 Z
+                 M 60 -45 C 45 -45 30 -30 30 -5 C 30 20 40 35 55 35 C 70 35 80 20 80 -5 C 80 -25 75 -45 60 -45 Z
+                 M -25 -55 C -20 -55 -10 -40 -10 -25 C -10 -15 -15 -5 -25 -5 C -35 -5 -40 -15 -40 -25 C -40 -40 -30 -55 -25 -55 Z" transform="translate(150, 75) scale(0.9)" />
+      </svg>
+      <div class="brand-title-top">SHOPPING LIST</div>
+      <div class="brand-title-bottom">BY CJ</div>
+    </div>
     <button id="checkUpdateBtn" class="check-update-btn">🔄 Check for updates</button>
   </header>
   <p class="tagline">tick it, shop it</p>
@@ -584,7 +617,7 @@ h1{
     </div>
 
     <div class="form-field">
-      <label>Aisle</label>
+      <label>Category</label>
       <select id="aisleSelect"></select>
     </div>
 
@@ -648,7 +681,17 @@ h1{
 </div>
 
 <script>
-const AISLES = ["Fruit & Veg","Bakery","Meat & Deli","Pantry","Drinks","Household & Other","Dairy & Eggs","Freezer"];
+const AISLES = [
+  "Fresh & Produce",
+  "Bakery",
+  "Meat & Seafood",
+  "Dairy, Eggs & Fridge",
+  "Pantry & Dry Goods",
+  "Freezer",
+  "Drinks & Beverages",
+  "Household & Personal Care"
+];
+
 const STORAGE_KEY = "grocery-catalog";
 
 let catalog = [];
@@ -657,74 +700,74 @@ let editingItemId = null;
 let selectedSearchStore = "Aldi";
 
 const DEFAULT_ITEMS = [
-  ["Bananas","Fruit & Veg",1,"Aldi",5.00],
-  ["Capsicum Green","Fruit & Veg",1,"Aldi",2.00],
-  ["Capsicum Red","Fruit & Veg",2,"Aldi",2.00],
-  ["Cherry Tomatoes 250g","Fruit & Veg",1,"Aldi",2.49],
-  ["Cos Lettuce 2 Pack","Fruit & Veg",1,"Aldi",2.99],
-  ["Lebanese Cucumbers Loose","Fruit & Veg",1,"Aldi",1.15],
-  ["Salad Leaf Mix 300g","Fruit & Veg",1,"Aldi",3.99],
-  ["Spudlite Potatoes 1.5kg","Fruit & Veg",1,"Aldi",5.99],
-  ["Beef chuck","Meat & Deli",1,"Aldi",18.99],
-  ["Beef Mince 500g","Meat & Deli",2,"Aldi",10.49],
-  ["Brisket","Meat & Deli",1,"Aldi",20.99],
-  ["Chicken Breast Value Pack","Meat & Deli",1,"Aldi",20.88],
-  ["Free Range Marinated Chicken Breast","Meat & Deli",1,"Aldi",9.50],
-  ["Short Cut Bacon 500g","Meat & Deli",1,"Aldi",6.99],
-  ["Leg Ham Thinly Sliced 4 Pack 400g","Meat & Deli",1,"Aldi",5.39],
+  ["Bananas","Fresh & Produce",1,"Aldi",5.00],
+  ["Capsicum Green","Fresh & Produce",1,"Aldi",2.00],
+  ["Capsicum Red","Fresh & Produce",2,"Aldi",2.00],
+  ["Cherry Tomatoes 250g","Fresh & Produce",1,"Aldi",2.49],
+  ["Cos Lettuce 2 Pack","Fresh & Produce",1,"Aldi",2.99],
+  ["Lebanese Cucumbers Loose","Fresh & Produce",1,"Aldi",1.15],
+  ["Salad Leaf Mix 300g","Fresh & Produce",1,"Aldi",3.99],
+  ["Spudlite Potatoes 1.5kg","Fresh & Produce",1,"Aldi",5.99],
+  ["Beef chuck","Meat & Seafood",1,"Aldi",18.99],
+  ["Beef Mince 500g","Meat & Seafood",2,"Aldi",10.49],
+  ["Brisket","Meat & Seafood",1,"Aldi",20.99],
+  ["Chicken Breast Value Pack","Meat & Seafood",1,"Aldi",20.88],
+  ["Free Range Marinated Chicken Breast","Meat & Seafood",1,"Aldi",9.50],
+  ["Short Cut Bacon 500g","Meat & Seafood",1,"Aldi",6.99],
+  ["Leg Ham Thinly Sliced 4 Pack 400g","Meat & Seafood",1,"Aldi",5.39],
   ["DIEGO'S Street Tacos 10 Pack 300g","Bakery",1,"Aldi",3.29],
   ["Large White Wraps 8 Pack 560g","Bakery",1,"Aldi",3.49],
   ["Turkish Rolls 4 Pack 400g","Bakery",1,"Aldi",2.39],
   ["White Extra Soft Bread Rolls 6 Pack 450g","Bakery",1,"Aldi",2.69],
-  ["Apple Cider Vinegar","Pantry",1,"Aldi",3.29],
-  ["Baked Beans","Pantry",1,"Aldi",3.99],
-  ["BAKERS LIFE Lower Carb Higher Protein Bread 600g","Pantry",1,"Aldi",5.49],
-  ["Coconut Milk Light 400ml","Pantry",1,"Aldi",1.69],
-  ["Dijon Mustard","Pantry",1,"Aldi",2.29],
-  ["English Muffins 6 Pack 400g","Pantry",1,"Aldi",2.79],
-  ["Evaporated Milk","Pantry",1,"Woolworths",5.00],
-  ["Extra Virgin Olive Oil Spray 225g","Pantry",1,"Aldi",4.49],
-  ["Green Curry Simmer Sauce 500g","Pantry",1,"Aldi",1.99],
-  ["Killer Coffee Co Beans Darkerside","Pantry",1,"Woolworths",24.00],
-  ["LA COSTENA Chipotle in Adobo Sauce 230g","Pantry",1,"Aldi",4.99],
-  ["Light Tasty Shredded Cheese 500g","Pantry",1,"Aldi",5.99],
-  ["Pasta Penne 500g","Pantry",1,"Aldi",1.00],
-  ["Premium Carbonara Pasta Sauce 500g","Pantry",1,"Aldi",2.69],
-  ["Protein Bars Salted Caramel","Pantry",1,"Aldi",3.99],
-  ["Salted Popcorn Multipack 10 Pack 200g","Pantry",1,"Aldi",2.39],
-  ["Sanitarium Weet-bix Bites Wild Berry Breakfast Cereal","Pantry",1,"Woolworths",4.00],
-  ["Tomato Sauce 2L","Pantry",1,"Aldi",4.99],
-  ["Wheat Biscuits Value Pack 1.12kg","Pantry",1,"Aldi",5.09],
-  ["Worcestershire Sauce","Pantry",1,"Aldi",1.89],
-  ["Dr Pepper","Drinks",1,"Aldi",3.00],
-  ["Bath & Shower Cleaner 750ml","Household & Other",1,"Aldi",2.69],
-  ["Flushable Wipes 40 Pack","Household & Other",1,"Aldi",2.69],
-  ["POWER FORCE Assorted Genie Wand Accessories","Household & Other",1,"Aldi",2.79],
-  ["Thick Sponges 4 Pack","Household & Other",1,"Aldi",3.69],
-  ["Toilet Blocks 2 Pack 2x50g","Household & Other",1,"Aldi",1.89],
-  ["Toilet Tissue 3 Ply 24 Pack","Household & Other",1,"Aldi",8.49],
-  ["Body Wash","Household & Other",1,"Aldi",4.49],
-  ["HEDAFEN Ibuprofen Tablets 24 Pack 200mg","Household & Other",1,"Aldi",1.39],
-  ["HEDANOL Paracetamol Tablet 16 Pack","Household & Other",1,"Aldi",1.89],
-  ["Tissues 2ply 224 Pack","Household & Other",1,"Aldi",1.89],
-  ["Vitamins B+C Effervescent Tablets 15 Pack","Household & Other",1,"Aldi",5.29],
-  ["Brancourts Low Fat Cottage Cheese 200g","Dairy & Eggs",1,"Woolworths",4.20],
-  ["Butter 250g","Dairy & Eggs",2,"Aldi",4.99],
-  ["COLWAY Smokey Chipotle Mayonnaise 252g","Dairy & Eggs",1,"Aldi",1.99],
-  ["Cottage Cheese 500g","Dairy & Eggs",1,"Aldi",5.49],
-  ["Greek Style Strained Yogurt Plain 900g","Dairy & Eggs",1,"Aldi",5.89],
-  ["Milk 3L","Dairy & Eggs",1,"Aldi",5.15],
-  ["Parmesan Cheese Block 200g","Dairy & Eggs",1,"Aldi",6.29],
-  ["Pauls Plus Chocolate Yoghurt","Dairy & Eggs",2,"Woolworths",2.10],
-  ["Pauls Plus Protein Chocolate Dessert","Dairy & Eggs",1,"Woolworths",2.10],
-  ["Pauls Plus Protein Yoghurt Pouch Lemon Cheesecake","Dairy & Eggs",2,"Woolworths",2.10],
-  ["Pizza Shredded Cheese 500g","Dairy & Eggs",1,"Aldi",6.29],
-  ["Tasty Cheese Slices 500g","Dairy & Eggs",1,"Aldi",6.99],
-  ["WICKED SISTER Banana Pudding 170g","Dairy & Eggs",3,"Aldi",2.69],
-  ["WICKED SISTER Chocolate Pudding 170g","Dairy & Eggs",3,"Aldi",2.69],
-  ["YOGURI Protein Yogurt Salted Caramel 160g","Dairy & Eggs",5,"Aldi",2.19],
-  ["YOGURI Protein Yogurt Vanilla 160g","Dairy & Eggs",5,"Aldi",2.19],
-  ["Eggs 700g","Dairy & Eggs",1,"Aldi",6.19],
+  ["Apple Cider Vinegar","Pantry & Dry Goods",1,"Aldi",3.29],
+  ["Baked Beans","Pantry & Dry Goods",1,"Aldi",3.99],
+  ["BAKERS LIFE Lower Carb Higher Protein Bread 600g","Bakery",1,"Aldi",5.49],
+  ["Coconut Milk Light 400ml","Pantry & Dry Goods",1,"Aldi",1.69],
+  ["Dijon Mustard","Pantry & Dry Goods",1,"Aldi",2.29],
+  ["English Muffins 6 Pack 400g","Bakery",1,"Aldi",2.79],
+  ["Evaporated Milk","Pantry & Dry Goods",1,"Woolworths",5.00],
+  ["Extra Virgin Olive Oil Spray 225g","Pantry & Dry Goods",1,"Aldi",4.49],
+  ["Green Curry Simmer Sauce 500g","Pantry & Dry Goods",1,"Aldi",1.99],
+  ["Killer Coffee Co Beans Darkerside","Pantry & Dry Goods",1,"Woolworths",24.00],
+  ["LA COSTENA Chipotle in Adobo Sauce 230g","Pantry & Dry Goods",1,"Aldi",4.99],
+  ["Light Tasty Shredded Cheese 500g","Dairy, Eggs & Fridge",1,"Aldi",5.99],
+  ["Pasta Penne 500g","Pantry & Dry Goods",1,"Aldi",1.00],
+  ["Premium Carbonara Pasta Sauce 500g","Pantry & Dry Goods",1,"Aldi",2.69],
+  ["Protein Bars Salted Caramel","Pantry & Dry Goods",1,"Aldi",3.99],
+  ["Salted Popcorn Multipack 10 Pack 200g","Pantry & Dry Goods",1,"Aldi",2.39],
+  ["Sanitarium Weet-bix Bites Wild Berry Breakfast Cereal","Pantry & Dry Goods",1,"Woolworths",4.00],
+  ["Tomato Sauce 2L","Pantry & Dry Goods",1,"Aldi",4.99],
+  ["Wheat Biscuits Value Pack 1.12kg","Pantry & Dry Goods",1,"Aldi",5.09],
+  ["Worcestershire Sauce","Pantry & Dry Goods",1,"Aldi",1.89],
+  ["Dr Pepper","Drinks & Beverages",1,"Aldi",3.00],
+  ["Bath & Shower Cleaner 750ml","Household & Personal Care",1,"Aldi",2.69],
+  ["Flushable Wipes 40 Pack","Household & Personal Care",1,"Aldi",2.69],
+  ["POWER FORCE Assorted Genie Wand Accessories","Household & Personal Care",1,"Aldi",2.79],
+  ["Thick Sponges 4 Pack","Household & Personal Care",1,"Aldi",3.69],
+  ["Toilet Blocks 2 Pack 2x50g","Household & Personal Care",1,"Aldi",1.89],
+  ["Toilet Tissue 3 Ply 24 Pack","Household & Personal Care",1,"Aldi",8.49],
+  ["Body Wash","Household & Personal Care",1,"Aldi",4.49],
+  ["HEDAFEN Ibuprofen Tablets 24 Pack 200mg","Household & Personal Care",1,"Aldi",1.39],
+  ["HEDANOL Paracetamol Tablet 16 Pack","Household & Personal Care",1,"Aldi",1.89],
+  ["Tissues 2ply 224 Pack","Household & Personal Care",1,"Aldi",1.89],
+  ["Vitamins B+C Effervescent Tablets 15 Pack","Household & Personal Care",1,"Aldi",5.29],
+  ["Brancourts Low Fat Cottage Cheese 200g","Dairy, Eggs & Fridge",1,"Woolworths",4.20],
+  ["Butter 250g","Dairy, Eggs & Fridge",2,"Aldi",4.99],
+  ["COLWAY Smokey Chipotle Mayonnaise 252g","Dairy, Eggs & Fridge",1,"Aldi",1.99],
+  ["Cottage Cheese 500g","Dairy, Eggs & Fridge",1,"Aldi",5.49],
+  ["Greek Style Strained Yogurt Plain 900g","Dairy, Eggs & Fridge",1,"Aldi",5.89],
+  ["Milk 3L","Dairy, Eggs & Fridge",1,"Aldi",5.15],
+  ["Parmesan Cheese Block 200g","Dairy, Eggs & Fridge",1,"Aldi",6.29],
+  ["Pauls Plus Chocolate Yoghurt","Dairy, Eggs & Fridge",2,"Woolworths",2.10],
+  ["Pauls Plus Protein Chocolate Dessert","Dairy, Eggs & Fridge",1,"Woolworths",2.10],
+  ["Pauls Plus Protein Yoghurt Pouch Lemon Cheesecake","Dairy, Eggs & Fridge",2,"Woolworths",2.10],
+  ["Pizza Shredded Cheese 500g","Dairy, Eggs & Fridge",1,"Aldi",6.29],
+  ["Tasty Cheese Slices 500g","Dairy, Eggs & Fridge",1,"Aldi",6.99],
+  ["WICKED SISTER Banana Pudding 170g","Dairy, Eggs & Fridge",3,"Aldi",2.69],
+  ["WICKED SISTER Chocolate Pudding 170g","Dairy, Eggs & Fridge",3,"Aldi",2.69],
+  ["YOGURI Protein Yogurt Salted Caramel 160g","Dairy, Eggs & Fridge",5,"Aldi",2.19],
+  ["YOGURI Protein Yogurt Vanilla 160g","Dairy, Eggs & Fridge",5,"Aldi",2.19],
+  ["Eggs 700g","Dairy, Eggs & Fridge",1,"Aldi",6.19],
   ["Chicken Breast Tenders Southern Style 1kg","Freezer",1,"Aldi",9.99],
   ["Winter Vegetables 1kg","Freezer",1,"Aldi",3.69]
 ];
@@ -1083,7 +1126,6 @@ document.getElementById('searchApiBtn').addEventListener('click', () => {
   } else if (selectedSearchStore === 'Coles') {
     searchUrl = `https://www.coles.com.au/search?q=${encodedQuery}`;
   } else if (selectedSearchStore === 'Aldi') {
-    // Correct ALDI Product Finder Search Route
     searchUrl = `https://www.aldi.com.au/products/search?q=${encodedQuery}`;
   }
 
