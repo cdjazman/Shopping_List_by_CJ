@@ -570,6 +570,16 @@ h1{
 
   <!-- ADD / EDIT PRODUCT VIEW -->
   <div id="addView" class="hidden">
+    <!-- LIVE SEARCH BAR -->
+    <div class="form-field">
+      <label>Live Store Price Search</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="liveSearchInput" placeholder="e.g. Cottage Cheese" style="flex:1;">
+        <button type="button" class="ghost-btn" id="searchApiBtn" style="padding:0 14px; font-weight:700;">🔍 Search</button>
+      </div>
+      <div id="searchResults" style="margin-top:8px; display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+
     <div class="form-field">
       <label>Item name</label>
       <input type="text" id="itemInput" placeholder="e.g. Bananas" autocomplete="off">
@@ -642,6 +652,7 @@ h1{
 <script>
 const AISLES = ["Fruit & Veg","Bakery","Meat & Deli","Pantry","Drinks","Household & Other","Dairy & Eggs","Freezer"];
 const STORAGE_KEY = "grocery-catalog";
+const API_URL = "https://shopping-list-ivory-three.vercel.app/api/search";
 
 let catalog = [];
 let currentStoreFilter = "ALL";
@@ -909,6 +920,8 @@ function openAddView(){
   itemInput.value = '';
   priceInput.value = '';
   qtyInput.value = '1';
+  document.getElementById('liveSearchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
   selectedStore = "Aldi";
   saveProductBtn.textContent = "Save Product";
   updateStoreToggleUI();
@@ -928,6 +941,8 @@ function openEditView(id){
   priceInput.value = (item.price != null && !isNaN(item.price)) ? item.price : '';
   qtyInput.value = item.qty || 1;
   selectedStore = item.store || "Aldi";
+  document.getElementById('liveSearchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
   
   saveProductBtn.textContent = "Update Product";
   updateStoreToggleUI();
@@ -1143,9 +1158,47 @@ newRunBtn.addEventListener('click', async ()=>{
   showMain();
 });
 
+// Live Price Search Listener
+document.getElementById('searchApiBtn').addEventListener('click', async () => {
+  const query = document.getElementById('liveSearchInput').value.trim();
+  const resultsContainer = document.getElementById('searchResults');
+  if(!query) return;
+
+  resultsContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--ink-soft);">Searching store prices...</p>';
+
+  try {
+    const res = await fetch(`${API_URL}?q=${encodeURIComponent(query)}&store=Woolworths`);
+    const data = await res.json();
+
+    if(!data.results || data.results.length === 0) {
+      resultsContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--ink-soft);">No matching products found.</p>';
+      return;
+    }
+
+    resultsContainer.innerHTML = '';
+    data.results.forEach(item => {
+      const card = document.createElement('div');
+      card.style.cssText = "padding:10px; border:1px solid var(--line); border-radius:10px; cursor:pointer; background:#fff; font-size:0.875rem;";
+      card.innerHTML = `<strong>${escapeHtml(item.name)}</strong> — $${item.price != null ? Number(item.price).toFixed(2) : 'N/A'} <span class="aisle-tag">${escapeHtml(item.store)}</span>`;
+      
+      card.addEventListener('click', () => {
+        itemInput.value = item.name;
+        priceInput.value = item.price || '';
+        selectedStore = item.store || "Woolworths";
+        updateStoreToggleUI();
+        resultsContainer.innerHTML = '';
+      });
+      
+      resultsContainer.appendChild(card);
+    });
+  } catch (err) {
+    resultsContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--rust);">Search offline or error connecting to API.</p>';
+  }
+});
+
 load();
 
-// Service Worker Registration with Update Banner Detection
+// Service Worker Registration with Update Detection
 if ('serviceWorker' in navigator) {
   let newWorker;
 
