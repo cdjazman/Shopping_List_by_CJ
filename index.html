@@ -106,8 +106,14 @@ header{
   display: block;
 }
 
+.update-btn-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
 .check-update-btn{
-  margin-top:2px;
   font-size:0.6875rem;
   font-family:'DM Sans', sans-serif;
   font-weight:700;
@@ -296,10 +302,54 @@ header{
   margin-bottom:6px;
 }
 
+/* Cost Counter & List Actions Box */
+.list-summary-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--paper-dim);
+  border-radius: 12px;
+  margin-top: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+}
+.cost-counter-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ink-soft);
+}
+.cost-counter-amount {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--sage-dark);
+}
+
+.clear-all-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px dashed var(--rust);
+  color: var(--rust);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: background 0.15s ease;
+}
+.clear-all-btn:active {
+  background: rgba(255,102,0,0.06);
+}
+
 .go-shop-wrap{
   position:sticky;
   bottom:calc(16px + env(safe-area-inset-bottom));
-  margin-top:24px;
+  margin-top:12px;
 }
 .go-shop-btn{
   width:100%;
@@ -532,7 +582,9 @@ header{
   <header>
     <img src="LOGO.png" alt="Shopping List by CJ" class="brand-logo-img">
   </header>
-  <button id="checkUpdateBtn" class="check-update-btn">🔄 Check for updates</button>
+  <div class="update-btn-wrap">
+    <button id="checkUpdateBtn" class="check-update-btn">🔄 Check for updates</button>
+  </div>
   <p class="tagline">tick it, shop it</p>
 
   <div class="tabs">
@@ -551,6 +603,15 @@ header{
       <div class="big">Your main list is empty</div>
       <div>Tap "Add Product" above to get started.</div>
     </div>
+
+    <!-- ESTIMATED TOTAL COST COUNTER -->
+    <div id="costSummaryBox" class="list-summary-footer hidden">
+      <span class="cost-counter-label">Estimated Total:</span>
+      <span id="estimatedTotalAmount" class="cost-counter-amount">$0.00</span>
+    </div>
+
+    <!-- CLEAR ALL BUTTON -->
+    <button id="clearAllBtn" class="clear-all-btn hidden">Clear All Selected Items</button>
 
     <div class="go-shop-wrap">
       <button class="go-shop-btn" id="goShopBtn" disabled>Start Shopping →</button>
@@ -759,6 +820,9 @@ const backToListBtn = document.getElementById('backToListBtn');
 const newRunBtn = document.getElementById('newRunBtn');
 const storeFilterBar = document.getElementById('storeFilterBar');
 const checkUpdateBtn = document.getElementById('checkUpdateBtn');
+const clearAllBtn = document.getElementById('clearAllBtn');
+const costSummaryBox = document.getElementById('costSummaryBox');
+const estimatedTotalAmount = document.getElementById('estimatedTotalAmount');
 
 let selectedStore = "Aldi";
 
@@ -916,7 +980,8 @@ function escapeHtml(str){
 
 function renderMain(){
   catalogWrap.innerHTML='';
-  const selectedCount = catalog.filter(i=>i.inList).length;
+  const selectedItems = catalog.filter(i=>i.inList);
+  const selectedCount = selectedItems.length;
 
   if(catalog.length===0){
     emptyState.classList.remove('hidden');
@@ -925,6 +990,23 @@ function renderMain(){
   }
   goShopBtn.disabled = selectedCount===0;
   goShopBtn.textContent = selectedCount===0 ? "Start Shopping →" : `Start Shopping (${selectedCount}) →`;
+
+  // Calculate Estimated Total Cost Counter
+  let estimatedTotal = 0;
+  selectedItems.forEach(item => {
+    if(item.price != null && !isNaN(item.price)) {
+      estimatedTotal += Number(item.price) * (item.qty || 1);
+    }
+  });
+
+  if(selectedCount > 0) {
+    costSummaryBox.classList.remove('hidden');
+    clearAllBtn.classList.remove('hidden');
+    estimatedTotalAmount.textContent = `$${estimatedTotal.toFixed(2)}`;
+  } else {
+    costSummaryBox.classList.add('hidden');
+    clearAllBtn.classList.add('hidden');
+  }
 
   const sorted = [...catalog].sort((a,b)=> a.name.localeCompare(b.name, undefined, {sensitivity:'base'}));
 
@@ -1065,6 +1147,16 @@ goShopBtn.addEventListener('click', showShop);
 backToListBtn.addEventListener('click', showMain);
 tabMain.addEventListener('click', showMain);
 tabShop.addEventListener('click', ()=>{ if(catalog.some(i=>i.inList)) showShop(); });
+
+// UX Safe Clear All Button Listener
+clearAllBtn.addEventListener('click', () => {
+  if(confirm("Are you sure you want to unselect all items from this week's list?")) {
+    catalog.forEach(i => { i.inList = false; i.checked = false; });
+    save();
+    renderMain();
+  }
+});
+
 newRunBtn.addEventListener('click', async ()=>{
   if(confirm("Reset the list? This will unselect and uncheck everything ready for next time.")){
     catalog.forEach(i=>{ i.inList=false; i.checked=false; });
