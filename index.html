@@ -1185,6 +1185,12 @@ document.getElementById('searchApiBtn').addEventListener('click', async () => {
         itemInput.value = item.name;
         priceInput.value = item.price || '';
         selectedStore = item.store || "Woolworths";
+
+        // Auto-select correct aisle if returned in result
+        if (item.aisle && AISLES.includes(item.aisle)) {
+          aisleSelect.value = item.aisle;
+        }
+
         updateStoreToggleUI();
         resultsContainer.innerHTML = '';
       });
