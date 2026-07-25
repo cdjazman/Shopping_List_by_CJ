@@ -575,6 +575,43 @@ header{
   color:var(--ink-soft);
   font-weight:700;
 }
+
+/* Custom Branded Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+.modal-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.modal-title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.modal-message {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
 </style>
 </head>
 <body>
@@ -736,6 +773,18 @@ header{
 
 </div>
 
+<!-- CUSTOM CONFIRMATION MODAL -->
+<div id="customModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-title">Shopping List by CJ says</div>
+    <div id="modalMessage" class="modal-message">Are you sure?</div>
+    <div class="modal-actions">
+      <button type="button" id="modalCancelBtn" class="ghost-btn">Cancel</button>
+      <button type="button" id="modalOkBtn" class="go-shop-btn" style="flex:1; padding:10px;">OK</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOAD DEFAULT ITEMS FROM EXTERNAL FILE -->
 <script src="defaults.js"></script>
 
@@ -830,6 +879,30 @@ function load(){
   }
 
   renderMain();
+}
+
+// Custom Modal Replacement for window.confirm
+function showConfirm(message, callback) {
+  const modal = document.getElementById('customModal');
+  document.getElementById('modalMessage').textContent = message;
+  modal.classList.remove('hidden');
+
+  const okBtn = document.getElementById('modalOkBtn');
+  const cancelBtn = document.getElementById('modalCancelBtn');
+
+  const newOk = okBtn.cloneNode(true);
+  const newCancel = cancelBtn.cloneNode(true);
+  okBtn.parentNode.replaceChild(newOk, okBtn);
+  cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+  document.getElementById('modalOkBtn').addEventListener('click', () => {
+    modal.classList.add('hidden');
+    callback(true);
+  });
+  document.getElementById('modalCancelBtn').addEventListener('click', () => {
+    modal.classList.add('hidden');
+    callback(false);
+  });
 }
 
 function addItem(){
@@ -1187,48 +1260,56 @@ tabMain.addEventListener('click', showMain);
 tabShop.addEventListener('click', ()=>{ if(catalog.some(i=>i.inList)) showShop(); });
 tabSettings.addEventListener('click', showSettings);
 
-// Clear All Selected Items Listener
+// Clear All Selected Items Listener (Using Custom Modal)
 clearAllBtn.addEventListener('click', () => {
-  if(confirm("Are you sure you want to unselect all items from this week's list?")) {
-    catalog.forEach(i => { i.inList = false; i.checked = false; i.qty = 1; });
-    save();
-    renderMain();
-  }
+  showConfirm("Are you sure you want to unselect all items from this week's list?", (confirmed) => {
+    if(confirmed) {
+      catalog.forEach(i => { i.inList = false; i.checked = false; i.qty = 1; });
+      save();
+      renderMain();
+    }
+  });
 });
 
-// Delete Unpinned Catalogue Listener
+// Delete Unpinned Catalogue Listener (Using Custom Modal)
 deleteCatalogBtn.addEventListener('click', () => {
-  if(confirm("⚠️ This will permanently delete all unpinned items in your catalogue. Pinned items will be kept safe. Continue?")) {
-    catalog = catalog.filter(i => i.pinned);
-    save();
-    showMain();
-  }
-});
-
-// Store-Specific or Global Shop Done Listener
-newRunBtn.addEventListener('click', async ()=>{
-  if(currentStoreFilter === 'ALL') {
-    if(confirm("Reset the list? This will unselect, uncheck, and reset all quantities to 1 ready for next time.")){
-      catalog.forEach(i=>{ i.inList=false; i.checked=false; i.qty=1; });
+  showConfirm("⚠️ This will permanently delete all unpinned items in your catalogue. Pinned items will be kept safe. Continue?", (confirmed) => {
+    if(confirmed) {
+      catalog = catalog.filter(i => i.pinned);
       save();
       showMain();
     }
-  } else {
-    if(confirm(`Finish shopping for ${currentStoreFilter}? This will clear only the ${currentStoreFilter} items from your current run.`)){
-      catalog.forEach(i=>{
-        if(i.store === currentStoreFilter) {
-          i.inList = false;
-          i.checked = false;
-          i.qty = 1;
-        }
-      });
-      save();
-      if(!catalog.some(i => i.inList)) {
+  });
+});
+
+// Store-Specific or Global Shop Done Listener (Using Custom Modal)
+newRunBtn.addEventListener('click', async ()=>{
+  if(currentStoreFilter === 'ALL') {
+    showConfirm("Reset the list? This will unselect, uncheck, and reset all quantities to 1 ready for next time.", (confirmed) => {
+      if(confirmed){
+        catalog.forEach(i=>{ i.inList=false; i.checked=false; i.qty=1; });
+        save();
         showMain();
-      } else {
-        renderShop();
       }
-    }
+    });
+  } else {
+    showConfirm(`Finish shopping for ${currentStoreFilter}? This will clear only the ${currentStoreFilter} items from your current run.`, (confirmed) => {
+      if(confirmed){
+        catalog.forEach(i=>{
+          if(i.store === currentStoreFilter) {
+            i.inList = false;
+            i.checked = false;
+            i.qty = 1;
+          }
+        });
+        save();
+        if(!catalog.some(i => i.inList)) {
+          showMain();
+        } else {
+          renderShop();
+        }
+      }
+    });
   }
 });
 
@@ -1267,7 +1348,7 @@ async function exportCatalog() {
   URL.revokeObjectURL(url);
 }
 
-// Import Catalog from a JSON file
+// Import Catalog from a JSON file (Using Custom Modal for confirmation)
 function importCatalog(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -1277,12 +1358,14 @@ function importCatalog(event) {
     try {
       const importedData = JSON.parse(e.target.result);
       if (Array.isArray(importedData)) {
-        if (confirm("This will overwrite your current catalogue with the backup file. Continue?")) {
-          catalog = importedData;
-          save();
-          showMain();
-          alert("Catalogue successfully restored!");
-        }
+        showConfirm("This will overwrite your current catalogue with the backup file. Continue?", (confirmed) => {
+          if (confirmed) {
+            catalog = importedData;
+            save();
+            showMain();
+            alert("Catalogue successfully restored!");
+          }
+        });
       } else {
         alert("Invalid backup file format.");
       }
