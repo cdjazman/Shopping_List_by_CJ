@@ -566,9 +566,14 @@ h1{
   <div id="addView" class="hidden">
     <!-- LIVE SEARCH BAR -->
     <div class="form-field">
-      <label>Live Store Price Search</label>
+      <label>Search Store Catalog</label>
+      <div style="display:flex; gap:6px; margin-bottom:8px;" id="searchStoreSelect">
+        <button type="button" class="filter-btn active" data-searchstore="Aldi">Aldi</button>
+        <button type="button" class="filter-btn" data-searchstore="Coles">Coles</button>
+        <button type="button" class="filter-btn" data-searchstore="Woolworths">Woolworths</button>
+      </div>
       <div style="display:flex; gap:8px;">
-        <input type="text" id="liveSearchInput" placeholder="e.g. Cottage Cheese" style="flex:1;">
+        <input type="text" id="liveSearchInput" placeholder="Search any item (e.g. Sourdough)">
         <button type="button" class="ghost-btn" id="searchApiBtn" style="padding:0 14px; font-weight:700;">🔍 Search</button>
       </div>
       <div id="searchResults" style="margin-top:8px; display:flex; flex-direction:column; gap:6px;"></div>
@@ -651,6 +656,7 @@ const API_URL = "https://shopping-list-ivory-three.vercel.app/api/search";
 let catalog = [];
 let currentStoreFilter = "ALL";
 let editingItemId = null;
+let selectedSearchStore = "Aldi";
 
 const DEFAULT_ITEMS = [
   ["Bananas","Fruit & Veg",1,"Aldi",5.00],
@@ -1055,16 +1061,29 @@ newRunBtn.addEventListener('click', async ()=>{
   showMain();
 });
 
+// Search Store Toggle Listener
+document.querySelectorAll('#searchStoreSelect .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#searchStoreSelect .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedSearchStore = btn.dataset.searchstore;
+  });
+});
+
 // Live Price Search Listener
 document.getElementById('searchApiBtn').addEventListener('click', async () => {
   const query = document.getElementById('liveSearchInput').value.trim();
   const resultsContainer = document.getElementById('searchResults');
-  if(!query) return;
+  
+  if(!query) {
+    alert("Please enter a product name to search.");
+    return;
+  }
 
-  resultsContainer.innerHTML = '<p style="font-size:0.8rem; color:var(--ink-soft);">Searching store prices...</p>';
+  resultsContainer.innerHTML = `<p style="font-size:0.8rem; color:var(--ink-soft);">Searching ${selectedSearchStore}...</p>`;
 
   try {
-    const res = await fetch(`${API_URL}?q=${encodeURIComponent(query)}`);
+    const res = await fetch(`${API_URL}?q=${encodeURIComponent(query)}&store=${encodeURIComponent(selectedSearchStore)}`);
     const data = await res.json();
 
     if(!data.results || data.results.length === 0) {
@@ -1076,12 +1095,14 @@ document.getElementById('searchApiBtn').addEventListener('click', async () => {
     data.results.forEach(item => {
       const card = document.createElement('div');
       card.style.cssText = "padding:10px; border:1px solid var(--line); border-radius:10px; cursor:pointer; background:#fff; font-size:0.875rem;";
-      card.innerHTML = `<strong>${escapeHtml(item.name)}</strong> — $${item.price != null ? Number(item.price).toFixed(2) : 'N/A'} <span class="aisle-tag">${escapeHtml(item.store)}</span>`;
+      
+      const priceDisplay = item.price != null ? `$${Number(item.price).toFixed(2)}` : 'Set Price';
+      card.innerHTML = `<strong>${escapeHtml(item.name)}</strong> — ${priceDisplay} <span class="aisle-tag">${escapeHtml(item.store)}</span>`;
       
       card.addEventListener('click', () => {
         itemInput.value = item.name;
         priceInput.value = item.price || '';
-        selectedStore = item.store || "Woolworths";
+        selectedStore = item.store || selectedSearchStore;
 
         if (item.aisle && AISLES.includes(item.aisle)) {
           aisleSelect.value = item.aisle;
