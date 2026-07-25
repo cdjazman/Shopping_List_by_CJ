@@ -1,4 +1,4 @@
-const CACHE_NAME = "grocery-run-v12";
+const CACHE_NAME = "grocery-run-v15";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
@@ -14,13 +14,14 @@ const ASSETS = [
   "./icon-512-maskable.png"
 ];
 
+// Install: Cache static assets
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
 });
 
+// Activate: Clean up old caches & claim clients
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -30,10 +31,27 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+// Fetch: Direct GitHub sync requests to network, Network-First for HTML (so updates hit mobile immediately)
 self.addEventListener("fetch", (event) => {
   if (event.request.url.includes("api.github.com")) {
-    return; // let sync requests go straight to the network, uncached
+    return; // Sync requests go straight to network
   }
+
+  // Network-first strategy for navigation / HTML page requests
+  if (event.request.mode === 'navigate' || event.request.url.endsWith('index.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Cache-first strategy for static assets (icons, etc.)
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
@@ -44,4 +62,11 @@ self.addEventListener("fetch", (event) => {
       }).catch(() => cached);
     })
   );
+});
+
+// Listen for message from app to immediately activate new version
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
