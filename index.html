@@ -1083,7 +1083,8 @@ document.getElementById('searchApiBtn').addEventListener('click', () => {
   } else if (selectedSearchStore === 'Coles') {
     searchUrl = `https://www.coles.com.au/search?q=${encodedQuery}`;
   } else if (selectedSearchStore === 'Aldi') {
-    searchUrl = `https://www.aldi.com.au/en/search/?text=${encodedQuery}`;
+    // Correct ALDI Product Finder Search Route
+    searchUrl = `https://www.aldi.com.au/products/search?q=${encodedQuery}`;
   }
 
   if (searchUrl) {
