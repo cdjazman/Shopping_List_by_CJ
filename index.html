@@ -164,19 +164,6 @@ h1{
   max-width:130px;
 }
 
-#addBtn{
-  padding:0 18px;
-  border:none;
-  border-radius:10px;
-  background:var(--sage);
-  color:#fff;
-  font-weight:700;
-  font-size:1.25rem;
-  cursor:pointer;
-  line-height:1;
-}
-#addBtn:active{background:var(--sage-dark);}
-
 .hint{
   font-size:0.75rem;
   color:var(--ink-soft);
@@ -251,13 +238,27 @@ h1{
   font-weight:700;
 }
 
+.action-btns{
+  display:flex;
+  align-items:center;
+  gap:2px;
+}
+.edit-btn{
+  background:none;
+  border:none;
+  color:var(--ink-soft);
+  font-size:0.9375rem;
+  cursor:pointer;
+  padding:4px 6px;
+  opacity:.6;
+}
 .remove-btn{
   background:none;
   border:none;
   color:var(--rust);
   font-size:1rem;
   cursor:pointer;
-  padding:4px 8px;
+  padding:4px 6px;
   opacity:.55;
 }
 
@@ -529,7 +530,7 @@ h1{
     </div>
   </div>
 
-  <!-- ADD PRODUCT VIEW -->
+  <!-- ADD / EDIT PRODUCT VIEW -->
   <div id="addView" class="hidden">
     <div class="form-field">
       <label>Item name</label>
@@ -606,6 +607,7 @@ const STORAGE_KEY = "grocery-catalog";
 
 let catalog = [];
 let currentStoreFilter = "ALL";
+let editingItemId = null; // Tracks item currently being edited
 
 const DEFAULT_ITEMS = [
   ["Bananas","Fruit & Veg",1,"Aldi",5.00],
@@ -806,7 +808,6 @@ async function load(){
     }catch(e){ catalog = []; }
   }
 
-  // Fallback seed if catalog is empty
   if(!catalog || catalog.length===0){
     catalog = DEFAULT_ITEMS.map(([name,aisle,qty,store,price])=>({id:uid(),name,aisle,qty,store,price,inList:false,checked:false}));
     await save();
@@ -837,26 +838,64 @@ function addItem(){
   if(!name){ itemInput.focus(); return; }
   const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
   const price = parseFloat(priceInput.value);
-  catalog.push({
-    id: uid(),
-    name,
-    aisle: aisleSelect.value,
-    qty,
-    store: selectedStore,
-    price: isNaN(price) ? null : price,
-    inList:false,
-    checked:false
-  });
+
+  if(editingItemId) {
+    // Update existing product
+    const item = catalog.find(i => i.id === editingItemId);
+    if(item) {
+      item.name = name;
+      item.aisle = aisleSelect.value;
+      item.qty = qty;
+      item.store = selectedStore;
+      item.price = isNaN(price) ? null : price;
+    }
+    editingItemId = null;
+  } else {
+    // Add brand new product
+    catalog.push({
+      id: uid(),
+      name,
+      aisle: aisleSelect.value,
+      qty,
+      store: selectedStore,
+      price: isNaN(price) ? null : price,
+      inList:false,
+      checked:false
+    });
+  }
+
   save();
   showMain();
 }
 
 function openAddView(){
-  itemInput.value='';
-  priceInput.value='';
-  qtyInput.value='1';
+  editingItemId = null;
+  itemInput.value = '';
+  priceInput.value = '';
+  qtyInput.value = '1';
   selectedStore = "Aldi";
+  saveProductBtn.textContent = "Save Product";
   updateStoreToggleUI();
+  mainView.classList.add('hidden');
+  shopView.classList.add('hidden');
+  addView.classList.remove('hidden');
+  setTimeout(()=> itemInput.focus(), 50);
+}
+
+function openEditView(id){
+  const item = catalog.find(i => i.id === id);
+  if(!item) return;
+
+  editingItemId = item.id;
+  itemInput.value = item.name || '';
+  aisleSelect.value = item.aisle || AISLES[0];
+  priceInput.value = (item.price != null && !isNaN(item.price)) ? item.price : '';
+  qtyInput.value = item.qty || 1;
+  selectedStore = item.store || "Aldi";
+  
+  saveProductBtn.textContent = "Update Product";
+  updateStoreToggleUI();
+
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
   addView.classList.remove('hidden');
@@ -942,13 +981,22 @@ function renderMain(){
           </div>
         </div>
       </div>
-      <button class="remove-btn" data-remove="${item.id}">✕</button>
+      <div class="action-btns">
+        <button class="edit-btn" data-edit="${item.id}" title="Edit Product">✎</button>
+        <button class="remove-btn" data-remove="${item.id}" title="Delete Product">✕</button>
+      </div>
     `;
     catalogWrap.appendChild(row);
   });
 
   catalogWrap.querySelectorAll('.catalog-left').forEach(el=>{
     el.addEventListener('click', ()=> toggleInList(el.dataset.id));
+  });
+  catalogWrap.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openEditView(btn.dataset.edit);
+    });
   });
   catalogWrap.querySelectorAll('[data-remove]').forEach(btn=>{
     btn.addEventListener('click', (e)=>{
