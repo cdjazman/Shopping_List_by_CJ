@@ -1,10 +1,15 @@
-const CACHE_NAME = 'shopping-list-v2';
+const CACHE_NAME = 'shopping-list-v3';
 const PRECACHE_URLS = [
   './index.html',
   './manifest.json',
   './css/style.css',
   './js/app.js',
   './js/defaults.js',
+  './js/storage.js',
+  './js/catalog.js',
+  './js/shopping.js',
+  './js/ui.js',
+  './js/settings.js',
   './assets/icons/icon-192.png',
   './assets/images/LOGO.png'
 ];

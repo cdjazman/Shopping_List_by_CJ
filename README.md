@@ -21,9 +21,20 @@ A clean, fast, offline-first Progressive Web App (PWA) designed to manage, estim
 
 ```text
 Shopping-List-App/
-├── index.html           # Main application file & UI logic
-├── js/defaults.js       # Default catalogue items (can be left blank for pristine start)
-├── manifest.json        # PWA manifest configuration
-├── service-worker.js    # Offline caching and background updates
-├── CHANGELOG.md         # Detailed project version history
-└── assets/images/LOGO.png # App branding icon
+├── index.html                 # App shell and UI structure
+├── css/style.css              # Extracted stylesheet
+├── js/app.js                  # App bootstrap and orchestration
+├── js/defaults.js             # Seed catalogue data
+├── js/storage.js              # Local storage persistence and migration
+├── js/catalog.js              # Catalogue add/edit/delete logic
+├── js/shopping.js             # Shopping mode and quantity logic
+├── js/ui.js                   # Rendering and view management
+├── js/settings.js             # Backup/import and settings handlers
+├── manifest.json              # PWA manifest
+├── service-worker.js          # Offline caching and update handling
+├── assets/icons/              # PWA icons
+├── assets/images/             # Branding assets
+├── README.md                  # Overview and usage
+├── ARCHITECTURE.md            # Technical architecture notes
+├── PROJECT.md                 # Product and engineering context
+└── CHANGELOG.md               # Version history

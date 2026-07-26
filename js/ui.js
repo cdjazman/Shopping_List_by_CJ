@@ -210,27 +210,12 @@
     }
   }
 
-  function openAddForm(mainView, shopView, settingsView, addView, itemInput, saveProductBtn, selectedStore, updateStoreToggleUI) {
-    itemInput.value = '';
-    document.getElementById('priceInput').value = '';
-    document.getElementById('qtyInput').value = '1';
-    document.getElementById('liveSearchInput').value = '';
-    saveProductBtn.textContent = 'Save Product';
-    updateStoreToggleUI();
-    mainView.classList.add('hidden');
-    shopView.classList.add('hidden');
-    settingsView.classList.add('hidden');
-    addView.classList.remove('hidden');
-    setTimeout(() => itemInput.focus(), 50);
-  }
-
   global.shoppingListUI = {
     escapeHtml,
     showConfirm,
     updateStoreToggleUI,
     renderMain,
     renderShop,
-    showView,
-    openAddForm
+    showView
   };
 })(window);

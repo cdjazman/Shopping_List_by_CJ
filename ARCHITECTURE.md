@@ -98,7 +98,7 @@ The storage layer ensures that application data remains accessible even when the
 
 # Current Folder Structure
 
-The current repository structure is intended to remain simple and lightweight.
+The repository is intentionally lightweight, with the refactor split into focused JavaScript modules.
 
 /
 ├── api/
@@ -108,41 +108,34 @@ The current repository structure is intended to remain simple and lightweight.
 ├── css/
 │   └── style.css
 ├── js/
-│   └── app.js
+│   ├── app.js
+│   ├── catalog.js
+│   ├── defaults.js
+│   ├── settings.js
+│   ├── shopping.js
+│   ├── storage.js
+│   └── ui.js
 ├── index.html
 ├── manifest.json
 ├── service-worker.js
 ├── PROJECT.md
 ├── DECISIONS.md
-└── ARCHITECTURE.md
+├── ARCHITECTURE.md
+└── README.md
 
 ---
 
-# Planned Folder Structure
+# Current Module Responsibilities
 
-As the application grows, the JavaScript layer should be split into focused modules to keep the codebase maintainable.
+The JavaScript layer is now split into focused modules:
 
-js/
-
-app.js
-ui.js
-storage.js
-backup.js
-catalog.js
-shop.js
-settings.js
-constants.js
-
-Each module should have a clear responsibility:
-
-- app.js: application bootstrap and orchestration
-- ui.js: rendering and DOM interaction
-- storage.js: browser storage access and persistence helpers
-- backup.js: import and export logic
-- catalog.js: product catalogue management
-- shop.js: shopping mode and list interaction flow
-- settings.js: settings state and configuration
-- constants.js: shared constants and keys
+- app.js: application bootstrap, event wiring, and orchestration
+- ui.js: rendering, DOM updates, and view switching
+- storage.js: browser storage access, persistence, and data migration
+- catalog.js: product catalogue add/edit/delete behavior
+- shopping.js: shopping list selection, quantity changes, and list creation
+- settings.js: backup export/import and search-store preference handling
+- defaults.js: seed catalogue data for first use
 
 ---
 
