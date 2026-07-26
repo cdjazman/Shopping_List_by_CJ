@@ -89,37 +89,22 @@ function showConfirm(message, callback) {
 }
 
 function addItem(){
-  const name = itemInput.value.trim();
-  if(!name){ itemInput.focus(); return; }
-  const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
-  const price = parseFloat(priceInput.value);
-
-  if(editingItemId) {
-    const item = catalog.find(i => i.id === editingItemId);
-    if(item) {
-      item.name = name;
-      item.aisle = aisleSelect.value;
-      item.qty = qty;
-      item.store = selectedStore;
-      item.price = isNaN(price) ? null : price;
+  const didUpdate = shoppingListCatalog.addProduct(
+    catalog,
+    itemInput,
+    aisleSelect,
+    qtyInput,
+    priceInput,
+    selectedStore,
+    editingItemId,
+    (value) => { editingItemId = value; },
+    () => {
+      save();
+      showMain();
     }
-    editingItemId = null;
-  } else {
-    catalog.push({
-      id: uid(),
-      name,
-      aisle: aisleSelect.value,
-      qty,
-      store: selectedStore,
-      price: isNaN(price) ? null : price,
-      inList:false,
-      checked:false,
-      pinned:false
-    });
-  }
+  );
 
-  save();
-  showMain();
+  if (didUpdate === false) return;
 }
 
 function openAddView(){
@@ -139,25 +124,24 @@ function openAddView(){
 }
 
 function openEditView(id){
-  const item = catalog.find(i => i.id === id);
-  if(!item) return;
-
-  editingItemId = item.id;
-  itemInput.value = item.name || '';
-  aisleSelect.value = item.aisle || AISLES[0];
-  priceInput.value = (item.price != null && !isNaN(item.price)) ? item.price : '';
-  qtyInput.value = item.qty || 1;
-  selectedStore = item.store || "Aldi";
-  document.getElementById('liveSearchInput').value = '';
-  
-  saveProductBtn.textContent = "Update Product";
-  updateStoreToggleUI();
-
-  mainView.classList.add('hidden');
-  shopView.classList.add('hidden');
-  settingsView.classList.add('hidden');
-  addView.classList.remove('hidden');
-  setTimeout(()=> itemInput.focus(), 50);
+  shoppingListCatalog.editProduct(
+    catalog,
+    id,
+    itemInput,
+    aisleSelect,
+    qtyInput,
+    priceInput,
+    (value) => { selectedStore = value; },
+    (value) => { editingItemId = value; },
+    (value) => { saveProductBtn.textContent = value; },
+    updateStoreToggleUI,
+    () => {
+      mainView.classList.add('hidden');
+      shopView.classList.add('hidden');
+      settingsView.classList.add('hidden');
+      addView.classList.remove('hidden');
+    }
+  );
 }
 
 function updateStoreToggleUI(){
@@ -177,10 +161,8 @@ const STORE_LETTER = { "Aldi":"A", "Coles":"C", "Woolworths":"W" };
 const STORE_CYCLE = ["Aldi","Coles","Woolworths"];
 
 function cycleStore(id){
-  const item = catalog.find(i=>i.id===id);
+  const item = shoppingListCatalog.cycleStore(catalog, id);
   if(!item) return;
-  const idx = STORE_CYCLE.indexOf(item.store);
-  item.store = STORE_CYCLE[(idx+1) % STORE_CYCLE.length];
   save();
   renderShop();
 }
@@ -194,32 +176,25 @@ function togglePin(id){
 }
 
 function removeFromCatalog(id){
-  const item = catalog.find(i=>i.id===id);
-  if(item && item.pinned) {
+  const result = shoppingListCatalog.deleteProduct(catalog, id, () => {
     alert("This item is pinned and cannot be deleted.");
-    return;
-  }
-  catalog = catalog.filter(i=>i.id!==id);
+  });
+  if (!result || result.removed === false) return;
+  catalog = result.catalog;
   save();
   renderMain();
 }
 
 function toggleInList(id){
-  const item = catalog.find(i=>i.id===id);
+  const item = shoppingListShopping.toggleInList(catalog, id);
   if(!item) return;
-  item.inList = !item.inList;
-  if(!item.inList) {
-    item.checked = false;
-    item.qty = 1;
-  }
   save();
   renderMain();
 }
 
 function changeQty(id, delta){
-  const item = catalog.find(i=>i.id===id);
+  const item = shoppingListShopping.changeQty(catalog, id, delta);
   if(!item) return;
-  item.qty = Math.max(1, (item.qty || 1) + delta);
   save();
   renderMain();
 }
@@ -259,7 +234,7 @@ function renderMain(){
     clearAllBtn.classList.add('hidden');
   }
 
-  const sorted = [...catalog].sort((a,b)=> a.name.localeCompare(b.name, undefined, {sensitivity:'base'}));
+  const sorted = shoppingListShopping.sortCatalogItems(catalog);
 
   sorted.forEach(item=>{
     const row = document.createElement('div');
@@ -346,11 +321,7 @@ storeFilterBar.querySelectorAll('.filter-btn').forEach(btn=>{
 function renderShop(){
   aisleGroups.innerHTML='';
   
-  const allActive = catalog.filter(i=>i.inList);
-  const active = allActive.filter(item => {
-    if(currentStoreFilter === 'ALL') return true;
-    return item.store === currentStoreFilter;
-  });
+  const active = shoppingListShopping.createShoppingList(catalog, currentStoreFilter);
 
   const total = active.length;
   const checkedCount = active.filter(i=>i.checked).length;
