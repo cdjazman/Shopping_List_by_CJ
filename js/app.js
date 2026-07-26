@@ -68,6 +68,9 @@ let activeView = 'lists';
 let currentListId = 'weekly';
 let mainScrollTop = 0;
 let activeProductDeleteDialog = null;
+let productsSearchQuery = '';
+let productsFavouriteFilter = 'all';
+window.__shoppingAppOpenList = null;
 
 function getActiveListId() {
   return window.shoppingLists?.getActiveList?.()?.id || currentListId || 'default';
@@ -278,6 +281,14 @@ function togglePin(id){
   renderMain();
 }
 
+function toggleFavourite(id){
+  const item = catalog.find((entry) => entry.id === id);
+  if (!item) return;
+  item.favourite = !item.favourite;
+  save();
+  renderMain();
+}
+
 function removeFromCatalog(id){
   const item = catalog.find((entry) => entry.id === id);
   if (!item) return;
@@ -311,6 +322,33 @@ function escapeHtml(str){
   return shoppingListUI.escapeHtml(str);
 }
 
+function getFilteredProducts() {
+  const query = (productsSearchQuery || '').trim().toLowerCase();
+  const favouritesOnly = productsFavouriteFilter === 'favourites';
+
+  return catalog.filter((item) => {
+    const matchesFilter = favouritesOnly ? Boolean(item.favourite) : true;
+    if (!matchesFilter) return false;
+
+    const searchableText = [item.name, item.aisle]
+      .filter(Boolean)
+      .map((value) => String(value).toLowerCase())
+      .join(' ');
+
+    if (!query) return true;
+    return searchableText.includes(query);
+  });
+}
+
+function updateProductsSearchUI() {
+  const searchInput = document.getElementById('productsSearchInput');
+  const clearBtn = document.getElementById('productsSearchClearBtn');
+
+  if (!searchInput || !clearBtn) return;
+
+  clearBtn.classList.toggle('hidden', !searchInput.value.trim());
+}
+
 function renderMain(){
   const activeListId = getActiveListId();
   const selectedItems = catalog.filter((item) => Boolean(item.lists?.[activeListId]));
@@ -323,8 +361,9 @@ function renderMain(){
       estimatedTotal += Number(item.price) * qty;
     }
   });
-  const sorted = shoppingListShopping.sortCatalogItems(catalog);
-  shoppingListUI.renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, catalog, selectedItems, selectedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, escapeHtml, activeListId);
+  const visibleCatalog = getFilteredProducts();
+  const sorted = shoppingListShopping.sortCatalogItems(visibleCatalog);
+  shoppingListUI.renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, visibleCatalog, catalog, selectedItems, selectedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, toggleFavourite, escapeHtml, activeListId, productsSearchQuery);
 }
 
 function renderLists(){
@@ -333,11 +372,12 @@ function renderLists(){
   }
 
   shoppingLists.loadLists();
-  shoppingLists.render(listsWrap, catalog, (list) => {
+  window.__shoppingAppOpenList = (list) => {
     currentListId = list.id;
     updateActiveListHeader();
     showMain();
-  });
+  };
+  shoppingLists.render(listsWrap, catalog, window.__shoppingAppOpenList);
 }
 
 function removeActiveListEntries(filterFn = () => true) {
@@ -442,6 +482,57 @@ saveProductBtn.addEventListener('click', addItem);
 itemInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addItem(); });
 goShopBtn.addEventListener('click', showShop);
 backToListBtn.addEventListener('click', showMain);
+
+const productsSearchInput = document.getElementById('productsSearchInput');
+const productsSearchClearBtn = document.getElementById('productsSearchClearBtn');
+const productsFilterAllBtn = document.getElementById('productsFilterAllBtn');
+const productsFilterFavouritesBtn = document.getElementById('productsFilterFavouritesBtn');
+
+function updateFavouriteFilterUI() {
+  if (productsFilterAllBtn) {
+    productsFilterAllBtn.classList.toggle('active', productsFavouriteFilter === 'all');
+  }
+  if (productsFilterFavouritesBtn) {
+    productsFilterFavouritesBtn.classList.toggle('active', productsFavouriteFilter === 'favourites');
+  }
+}
+
+if (productsSearchInput) {
+  productsSearchInput.addEventListener('input', () => {
+    productsSearchQuery = productsSearchInput.value;
+    updateProductsSearchUI();
+    renderMain();
+  });
+}
+
+if (productsSearchClearBtn) {
+  productsSearchClearBtn.addEventListener('click', () => {
+    if (productsSearchInput) {
+      productsSearchInput.value = '';
+    }
+    productsSearchQuery = '';
+    updateProductsSearchUI();
+    renderMain();
+  });
+}
+
+if (productsFilterAllBtn) {
+  productsFilterAllBtn.addEventListener('click', () => {
+    productsFavouriteFilter = 'all';
+    updateFavouriteFilterUI();
+    renderMain();
+  });
+}
+
+if (productsFilterFavouritesBtn) {
+  productsFilterFavouritesBtn.addEventListener('click', () => {
+    productsFavouriteFilter = 'favourites';
+    updateFavouriteFilterUI();
+    renderMain();
+  });
+}
+
+updateFavouriteFilterUI();
 backFromSettingsBtn.addEventListener('click', () => {
   showLists();
   renderLists();

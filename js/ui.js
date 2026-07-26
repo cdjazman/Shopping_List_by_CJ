@@ -34,12 +34,75 @@
     });
   }
 
-  function renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, catalog, selectedItems, selectedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, escapeHtml, activeListId) {
+  function renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, visibleCatalog, sourceCatalog, selectedItems, selectedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, toggleFavourite, escapeHtml, activeListId, searchQuery) {
     catalogWrap.innerHTML='';
 
-    if(catalog.length===0){
+    if (!catalogWrap.__shoppingListProductBound) {
+      catalogWrap.addEventListener('click', (event) => {
+        const left = event.target.closest('.catalog-left');
+        if (left) {
+          event.stopPropagation();
+          toggleInList(left.dataset.id);
+          return;
+        }
+
+        const favouriteBtn = event.target.closest('[data-favourite]');
+        if (favouriteBtn) {
+          event.stopPropagation();
+          toggleFavourite(favouriteBtn.dataset.favourite);
+          return;
+        }
+
+        const pinBtn = event.target.closest('[data-pin]');
+        if (pinBtn) {
+          event.stopPropagation();
+          togglePin(pinBtn.dataset.pin);
+          return;
+        }
+
+        const incBtn = event.target.closest('[data-inc]');
+        if (incBtn) {
+          event.stopPropagation();
+          changeQty(incBtn.dataset.inc, 1);
+          return;
+        }
+
+        const decBtn = event.target.closest('[data-dec]');
+        if (decBtn) {
+          event.stopPropagation();
+          changeQty(decBtn.dataset.dec, -1);
+          return;
+        }
+
+        const editBtn = event.target.closest('[data-edit]');
+        if (editBtn) {
+          event.stopPropagation();
+          openEditView(editBtn.dataset.edit);
+          return;
+        }
+
+        const removeBtn = event.target.closest('[data-remove]');
+        if (removeBtn) {
+          event.stopPropagation();
+          removeFromCatalog(removeBtn.dataset.remove);
+        }
+      });
+      catalogWrap.__shoppingListProductBound = true;
+    }
+
+    const query = (searchQuery || '').trim();
+    const hasSourceItems = sourceCatalog.length > 0;
+    const hasVisibleItems = visibleCatalog.length > 0;
+
+    if(!hasSourceItems){
       emptyState.classList.remove('hidden');
-    }else{
+      emptyState.querySelector('.big').textContent = 'Your products list is empty';
+      emptyState.querySelector('div:last-child').textContent = 'Use the Add Product action below to get started.';
+    } else if (query && !hasVisibleItems) {
+      emptyState.classList.remove('hidden');
+      emptyState.querySelector('.big').textContent = 'No products found';
+      emptyState.querySelector('div:last-child').textContent = 'Try another search.';
+    } else{
       emptyState.classList.add('hidden');
     }
     goShopBtn.disabled = selectedCount===0;
@@ -59,82 +122,112 @@
       clearAllBtn.classList.add('hidden');
     }
 
-    sorted.forEach((item) => {
-      const entry = item.lists?.[activeListId];
-      const isSelected = Boolean(entry);
-      const qty = Number(entry?.qty || 1);
-      const row = document.createElement('div');
-      row.className='catalog-item' + (isSelected ? ' selected':'');
-      const priceStr = (item.price!=null && !isNaN(item.price)) ? `<span class="price-tag">${new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(item.price))}</span>` : '';
-      const storeStr = item.store ? `<span class="store-badge" data-store="${escapeHtml(item.store)}">${STORE_LETTER[item.store]||'?'}</span>` : '';
-      const qtyMod = isSelected ? `
-        <div style="display:flex; align-items:center; gap:6px; margin-left:10px;" onclick="event.stopPropagation()">
-          <button type="button" class="ghost-btn" style="padding:2px 8px; font-size:0.75rem;" data-dec="${item.id}">-</button>
-          <span style="font-weight:700; font-size:0.875rem;">${qty}</span>
-          <button type="button" class="ghost-btn" style="padding:2px 8px; font-size:0.75rem;" data-inc="${item.id}">+</button>
-        </div>
-      ` : '';
-      const removeOrLock = item.pinned
-        ? `<span title="Pinned item (protected)" style="padding:4px 6px; font-size:0.85rem; opacity:0.6;">🔒</span>`
-        : `<button class="remove-btn" data-remove="${item.id}" title="Delete Product">✕</button>`;
-
-      row.innerHTML = `
-        <div class="catalog-left" data-id="${item.id}">
-          <div class="checkbox">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    function appendItems(items) {
+      items.forEach((item) => {
+        const entry = item.lists?.[activeListId];
+        const isSelected = Boolean(entry);
+        const qty = Number(entry?.qty || 1);
+        const row = document.createElement('div');
+        row.className='catalog-item' + (isSelected ? ' selected':'');
+        const priceStr = (item.price!=null && !isNaN(item.price)) ? `<span class="price-tag">${new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(item.price))}</span>` : '';
+        const storeStr = item.store ? `<span class="store-badge" data-store="${escapeHtml(item.store)}">${STORE_LETTER[item.store]||'?'}</span>` : '';
+        const qtyMod = isSelected ? `
+          <div style="display:flex; align-items:center; gap:6px; margin-left:10px;" onclick="event.stopPropagation()">
+            <button type="button" class="ghost-btn" style="padding:2px 8px; font-size:0.75rem;" data-dec="${item.id}">-</button>
+            <span style="font-weight:700; font-size:0.875rem;">${qty}</span>
+            <button type="button" class="ghost-btn" style="padding:2px 8px; font-size:0.75rem;" data-inc="${item.id}">+</button>
           </div>
-          <div>
-            <span class="name">${escapeHtml(item.name)}${!isSelected && qty>1?`<span class="qty">×${qty}</span>`:''}</span>
-            <div class="item-meta">
-              <span class="aisle-tag">${escapeHtml(item.aisle)}</span>
-              ${storeStr}
-              ${priceStr}
+        ` : '';
+        const removeOrLock = item.pinned
+          ? `<span title="Pinned item (protected)" style="padding:4px 6px; font-size:0.85rem; opacity:0.6;">🔒</span>`
+          : `<button class="remove-btn" data-remove="${item.id}" title="Delete Product">✕</button>`;
+
+        row.innerHTML = `
+          <div class="catalog-left" data-id="${item.id}">
+            <div class="checkbox">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div>
+              <span class="name">${escapeHtml(item.name)}${!isSelected && qty>1?`<span class="qty">×${qty}</span>`:''}</span>
+              <div class="item-meta">
+                <span class="aisle-tag">${escapeHtml(item.aisle)}</span>
+                ${storeStr}
+                ${priceStr}
+              </div>
             </div>
           </div>
-        </div>
-        <div style="display:flex; align-items:center;">
-          ${qtyMod}
-          <div class="action-btns" style="margin-left:6px;">
-            <button class="pin-btn" data-pin="${item.id}" title="${item.pinned ? 'Unpin item' : 'Pin item'}">${item.pinned ? '📌' : '📍'}</button>
-            <button class="edit-btn" data-edit="${item.id}" title="Edit Product">✎</button>
-            ${removeOrLock}
+          <div style="display:flex; align-items:center;">
+            ${qtyMod}
+            <div class="action-btns" style="margin-left:6px;">
+              <button class="favourite-toggle${item.favourite ? ' is-favourite' : ''}" type="button" data-favourite="${item.id}" title="${item.favourite ? 'Remove favourite' : 'Add favourite'}" aria-label="${item.favourite ? 'Remove favourite' : 'Mark favourite'}">${item.favourite ? '★' : '☆'}</button>
+              <button class="pin-btn" data-pin="${item.id}" title="${item.pinned ? 'Unpin item' : 'Pin item'}">${item.pinned ? '📌' : '📍'}</button>
+              <button class="edit-btn" data-edit="${item.id}" title="Edit Product">✎</button>
+              ${removeOrLock}
+            </div>
           </div>
-        </div>
-      `;
-      catalogWrap.appendChild(row);
-    });
+        `;
+        catalogWrap.appendChild(row);
+      });
+    }
 
-    catalogWrap.querySelectorAll('.catalog-left').forEach((el)=>{
-      el.addEventListener('click', ()=> toggleInList(el.dataset.id));
-    });
-    catalogWrap.querySelectorAll('[data-pin]').forEach((btn)=>{
-      btn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        togglePin(btn.dataset.pin);
-      });
-    });
-    catalogWrap.querySelectorAll('[data-inc]').forEach((btn)=>{
-      btn.addEventListener('click', ()=> changeQty(btn.dataset.inc, 1));
-    });
-    catalogWrap.querySelectorAll('[data-dec]').forEach((btn)=>{
-      btn.addEventListener('click', ()=> changeQty(btn.dataset.dec, -1));
-    });
-    catalogWrap.querySelectorAll('[data-edit]').forEach((btn)=>{
-      btn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        openEditView(btn.dataset.edit);
-      });
-    });
-    catalogWrap.querySelectorAll('[data-remove]').forEach((btn)=>{
-      btn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        removeFromCatalog(btn.dataset.remove);
-      });
-    });
+    const favouriteItems = sorted.filter((item) => item.favourite);
+    const otherItems = sorted.filter((item) => !item.favourite);
+
+    if (searchQuery && favouriteItems.length === 0 && otherItems.length === 0) {
+      // handled by empty state above
+    } else if (favouriteItems.length > 0 && otherItems.length > 0) {
+      const heading = document.createElement('div');
+      heading.className = 'products-section-heading';
+      heading.textContent = '⭐ Favourite Products';
+      catalogWrap.appendChild(heading);
+      appendItems(favouriteItems);
+
+      const allHeading = document.createElement('div');
+      allHeading.className = 'products-section-heading';
+      allHeading.textContent = 'All Products';
+      catalogWrap.appendChild(allHeading);
+      appendItems(otherItems);
+    } else if (favouriteItems.length > 0) {
+      const heading = document.createElement('div');
+      heading.className = 'products-section-heading';
+      heading.textContent = '⭐ Favourite Products';
+      catalogWrap.appendChild(heading);
+      appendItems(favouriteItems);
+    } else {
+      appendItems(otherItems);
+    }
+
   }
 
   function renderShop(aisleGroups, active, AISLES, STORE_LETTER, escapeHtml, cycleStore, save, renderShopFn) {
     aisleGroups.innerHTML='';
+
+    if (!aisleGroups.__shoppingListShopBound) {
+      aisleGroups.addEventListener('click', (event) => {
+        const shopRow = event.target.closest('.shop-item');
+        if (!shopRow) return;
+
+        const cycleButton = event.target.closest('[data-cyclestore]');
+        if (cycleButton) {
+          event.stopPropagation();
+          cycleStore(cycleButton.dataset.cyclestore);
+          return;
+        }
+
+        const activeListId = window.shoppingLists?.getActiveList?.()?.id;
+        const entry = active.find((item) => item.id === shopRow.dataset.id);
+
+        if (entry) {
+          window.shoppingListStorage.toggleChecked(entry.id, activeListId);
+        } else {
+          const created = window.shoppingListStorage.addProductToList(shopRow.dataset.id, activeListId);
+          if (created) created.checked = true;
+        }
+        save();
+        renderShopFn();
+      });
+      aisleGroups.__shoppingListShopBound = true;
+    }
 
     const activeListId = window.shoppingLists?.getActiveList?.()?.id;
     const total = active.length;
@@ -178,21 +271,6 @@
             </div>
           </div>
         `;
-        row.addEventListener('click', (e)=>{
-          if(e.target.closest('[data-cyclestore]')){
-            e.stopPropagation();
-            cycleStore(e.target.closest('[data-cyclestore]').dataset.cyclestore);
-            return;
-          }
-          if (entry) {
-            window.shoppingListStorage.toggleChecked(item.id, activeListId);
-          } else {
-            const created = window.shoppingListStorage.addProductToList(item.id, activeListId);
-            if (created) created.checked = true;
-          }
-          save();
-          renderShopFn();
-        });
         wrap.appendChild(row);
       });
       aisleGroups.appendChild(wrap);

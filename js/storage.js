@@ -73,6 +73,7 @@
         store: item.store || "Aldi",
         price: item.price ?? null,
         pinned: item.pinned ?? false,
+        favourite: item.favourite ?? false,
         lists: {}
       };
 
@@ -102,6 +103,11 @@
 
       if (item.pinned == null) {
         migratedItem.pinned = false;
+        updated = true;
+      }
+
+      if (item.favourite == null) {
+        migratedItem.favourite = false;
         updated = true;
       }
 
@@ -149,6 +155,7 @@
         store,
         price,
         pinned: false,
+        favourite: false,
         lists: {}
       })
     );

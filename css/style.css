@@ -32,6 +32,10 @@
 
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;}
+html, body {
+  height:100%;
+  overflow:hidden;
+}
 body{
   background:var(--color-bg);
   color:var(--color-text);
@@ -49,10 +53,14 @@ html{
 .app{
   width:100%;
   max-width:clamp(320px, 92vw, 560px);
-  min-height:100vh;
-  min-height:100dvh;
+  height:100vh;
+  height:100dvh;
+  min-height:0;
   background:var(--paper);
   position:relative;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
   padding:clamp(18px, 5vw, 32px) clamp(14px, 4.5vw, 24px) clamp(28px, 6vw, 44px);
   padding-top:calc(clamp(18px, 5vw, 32px) + env(safe-area-inset-top));
   padding-bottom:calc(clamp(28px, 6vw, 44px) + env(safe-area-inset-bottom));
@@ -791,7 +799,7 @@ header{
   color: var(--ink-soft);
 }
 .cost-counter-amount {
-  font-family: 'Fraunces', serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--sage-dark);
@@ -815,9 +823,125 @@ header{
   background: rgba(200,90,31,0.08);
 }
 
+.products-view{
+  display:flex;
+  flex-direction:column;
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+}
+
+.main-view__sticky-header{
+  flex-shrink:0;
+}
+
+.products-filter-bar{
+  display:flex;
+  gap:8px;
+  margin:4px 0 10px;
+}
+
+.products-filter-btn{
+  flex:1;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper-dim);
+  color:var(--ink-soft);
+  font-family:'DM Sans', sans-serif;
+  font-size:0.82rem;
+  font-weight:700;
+  padding:8px 10px;
+}
+
+.products-filter-btn.active{
+  background:var(--color-primary);
+  color:var(--color-text);
+  border-color:var(--color-primary);
+}
+
+.products-search-wrap{
+  margin:4px 0 12px;
+}
+
+.products-search{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+
+.products-search__input{
+  width:100%;
+  padding:11px 40px 11px 12px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper-dim);
+  color:var(--ink);
+  font-family:'DM Sans', sans-serif;
+  font-size:0.9rem;
+}
+
+.products-search__input::placeholder{
+  color:var(--ink-soft);
+}
+
+.products-search__clear{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  width:28px;
+  height:28px;
+  border:none;
+  border-radius:50%;
+  background:transparent;
+  color:var(--ink-soft);
+  font-size:1rem;
+  cursor:pointer;
+}
+
+.products-search__clear:hover,
+.products-search__clear:focus-visible{
+  background:var(--color-surface-highlight);
+  color:var(--ink);
+}
+
+.products-section-heading{
+  margin:12px 0 8px;
+  font-size:0.72rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--color-primary);
+}
+
+.favourite-toggle{
+  width:36px;
+  height:36px;
+  border:none;
+  background:none;
+  color:var(--color-text-muted);
+  font-size:1.05rem;
+  line-height:1;
+  padding:0;
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+}
+
+.favourite-toggle.is-favourite{
+  color:var(--color-primary);
+}
+
+.products-scroll-area{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-bottom:8px;
+}
+
 .go-shop-wrap{
-  position:sticky;
-  bottom:calc(16px + env(safe-area-inset-bottom));
+  flex-shrink:0;
   margin-top:12px;
 }
 .go-shop-btn{
@@ -1098,6 +1222,7 @@ header{
 .store-badge[data-store="Coles"]{ background:var(--color-primary); }
 .store-badge[data-store="Woolworths"]{ background:var(--sage); }
 .price-tag{
+  font-family:'Montserrat', sans-serif;
   font-size:0.75rem;
   color:var(--ink-soft);
   font-weight:700;
@@ -1119,6 +1244,8 @@ header{
 #addView,
 #shopView,
 #settingsView {
+  flex:1 1 auto;
+  min-height:0;
   padding-bottom: var(--bottom-nav-offset);
 }
 .modal-card {

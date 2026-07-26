@@ -22,6 +22,7 @@
   let listsWrap = null;
   let activeListMenu = null;
   let activeDeleteDialog = null;
+  let latestOnOpen = null;
 
   function uid() {
     return Math.random().toString(36).slice(2, 10);
@@ -264,7 +265,9 @@
   function setActiveList(id) {
     const match = lists.find((item) => item.id === id);
 
-    if (!match) return null;
+    if (!match) {
+      return null;
+    }
 
     activeListId = match.id;
     persistActiveList();
@@ -431,16 +434,41 @@
     closeDeleteDialog();
     listsWrap = targetContainer;
 
+    if (typeof onOpen === 'function') {
+      latestOnOpen = onOpen;
+    }
+
     if (!targetContainer.__shoppingListClickBound) {
       targetContainer.addEventListener('click', (event) => {
         const card = event.target.closest('.list-card');
-        if (!card || !card.dataset.listId) return;
+        if (!card || !card.dataset.listId) {
+          return;
+        }
+        if (event.target.closest('.list-card__menu-button, .list-card__menu, .list-card__menu-item')) {
+          return;
+        }
 
         const updatedList = setActiveList(card.dataset.listId);
-        if (updatedList && typeof onOpen === 'function') {
-          onOpen(updatedList);
+        const openHandler = latestOnOpen;
+        if (updatedList && typeof openHandler === 'function') {
+          openHandler(updatedList);
         }
       });
+
+      targetContainer.addEventListener('keydown', (event) => {
+        const card = event.target.closest('.list-card');
+        if (!card || !card.dataset.listId) return;
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        if (event.target.closest('.list-card__menu-button, .list-card__menu, .list-card__menu-item')) return;
+
+        event.preventDefault();
+        const updatedList = setActiveList(card.dataset.listId);
+        const openHandler = latestOnOpen;
+        if (updatedList && typeof openHandler === 'function') {
+          openHandler(updatedList);
+        }
+      });
+
       targetContainer.__shoppingListClickBound = true;
     }
 
@@ -525,30 +553,6 @@
           return;
         }
         showListMenu(list, menuButton, card);
-      });
-
-      card.addEventListener('click', (event) => {
-        if (event.target.closest('.list-card__menu-button, .list-card__menu, .list-card__menu-item')) {
-          return;
-        }
-
-        const updatedList = setActiveList(list.id);
-        if (updatedList && typeof onOpen === 'function') {
-          onOpen(updatedList);
-        }
-      });
-
-      card.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          if (event.target.closest('.list-card__menu-button, .list-card__menu, .list-card__menu-item')) {
-            return;
-          }
-          const updatedList = setActiveList(list.id);
-          if (updatedList && typeof onOpen === 'function') {
-            onOpen(updatedList);
-          }
-        }
       });
 
       targetContainer.appendChild(card);

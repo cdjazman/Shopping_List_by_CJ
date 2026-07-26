@@ -29,7 +29,7 @@
 </style>
 </head>
 <body>
-<div class="app">
+<main id="app" class="app">
 
   <!-- UPDATE BANNER -->
   <div id="updateBanner" class="update-banner hidden">
@@ -75,32 +75,48 @@
   </div>
 
   <!-- PRODUCTS VIEW -->
-  <div id="mainView" class="hidden">
-    <div class="list-nav-header">
-      <button id="backToListsBtn" class="back-link-btn" type="button">← My Lists</button>
-      <button id="openAddFromProductsBtn" class="new-list-header-btn" type="button">
-        <span class="new-list-header-btn__icon" aria-hidden="true">+</span>
-        <span class="new-list-header-btn__text">Add Product</span>
-      </button>
+  <div id="mainView" class="products-view hidden">
+    <div class="main-view__sticky-header">
+      <div class="list-nav-header">
+        <button id="backToListsBtn" class="back-link-btn" type="button">← My Lists</button>
+        <button id="openAddFromProductsBtn" class="new-list-header-btn" type="button">
+          <span class="new-list-header-btn__icon" aria-hidden="true">+</span>
+          <span class="new-list-header-btn__text">Add Product</span>
+        </button>
+      </div>
+      <div class="list-nav-header__title-row">
+        <div id="activeListHeaderName" class="active-list-header-name">My List</div>
+      </div>
+
+      <p class="hint">Tap any item below to add or remove it from this week's run.</p>
+
+      <!-- ESTIMATED TOTAL COST COUNTER & CLEAR ALL -->
+      <div id="costSummaryBox" class="list-summary-footer hidden">
+        <span class="cost-counter-label">Estimated Total:</span>
+        <span id="estimatedTotalAmount" class="cost-counter-amount">$0.00</span>
+      </div>
+      <button id="clearAllBtn" class="clear-all-btn hidden">Clear All Selected Items</button>
+
+      <div class="products-filter-bar" role="tablist" aria-label="Product filters">
+        <button class="products-filter-btn active" id="productsFilterAllBtn" type="button">All</button>
+        <button class="products-filter-btn" id="productsFilterFavouritesBtn" type="button">⭐ Favourites</button>
+      </div>
+
+      <div class="products-search-wrap">
+        <div class="products-search">
+          <input id="productsSearchInput" class="products-search__input" type="text" placeholder="Search products..." autocomplete="off" aria-label="Search products">
+          <button id="productsSearchClearBtn" class="products-search__clear hidden" type="button" aria-label="Clear search">×</button>
+        </div>
+      </div>
     </div>
-    <div class="list-nav-header__title-row">
-      <div id="activeListHeaderName" class="active-list-header-name">My List</div>
-    </div>
 
-    <p class="hint">Tap any item below to add or remove it from this week's run.</p>
+    <div class="products-scroll-area">
+      <div id="catalogWrap"></div>
 
-    <!-- ESTIMATED TOTAL COST COUNTER & CLEAR ALL -->
-    <div id="costSummaryBox" class="list-summary-footer hidden">
-      <span class="cost-counter-label">Estimated Total:</span>
-      <span id="estimatedTotalAmount" class="cost-counter-amount">$0.00</span>
-    </div>
-    <button id="clearAllBtn" class="clear-all-btn hidden">Clear All Selected Items</button>
-
-    <div id="catalogWrap"></div>
-
-    <div id="emptyState" class="empty-state hidden">
-      <div class="big">Your products list is empty</div>
-      <div>Use the Add Product action below to get started.</div>
+      <div id="emptyState" class="empty-state hidden">
+        <div class="big">Your products list is empty</div>
+        <div>Use the Add Product action below to get started.</div>
+      </div>
     </div>
 
     <div class="go-shop-wrap">
@@ -225,7 +241,7 @@
     </div>
   </div>
 
-</div>
+</main>
 
 <!-- NEW LIST MODAL -->
 <div id="newListModal" class="modal-overlay hidden">

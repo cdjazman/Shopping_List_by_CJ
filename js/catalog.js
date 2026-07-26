@@ -41,6 +41,7 @@
         store: selectedStore,
         price: isNaN(price) ? null : price,
         pinned: false,
+        favourite: false,
         lists: {}
       });
     }
