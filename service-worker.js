@@ -1,7 +1,19 @@
-const CACHE_NAME = 'shopping-list-v1';
+const CACHE_NAME = 'shopping-list-v2';
+const PRECACHE_URLS = [
+  './index.html',
+  './manifest.json',
+  './css/style.css',
+  './js/app.js',
+  './js/defaults.js',
+  './assets/icons/icon-192.png',
+  './assets/images/LOGO.png'
+];
 
 // Install event - cache core assets once
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+  );
   self.skipWaiting();
 });
 
