@@ -5,13 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Shopping List by CJ</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#FF6600">
+<meta name="theme-color" content="#C85A1F">
 <link rel="icon" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Shopping List">
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/style.css">
+<style>
+.store-filter-bar .filter-btn.active {
+  background:var(--color-text) !important;
+  color:var(--color-bg) !important;
+  border-color:var(--color-text) !important;
+  font-weight:700;
+}
+.store-filter-bar .filter-btn.active:hover,
+.store-filter-bar .filter-btn.active:focus-visible {
+  background:var(--color-text) !important;
+  color:var(--color-bg) !important;
+  border-color:var(--color-text) !important;
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -30,15 +45,48 @@
   </div>
   <p class="tagline">tick it, shop it</p>
 
-  <div class="tabs">
-    <button class="tab-btn active" id="tabMain">Main List</button>
+  <div class="tabs hidden" id="topTabs">
+    <button class="tab-btn active" id="tabMain">Products</button>
     <button class="tab-btn" id="tabShop">Shop</button>
     <button class="tab-btn" id="tabSettings">Settings</button>
   </div>
 
-  <!-- MAIN LIST VIEW -->
-  <div id="mainView">
-    <button id="openAddBtn" class="add-product-btn">+ Add Product</button>
+  <!-- MY LISTS VIEW -->
+  <div id="myListsView">
+    <div class="home-hero">
+      <div class="home-hero__eyebrow">Welcome back</div>
+      <div class="home-hero__heading-row">
+        <div class="home-hero__title">My Lists</div>
+        <button class="new-list-header-btn" id="newListBtn" type="button">
+          <span class="new-list-header-btn__icon" aria-hidden="true">+</span>
+          <span class="new-list-header-btn__text">New List</span>
+        </button>
+      </div>
+      <div class="home-hero__copy">Browse your weekly shopping plans and jump into a list whenever you are ready.</div>
+    </div>
+
+    <div id="listsWrap" class="lists-wrap"></div>
+
+    <div class="bottom-nav" id="bottomNav">
+      <button class="bottom-nav__item active" data-nav="lists">My Lists</button>
+      <button id="openAddBtn" class="bottom-nav__item bottom-nav__item--primary" type="button">+ Add Product</button>
+      <button class="bottom-nav__item" data-nav="settings">Settings</button>
+    </div>
+  </div>
+
+  <!-- PRODUCTS VIEW -->
+  <div id="mainView" class="hidden">
+    <div class="list-nav-header">
+      <button id="backToListsBtn" class="back-link-btn" type="button">← My Lists</button>
+      <button id="openAddFromProductsBtn" class="new-list-header-btn" type="button">
+        <span class="new-list-header-btn__icon" aria-hidden="true">+</span>
+        <span class="new-list-header-btn__text">Add Product</span>
+      </button>
+    </div>
+    <div class="list-nav-header__title-row">
+      <div id="activeListHeaderName" class="active-list-header-name">My List</div>
+    </div>
+
     <p class="hint">Tap any item below to add or remove it from this week's run.</p>
 
     <!-- ESTIMATED TOTAL COST COUNTER & CLEAR ALL -->
@@ -51,8 +99,8 @@
     <div id="catalogWrap"></div>
 
     <div id="emptyState" class="empty-state hidden">
-      <div class="big">Your main list is empty</div>
-      <div>Tap "Add Product" above to get started.</div>
+      <div class="big">Your products list is empty</div>
+      <div>Use the Add Product action below to get started.</div>
     </div>
 
     <div class="go-shop-wrap">
@@ -62,6 +110,13 @@
 
   <!-- ADD / EDIT PRODUCT VIEW -->
   <div id="addView" class="hidden">
+    <div class="list-nav-header" style="margin-bottom:16px;">
+      <button id="backToProductsBtn" class="back-link-btn" type="button">← Products</button>
+    </div>
+    <div class="list-nav-header__title-row">
+      <div class="active-list-header-name">Add Product</div>
+    </div>
+
     <!-- DIRECT WEB SEARCH BAR -->
     <div class="form-field">
       <label>Search Store Page Direct</label>
@@ -151,8 +206,8 @@
       <div style="font-weight:700; margin-bottom:6px; color:var(--ink);">Backup & Restore</div>
       <p style="font-size:0.8125rem; color:var(--ink-soft); margin:0 0 14px;">Download a backup file of your catalogue or restore a previous list.</p>
       <div style="display:flex; gap:8px;">
-        <button type="button" id="exportBtn" class="ghost-btn" style="background:#fff; flex:1;">📤 Export</button>
-        <label class="ghost-btn" style="background:#fff; flex:1; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+        <button type="button" id="exportBtn" class="ghost-btn" style="background:var(--color-text); flex:1;">📤 Export</button>
+        <label class="ghost-btn" style="background:var(--color-text); flex:1; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center;">
           📥 Import
           <input type="file" id="importFile" accept=".json" style="display:none;">
         </label>
@@ -166,10 +221,59 @@
     </div>
 
     <div class="footer-actions">
-      <button class="ghost-btn" id="backFromSettingsBtn">← Back to List</button>
+      <button class="ghost-btn" id="backFromSettingsBtn">← Back to Lists</button>
     </div>
   </div>
 
+</div>
+
+<!-- NEW LIST MODAL -->
+<div id="newListModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-title">Create New List</div>
+    <form id="newListForm">
+      <div class="modal-scroll-area">
+        <div class="form-field">
+          <label for="newListNameInput">List Name</label>
+          <input type="text" id="newListNameInput" placeholder="e.g. Weekly Shop" autocomplete="off" required>
+        </div>
+
+        <div class="form-field">
+          <label for="newListIconSelect">Icon</label>
+          <select id="newListIconSelect">
+            <option value="shopping_cart">shopping_cart</option>
+            <option value="home">home</option>
+            <option value="party">party</option>
+            <option value="school">school</option>
+            <option value="work">work</option>
+            <option value="travel">travel</option>
+            <option value="gift">gift</option>
+            <option value="food">food</option>
+            <option value="health">health</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="newListColourSelect">Colour</label>
+          <select id="newListColourSelect">
+            <option value="orange">Orange</option>
+            <option value="gold">Gold</option>
+            <option value="sage">Sage</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="newListBudgetInput">Budget</label>
+          <input type="number" id="newListBudgetInput" min="0" step="1" value="200">
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="newListCancelBtn" class="ghost-btn">Cancel</button>
+        <button type="submit" id="newListSaveBtn" class="go-shop-btn" style="flex:1; padding:10px;">Save</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- CUSTOM CONFIRMATION MODAL -->
@@ -191,6 +295,7 @@
 <script src="js/shopping.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/settings.js"></script>
+<script src="js/lists.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -5,6 +5,10 @@
     return Math.random().toString(36).slice(2, 9);
   }
 
+  function getActiveListId() {
+    return global.shoppingLists?.getActiveList?.()?.id || 'default';
+  }
+
   function addProduct(catalog, itemInput, aisleSelect, qtyInput, priceInput, selectedStore, editingItemId, setEditingItemId, onComplete) {
     const name = itemInput.value.trim();
     if (!name) {
@@ -14,15 +18,19 @@
 
     const qty = Math.max(1, parseInt(qtyInput.value, 10) || 1);
     const price = parseFloat(priceInput.value);
+    const activeListId = getActiveListId();
 
     if (editingItemId) {
       const item = catalog.find((i) => i.id === editingItemId);
       if (item) {
         item.name = name;
         item.aisle = aisleSelect.value;
-        item.qty = qty;
         item.store = selectedStore;
         item.price = isNaN(price) ? null : price;
+
+        if (item.lists?.[activeListId]) {
+          item.lists[activeListId].qty = qty;
+        }
       }
       setEditingItemId(null);
     } else {
@@ -30,12 +38,10 @@
         id: uid(),
         name,
         aisle: aisleSelect.value,
-        qty,
         store: selectedStore,
         price: isNaN(price) ? null : price,
-        inList: false,
-        checked: false,
-        pinned: false
+        pinned: false,
+        lists: {}
       });
     }
 
@@ -47,11 +53,14 @@
     const item = catalog.find((i) => i.id === id);
     if (!item) return false;
 
+    const activeListId = getActiveListId();
+    const entry = item.lists?.[activeListId];
+
     setEditingItemId(item.id);
     itemInput.value = item.name || '';
     aisleSelect.value = item.aisle || 'Fresh & Produce';
     priceInput.value = (item.price != null && !isNaN(item.price)) ? item.price : '';
-    qtyInput.value = item.qty || 1;
+    qtyInput.value = entry?.qty || 1;
     setSelectedStore(item.store || 'Aldi');
     document.getElementById('liveSearchInput').value = '';
     setSaveLabel('Update Product');

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shopping-list-v3';
+const CACHE_NAME = 'shopping-list-v6';
 const PRECACHE_URLS = [
   './index.html',
   './manifest.json',

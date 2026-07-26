@@ -20,7 +20,9 @@ const priceInput = document.getElementById('priceInput');
 const qtyInput = document.getElementById('qtyInput');
 const storeToggle = document.getElementById('storeToggle');
 const openAddBtn = document.getElementById('openAddBtn');
+const openAddFromProductsBtn = document.getElementById('openAddFromProductsBtn');
 const cancelAddBtn = document.getElementById('cancelAddBtn');
+const backToProductsBtn = document.getElementById('backToProductsBtn');
 const saveProductBtn = document.getElementById('saveProductBtn');
 const addView = document.getElementById('addView');
 const catalogWrap = document.getElementById('catalogWrap');
@@ -39,6 +41,8 @@ const progressPct = document.getElementById('progressPct');
 const doneBanner = document.getElementById('doneBanner');
 const backToListBtn = document.getElementById('backToListBtn');
 const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
+const backToListsBtn = document.getElementById('backToListsBtn');
+const activeListHeaderName = document.getElementById('activeListHeaderName');
 const newRunBtn = document.getElementById('newRunBtn');
 const storeFilterBar = document.getElementById('storeFilterBar');
 const checkUpdateBtn = document.getElementById('checkUpdateBtn');
@@ -46,8 +50,37 @@ const clearAllBtn = document.getElementById('clearAllBtn');
 const deleteCatalogBtn = document.getElementById('deleteCatalogBtn');
 const costSummaryBox = document.getElementById('costSummaryBox');
 const estimatedTotalAmount = document.getElementById('estimatedTotalAmount');
+const myListsView = document.getElementById('myListsView');
+const listsWrap = document.getElementById('listsWrap');
+const topTabs = document.getElementById('topTabs');
+const bottomNav = document.getElementById('bottomNav');
+const newListBtn = document.getElementById('newListBtn');
+const newListModal = document.getElementById('newListModal');
+const newListForm = document.getElementById('newListForm');
+const newListNameInput = document.getElementById('newListNameInput');
+const newListIconSelect = document.getElementById('newListIconSelect');
+const newListColourSelect = document.getElementById('newListColourSelect');
+const newListBudgetInput = document.getElementById('newListBudgetInput');
+const newListCancelBtn = document.getElementById('newListCancelBtn');
 
 let selectedStore = "Aldi";
+let activeView = 'lists';
+let currentListId = 'weekly';
+let mainScrollTop = 0;
+let activeProductDeleteDialog = null;
+
+function getActiveListId() {
+  return window.shoppingLists?.getActiveList?.()?.id || currentListId || 'default';
+}
+
+function updateActiveListHeader() {
+  const activeList = window.shoppingLists?.getActiveList?.();
+  const name = activeList?.name || 'My List';
+
+  if (activeListHeaderName) {
+    activeListHeaderName.textContent = name;
+  }
+}
 
 AISLES.forEach(a=>{
   const opt = document.createElement('option');
@@ -56,12 +89,55 @@ AISLES.forEach(a=>{
 });
 
 function save(){
-  shoppingListStorage.saveCatalog(catalog);
+  catalog = shoppingListStorage.saveCatalog(catalog);
 }
 
 function load(){
   catalog = shoppingListStorage.loadCatalog(DEFAULT_ITEMS);
-  renderMain();
+  renderLists();
+  showLists();
+}
+
+function openNewListModal() {
+  if (!newListModal) return;
+
+  newListForm.reset();
+  newListIconSelect.value = 'shopping_cart';
+  newListColourSelect.value = 'orange';
+  newListBudgetInput.value = '200';
+  newListModal.classList.remove('hidden');
+  setTimeout(() => newListNameInput.focus(), 50);
+}
+
+function closeNewListModal() {
+  if (!newListModal) return;
+  newListModal.classList.add('hidden');
+}
+
+function saveNewList(event) {
+  if (event) event.preventDefault();
+
+  const name = (newListNameInput.value || '').trim();
+  if (!name) {
+    newListNameInput.focus();
+    return;
+  }
+
+  const icon = newListIconSelect.value || 'shopping_cart';
+  const colour = newListColourSelect.value || 'orange';
+  const budget = Number(newListBudgetInput.value || 0);
+
+  const createdList = window.shoppingLists.createList({
+    name,
+    icon,
+    colour,
+    budget
+  });
+
+  if (createdList) {
+    renderLists();
+    closeNewListModal();
+  }
 }
 
 // Custom Modal Replacement for window.confirm
@@ -81,11 +157,53 @@ function addItem(){
     (value) => { editingItemId = value; },
     () => {
       save();
+      renderLists();
       showMain();
+      renderMain();
+      renderShop();
+      updateActiveListHeader();
     }
   );
 
   if (didUpdate === false) return;
+}
+
+function closeProductDeleteDialog() {
+  if (activeProductDeleteDialog && activeProductDeleteDialog.parentNode) {
+    activeProductDeleteDialog.parentNode.removeChild(activeProductDeleteDialog);
+  }
+  activeProductDeleteDialog = null;
+}
+
+function showProductDeleteDialog(product, onConfirm) {
+  closeProductDeleteDialog();
+
+  const dialog = document.createElement('div');
+  dialog.className = 'list-card__delete-dialog';
+  dialog.innerHTML = `
+    <div class="list-card__delete-card">
+      <div class="list-card__delete-title">Delete Product?</div>
+      <div class="list-card__delete-copy">Are you sure you want to delete "${product.name}"? This removes the product from your catalogue and every shopping list that uses it.</div>
+      <div class="list-card__delete-actions">
+        <button class="ghost-btn list-card__delete-cancel" type="button">Cancel</button>
+        <button class="go-shop-btn list-card__delete-confirm" type="button">Delete</button>
+      </div>
+    </div>
+  `;
+
+  dialog.querySelector('.list-card__delete-cancel').addEventListener('click', (event) => {
+    event.stopPropagation();
+    closeProductDeleteDialog();
+  });
+
+  dialog.querySelector('.list-card__delete-confirm').addEventListener('click', (event) => {
+    event.stopPropagation();
+    closeProductDeleteDialog();
+    onConfirm();
+  });
+
+  document.body.appendChild(dialog);
+  activeProductDeleteDialog = dialog;
 }
 
 function openAddView(){
@@ -97,10 +215,13 @@ function openAddView(){
   selectedStore = "Aldi";
   saveProductBtn.textContent = "Save Product";
   updateStoreToggleUI();
+  myListsView.classList.add('hidden');
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
   settingsView.classList.add('hidden');
   addView.classList.remove('hidden');
+  topTabs.classList.add('hidden');
+  bottomNav.classList.add('hidden');
   setTimeout(()=> itemInput.focus(), 50);
 }
 
@@ -117,10 +238,13 @@ function openEditView(id){
     (value) => { saveProductBtn.textContent = value; },
     updateStoreToggleUI,
     () => {
+      myListsView.classList.add('hidden');
       mainView.classList.add('hidden');
       shopView.classList.add('hidden');
       settingsView.classList.add('hidden');
       addView.classList.remove('hidden');
+      topTabs.classList.add('hidden');
+      bottomNav.classList.add('hidden');
     }
   );
 }
@@ -155,13 +279,18 @@ function togglePin(id){
 }
 
 function removeFromCatalog(id){
-  const result = shoppingListCatalog.deleteProduct(catalog, id, () => {
-    alert("This item is pinned and cannot be deleted.");
+  const item = catalog.find((entry) => entry.id === id);
+  if (!item) return;
+
+  if (item.pinned) return;
+
+  showProductDeleteDialog(item, () => {
+    const result = shoppingListCatalog.deleteProduct(catalog, id);
+    if (!result || result.removed === false) return;
+    catalog = result.catalog;
+    save();
+    renderMain();
   });
-  if (!result || result.removed === false) return;
-  catalog = result.catalog;
-  save();
-  renderMain();
 }
 
 function toggleInList(id){
@@ -183,22 +312,63 @@ function escapeHtml(str){
 }
 
 function renderMain(){
-  const selectedItems = catalog.filter(i=>i.inList);
+  const activeListId = getActiveListId();
+  const selectedItems = catalog.filter((item) => Boolean(item.lists?.[activeListId]));
   const selectedCount = selectedItems.length;
   let estimatedTotal = 0;
-  selectedItems.forEach(item => {
+  selectedItems.forEach((item) => {
+    const entry = item.lists?.[activeListId];
+    const qty = Number(entry?.qty || 1);
     if(item.price != null && !isNaN(item.price)) {
-      estimatedTotal += Number(item.price) * (item.qty || 1);
+      estimatedTotal += Number(item.price) * qty;
     }
   });
   const sorted = shoppingListShopping.sortCatalogItems(catalog);
-  shoppingListUI.renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, catalog, selectedItems, selectedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, escapeHtml);
+  shoppingListUI.renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, catalog, selectedItems, selectedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, escapeHtml, activeListId);
 }
 
-storeFilterBar.querySelectorAll('.filter-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    storeFilterBar.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
+function renderLists(){
+  if (shoppingLists.getActiveList?.() && shoppingLists.getActiveList().id) {
+    currentListId = shoppingLists.getActiveList().id;
+  }
+
+  shoppingLists.loadLists();
+  shoppingLists.render(listsWrap, catalog, (list) => {
+    currentListId = list.id;
+    updateActiveListHeader();
+    showMain();
+  });
+}
+
+function removeActiveListEntries(filterFn = () => true) {
+  const activeListId = getActiveListId();
+
+  catalog.forEach((item) => {
+    if (filterFn(item) && item.lists?.[activeListId]) {
+      window.shoppingListStorage.removeProductFromList(item.id, activeListId);
+    }
+  });
+
+  catalog = window.shoppingListStorage.saveCatalog(catalog);
+  return catalog;
+}
+
+function syncStoreFilterButtons(activeButton) {
+  storeFilterBar.querySelectorAll('.filter-btn').forEach((btn) => {
+    const isActive = btn === activeButton;
+    btn.classList.toggle('active', isActive);
+
+    if (isActive) {
+      btn.setAttribute('style', 'background-color:var(--color-text) !important;color:var(--color-bg) !important;border-color:var(--color-text) !important;font-weight:700;');
+    } else {
+      btn.removeAttribute('style');
+    }
+  });
+}
+
+storeFilterBar.querySelectorAll('.filter-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    syncStoreFilterButtons(btn);
     currentStoreFilter = btn.dataset.filter;
     renderShop();
   });
@@ -209,35 +379,92 @@ function renderShop(){
   shoppingListUI.renderShop(aisleGroups, active, AISLES, STORE_LETTER, escapeHtml, cycleStore, save, renderShop);
 }
 
+function captureMainScrollPosition(){
+  if (catalogWrap) {
+    mainScrollTop = catalogWrap.scrollTop || 0;
+  }
+}
+
+function restoreMainScrollPosition(){
+  if (catalogWrap) {
+    requestAnimationFrame(() => {
+      catalogWrap.scrollTop = mainScrollTop;
+    });
+  }
+}
+
+function showLists(){
+  activeView = 'lists';
+  myListsView.classList.remove('hidden');
+  mainView.classList.add('hidden');
+  shopView.classList.add('hidden');
+  addView.classList.add('hidden');
+  settingsView.classList.add('hidden');
+  topTabs.classList.add('hidden');
+  bottomNav.classList.remove('hidden');
+  updateActiveListHeader();
+  renderLists();
+}
+
 function showMain(){
+  activeView = 'main';
+  myListsView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'main');
+  topTabs.classList.remove('hidden');
+  bottomNav.classList.add('hidden');
+  updateActiveListHeader();
   renderMain();
+  renderShop();
+  restoreMainScrollPosition();
 }
 function showShop(){
+  activeView = 'shop';
+  myListsView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'shop');
+  topTabs.classList.remove('hidden');
+  bottomNav.classList.add('hidden');
   renderShop();
 }
 function showSettings(){
+  captureMainScrollPosition();
+  activeView = 'settings';
+  myListsView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'settings');
+  topTabs.classList.remove('hidden');
+  bottomNav.classList.add('hidden');
 }
 
 openAddBtn.addEventListener('click', openAddView);
+openAddFromProductsBtn.addEventListener('click', openAddView);
+backToProductsBtn.addEventListener('click', showMain);
 cancelAddBtn.addEventListener('click', showMain);
 saveProductBtn.addEventListener('click', addItem);
 itemInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addItem(); });
 goShopBtn.addEventListener('click', showShop);
 backToListBtn.addEventListener('click', showMain);
-backFromSettingsBtn.addEventListener('click', showMain);
+backFromSettingsBtn.addEventListener('click', () => {
+  showLists();
+  renderLists();
+});
+backToListsBtn.addEventListener('click', showLists);
 tabMain.addEventListener('click', showMain);
-tabShop.addEventListener('click', ()=>{ if(catalog.some(i=>i.inList)) showShop(); });
+tabShop.addEventListener('click', ()=>{ if(catalog.some((item) => Boolean(item.lists?.[getActiveListId()]))) showShop(); });
 tabSettings.addEventListener('click', showSettings);
+newListBtn.addEventListener('click', openNewListModal);
+newListCancelBtn.addEventListener('click', closeNewListModal);
+newListForm.addEventListener('submit', saveNewList);
+Array.from(bottomNav.querySelectorAll('[data-nav]')).forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.nav === 'settings') showSettings();
+    else showLists();
+  });
+});
 
 // Clear All Selected Items Listener (Using Custom Modal)
 clearAllBtn.addEventListener('click', () => {
   showConfirm("Are you sure you want to unselect all items from this week's list?", (confirmed) => {
     if(confirmed) {
-      catalog.forEach(i => { i.inList = false; i.checked = false; i.qty = 1; });
-      save();
+      removeActiveListEntries();
       renderMain();
     }
   });
@@ -259,23 +486,15 @@ newRunBtn.addEventListener('click', async ()=>{
   if(currentStoreFilter === 'ALL') {
     showConfirm("Reset the list? This will unselect, uncheck, and reset all quantities to 1 ready for next time.", (confirmed) => {
       if(confirmed){
-        catalog.forEach(i=>{ i.inList=false; i.checked=false; i.qty=1; });
-        save();
+        removeActiveListEntries();
         showMain();
       }
     });
   } else {
     showConfirm(`Finish shopping for ${currentStoreFilter}? This will clear only the ${currentStoreFilter} items from your current run.`, (confirmed) => {
       if(confirmed){
-        catalog.forEach(i=>{
-          if(i.store === currentStoreFilter) {
-            i.inList = false;
-            i.checked = false;
-            i.qty = 1;
-          }
-        });
-        save();
-        if(!catalog.some(i => i.inList)) {
+        removeActiveListEntries((item) => item.store === currentStoreFilter);
+        if(!catalog.some((item) => Boolean(item.lists?.[getActiveListId()]))) {
           showMain();
         } else {
           renderShop();

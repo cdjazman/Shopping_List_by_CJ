@@ -1,263 +1,195 @@
 # Shopping List by CJ
 
-**Project Version:** 0.9 Foundation  
-**Platform:** Progressive Web App (PWA)  
-**Target:** Android (Play Store), iOS (Web App), Windows, macOS, Linux
+Version:
+Project Orange
 
 ---
 
-# Project Vision
+# Vision
 
-Shopping List by CJ is an offline-first shopping list application designed to be the fastest and simplest grocery shopping app available.
+Shopping List by CJ is an Australian-first shopping list application designed to help people organise their shopping while keeping track of their budget.
 
-Unlike traditional shopping list applications, every user builds their own personalised catalogue over time.
+The application is not a price comparison app.
 
-The application is designed to feel lightweight, fast, reliable and clutter-free.
+It is a shopping list application with integrated budgeting.
 
----
-
-# Core Philosophy
-
-## Personal Catalogue
-
-The catalogue intentionally starts empty.
-
-**This is not a bug.**
-
-Users create their own catalogue by adding products they actually purchase.
-
-Advantages:
-
-- No unnecessary products.
-- Faster searching.
-- Smaller backups.
-- Fully personalised.
-- No bundled supermarket database.
-- No maintenance of thousands of products.
-
-This behaviour must never be "fixed" by automatically populating the catalogue.
+Budgeting supports shopping rather than replacing it.
 
 ---
 
-# Design Principles
+# Mission Statement
 
-The application should always prioritise:
+Plan your shop.
 
-- Simplicity
-- Speed
-- Reliability
-- Offline capability
-- Minimal taps
-- Clean interface
-- User ownership of data
+Track your budget.
 
-If a feature makes the app more complicated than useful, it should be reconsidered.
+Shop with confidence.
 
 ---
 
-# Target Users
+# Product Philosophy
 
-Australian shoppers who want:
+Shopping comes first.
 
-- A fast shopping list.
-- Their own product catalogue.
-- Offline functionality.
-- No advertisements.
-- No subscriptions.
-- No account required.
+Budget comes second.
 
----
+Everything else supports those goals.
 
-# Current Architecture
-
-```
-Shopping_List/
-
-├── api/
-├── assets/
-│   ├── icons/
-│   └── images/
-├── css/
-│   └── style.css
-├── js/
-│   ├── app.js
-│   └── defaults.js
-├── index.html
-├── manifest.json
-├── service-worker.js
-├── README.md
-└── PROJECT.md
-```
-
-This structure will evolve during the Version 0.9 refactor.
+Every feature should improve one or both.
 
 ---
 
-# Version Roadmap
+# Core Principles
 
-## Version 0.9
+## Shopping First
 
-Goal:
+The app exists to make shopping easier, more organised and less stressful.
 
-Create a stable, maintainable codebase.
+## Budget Aware
 
-Focus:
+Budget tracking should help users make better purchasing decisions without becoming a burden.
 
-- Refactoring only
-- Folder organisation
-- Better maintainability
-- No functionality changes
+## Offline First
 
-Features retained:
+The app must remain useful without a network connection.
 
-- Shopping lists
-- Personal catalogue
-- Categories
-- Shop mode
-- Settings
-- Backup & Restore
-- Local Storage
-- Offline PWA
+## Simple
 
----
+The experience should be easy to understand and use from the first interaction.
 
-## Version 1.0
+## Fast
 
-Goals:
+The app should feel responsive and efficient in everyday use.
 
-- Modern UI refresh
-- Better product editing
-- Improved search
-- Faster navigation
-- Cleaner settings
-- Improved onboarding
+## Reliable
 
----
+The product should behave consistently and safely at all times.
 
-## Future Versions
+## One-Hand Friendly
 
-Potential features:
+The interface should support quick mobile use with large, accessible controls.
 
-- Cloud Sync
-- Shared Lists
-- Barcode Scanner
-- Receipt Scanner
-- Price Comparison
-- Aldi Integration
-- Coles Integration
-- Woolworths Integration
-- Shopping Packs
-- Favourites
-- AI Product Suggestions
+## Australian Focused
 
-These features are optional and should never compromise the app's simplicity.
+The product should reflect the needs of Australian shoppers.
+
+## User Owns Their Data
+
+Users should remain in control of their catalogues, lists and backups.
 
 ---
 
-# Coding Standards
+# Personal Catalogue
 
-The project should follow these rules:
+The personal catalogue is a central part of the product experience.
 
-- No inline CSS.
-- No inline JavaScript.
-- One responsibility per function.
-- Keep functions small.
-- Avoid duplicated logic.
-- Use descriptive variable names.
-- Preserve backwards compatibility.
-- Minimise global variables.
+The catalogue intentionally starts empty so that users can build it around the products they actually buy.
+
+This keeps the experience relevant, lightweight and personal.
+
+Never populate defaults.js automatically.
+
+This is a permanent architectural decision.
 
 ---
 
-# Folder Standards
+# Design Philosophy
 
-Assets belong inside:
+The product should feel:
 
-```
-assets/icons/
-assets/images/
-```
+- Premium
+- Organised
+- Friendly
+- Calm
+- Confident
+- Modern
+- Fast
 
-Styles belong inside:
+The experience should never feel cluttered or overwhelming.
 
-```
-css/
-```
+---
 
-JavaScript belongs inside:
+# Design Review Rule
 
-```
-js/
-```
+No feature is coded until its interface has been designed and approved.
+
+## Workflow
+
+Design
+
+↓
+
+Review
+
+↓
+
+Approval
+
+↓
+
+Development
+
+↓
+
+Testing
+
+↓
+
+Release
+
+---
+
+# Development Rules
+
+- Never change application logic while redesigning the UI.
+- Separate presentation from business logic.
+- Keep reusable components.
+- Keep backwards compatibility.
+- Keep backup compatibility.
+- Never redesign multiple screens in one task.
 
 ---
 
 # Git Workflow
 
-Never develop directly on **main**.
-
-Workflow:
-
-1. Create feature/refactor branch.
-2. Complete one logical task.
-3. Test thoroughly.
-4. Commit.
-5. Merge after verification.
-
-Example commits:
-
-```
-refactor: extract inline css
-refactor: extract javascript
-refactor: move assets
-feat: add category editor
-fix: backup restore regression
-```
+- Use feature branches only.
+- Keep commits small.
+- Make one logical change per commit.
+- Always test before committing.
 
 ---
 
-# AI Development Rules
+# Version 1 Goals
 
-Any AI assistant working on this project must:
-
-- Preserve existing functionality.
-- Never redesign the interface unless requested.
-- Never combine refactoring and feature development.
-- Stop after each completed task for approval.
-- Prefer multiple small commits over one large commit.
-- Preserve existing backup compatibility.
-- Preserve Local Storage compatibility.
-- Keep the app offline-first.
-
-### Important
-
-Do **NOT** populate `defaults.js`.
-
-The catalogue intentionally starts empty.
-
-This is a product decision.
+- Complete visual redesign
+- Dark mode first
+- Multiple shopping lists
+- Budget improvements
+- Modern Android experience
+- Play Store ready
 
 ---
 
-# Testing Checklist
+# Success Criteria
 
-Every completed task must verify:
+The application should feel like a polished commercial Android application.
 
-- Application loads.
-- No console errors.
-- Shopping list functions correctly.
-- Product add/edit/delete works.
-- Categories work.
-- Shop mode works.
-- Settings work.
-- Backup export works.
-- Backup import works.
-- Local Storage works.
-- Refresh restores data.
-- PWA installs correctly.
-- Service Worker registers successfully.
+Consistency is more important than flashy effects.
+
+Every screen should feel like part of the same product.
 
 ---
+
+# Long-Term Vision
+
+Shopping List by CJ becomes Australia’s easiest shopping list application.
+
+It saves time.
+
+It reduces forgotten items.
+
+It helps shoppers stay within budget.
+
 
 # Performance Goals
 
