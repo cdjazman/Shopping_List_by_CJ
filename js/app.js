@@ -9,8 +9,6 @@ const AISLES = [
   "Household & Personal Care"
 ];
 
-const STORAGE_KEY = "grocery-catalog";
-
 let catalog = [];
 let currentStoreFilter = "ALL";
 let editingItemId = null;
@@ -57,36 +55,12 @@ AISLES.forEach(a=>{
   aisleSelect.appendChild(opt);
 });
 
-function uid(){ return Math.random().toString(36).slice(2,9); }
-
 function save(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(catalog)); }catch(e){}
+  shoppingListStorage.saveCatalog(catalog);
 }
 
 function load(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) catalog = JSON.parse(raw);
-  }catch(e){ catalog = []; }
-
-  if(!catalog || catalog.length===0){
-    catalog = DEFAULT_ITEMS.map(([name,aisle,qty,store,price])=>({id:uid(),name,aisle,qty,store,price,inList:false,checked:false,pinned:false}));
-    save();
-  } else {
-    let updated = false;
-    catalog.forEach(item => {
-      if(item.aisle === "Fruit & Veg") { item.aisle = "Fresh & Produce"; updated = true; }
-      if(item.aisle === "Meat & Deli") { item.aisle = "Meat & Seafood"; updated = true; }
-      if(item.aisle === "Dairy & Eggs") { item.aisle = "Dairy, Eggs & Fridge"; updated = true; }
-      if(item.aisle === "Pantry") { item.aisle = "Pantry & Dry Goods"; updated = true; }
-      if(item.aisle === "Drinks") { item.aisle = "Drinks & Beverages"; updated = true; }
-      if(item.aisle === "Household & Other") { item.aisle = "Household & Personal Care"; updated = true; }
-      if(item.qty == null) { item.qty = 1; updated = true; }
-      if(item.pinned == null) { item.pinned = false; updated = true; }
-    });
-    if(updated) save();
-  }
-
+  catalog = shoppingListStorage.loadCatalog(DEFAULT_ITEMS);
   renderMain();
 }
 
