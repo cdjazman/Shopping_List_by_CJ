@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shopping-list-v6';
+const CACHE_NAME = 'shopping-list-v7';
 const PRECACHE_URLS = [
   './index.html',
   './manifest.json',
@@ -10,7 +10,7 @@ const PRECACHE_URLS = [
   './js/shopping.js',
   './js/ui.js',
   './js/settings.js',
-  './assets/icons/icon-192.png',
+  './assets/icons/launcher-logo-192.png',
   './assets/images/LOGO.png'
 ];
 
