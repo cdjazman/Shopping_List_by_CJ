@@ -111,7 +111,7 @@
     if(selectedCount > 0) {
       costSummaryBox.classList.remove('hidden');
       clearAllBtn.classList.remove('hidden');
-      clearAllBtn.textContent = `Clear Completed (${selectedCount})`;
+      clearAllBtn.textContent = `Clear (${selectedCount})`;
       estimatedTotalAmount.textContent = new Intl.NumberFormat('en-AU', {
         style: 'currency',
         currency: 'AUD',
