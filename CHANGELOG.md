@@ -28,6 +28,35 @@
 * Separated default items into an external `defaults.js` file for independent list management.
 * Configured clean blank initial states for new users and testers.
 
+# v0.9.0
+
+Release Date: TBD
+
+## Changed
+
+- Refactored project into a modular architecture.
+- Extracted inline CSS into css/style.css.
+- Extracted inline JavaScript into dedicated modules.
+- Organised project assets into a cleaner folder structure.
+- Updated Service Worker for modular asset caching.
+- Updated PWA manifest asset references.
+- Removed unused code.
+- Improved project maintainability.
+- Updated project documentation.
+
+## Added
+
+- PROJECT.md
+- DECISIONS.md
+- ARCHITECTURE.md
+- CONTRIBUTING.md
+
+## Notes
+
+This release focuses entirely on improving the internal architecture and maintainability of the application.
+
+No user-facing features were intentionally changed.
+
 ### v0.8
 * Added JSON Export and Import functionality in Settings for manual list backups.
 * Replaced native browser alerts with custom branded confirmation popup boxes ("Shopping List by CJ says").
