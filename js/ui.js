@@ -34,7 +34,7 @@
     });
   }
 
-  function renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, visibleCatalog, sourceCatalog, selectedItems, selectedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, toggleFavourite, escapeHtml, activeListId, searchQuery) {
+  function renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, visibleCatalog, sourceCatalog, selectedItems, selectedCount, completedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, toggleFavourite, escapeHtml, activeListId, searchQuery) {
     catalogWrap.innerHTML='';
 
     if (!catalogWrap.__shoppingListProductBound) {
@@ -110,8 +110,13 @@
 
     if(selectedCount > 0) {
       costSummaryBox.classList.remove('hidden');
-      clearAllBtn.classList.remove('hidden');
-      clearAllBtn.textContent = `Clear (${selectedCount})`;
+      if (completedCount > 0) {
+        clearAllBtn.classList.remove('hidden');
+        clearAllBtn.textContent = `Clear (${completedCount})`;
+      } else {
+        clearAllBtn.classList.add('hidden');
+        clearAllBtn.textContent = '';
+      }
       estimatedTotalAmount.textContent = new Intl.NumberFormat('en-AU', {
         style: 'currency',
         currency: 'AUD',
@@ -134,10 +139,10 @@
         const priceStr = (item.price!=null && !isNaN(item.price)) ? `<span class="price-tag">${new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(item.price))}</span>` : '';
         const storeStr = item.store ? `<span class="store-badge" data-store="${escapeHtml(item.store)}">${STORE_LETTER[item.store]||'?'}</span>` : '';
         const qtyMod = isSelected ? `
-          <div style="display:flex; align-items:center; gap:6px; margin-left:10px;" onclick="event.stopPropagation()">
-            <button type="button" class="ghost-btn" style="padding:2px 8px; font-size:0.75rem;" data-dec="${item.id}">-</button>
-            <span style="font-weight:700; font-size:0.875rem;">${qty}</span>
-            <button type="button" class="ghost-btn" style="padding:2px 8px; font-size:0.75rem;" data-inc="${item.id}">+</button>
+          <div class="product-qty-controls" aria-label="Quantity controls">
+            <button type="button" class="ghost-btn product-qty-btn" data-dec="${item.id}">-</button>
+            <span class="product-qty-value">${qty}</span>
+            <button type="button" class="ghost-btn product-qty-btn" data-inc="${item.id}">+</button>
           </div>
         ` : '';
         const removeOrLock = item.pinned
@@ -145,27 +150,31 @@
           : `<button class="remove-btn" data-remove="${item.id}" title="Delete Product">✕</button>`;
 
         row.innerHTML = `
-          <div class="catalog-left" data-id="${item.id}">
-            <div class="checkbox">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <div class="catalog-top-row">
+            <div class="catalog-left" data-id="${item.id}">
+              <div class="checkbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
-            <div>
-              <span class="name">${escapeHtml(item.name)}${!isSelected && qty>1?`<span class="qty">×${qty}</span>`:''}</span>
-              <div class="item-meta">
-                <span class="aisle-tag">${escapeHtml(item.aisle)}</span>
-                ${storeStr}
-                ${priceStr}
+              <div class="catalog-name-wrap">
+                <span class="name">${escapeHtml(item.name)}${!isSelected && qty>1?`<span class="qty">×${qty}</span>`:''}</span>
+                <div class="item-meta item-meta--top">
+                  <span class="aisle-tag">${escapeHtml(item.aisle)}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div style="display:flex; align-items:center;">
-            ${qtyMod}
-            <div class="action-btns" style="margin-left:6px;">
+            <div class="action-btns">
               <button class="favourite-toggle${item.favourite ? ' is-favourite' : ''}" type="button" data-favourite="${item.id}" title="${item.favourite ? 'Remove favourite' : 'Add favourite'}" aria-label="${item.favourite ? 'Remove favourite' : 'Mark favourite'}">${item.favourite ? '★' : '☆'}</button>
               <button class="pin-btn" data-pin="${item.id}" title="${item.pinned ? 'Unpin item' : 'Pin item'}">${item.pinned ? '📌' : '📍'}</button>
               <button class="edit-btn" data-edit="${item.id}" title="Edit Product">✎</button>
               ${removeOrLock}
             </div>
+          </div>
+          <div class="catalog-bottom-row">
+            <div class="item-meta item-meta--bottom">
+              ${storeStr}
+              ${priceStr}
+            </div>
+            ${qtyMod}
           </div>
         `;
         catalogWrap.appendChild(row);

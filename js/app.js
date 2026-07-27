@@ -460,6 +460,7 @@ function renderMain(){
   const activeListId = getActiveListId();
   const selectedItems = catalog.filter((item) => Boolean(item.lists?.[activeListId]));
   const selectedCount = selectedItems.length;
+  const completedCount = selectedCount;
   let estimatedTotal = 0;
   selectedItems.forEach((item) => {
     const entry = item.lists?.[activeListId];
@@ -470,7 +471,7 @@ function renderMain(){
   });
   const visibleCatalog = getFilteredProducts();
   const sorted = shoppingListShopping.sortCatalogItems(visibleCatalog);
-  shoppingListUI.renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, visibleCatalog, catalog, selectedItems, selectedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, toggleFavourite, escapeHtml, activeListId, productsSearchQuery);
+  shoppingListUI.renderMain(catalogWrap, emptyState, goShopBtn, costSummaryBox, clearAllBtn, estimatedTotalAmount, visibleCatalog, catalog, selectedItems, selectedCount, completedCount, estimatedTotal, sorted, STORE_LETTER, toggleInList, togglePin, changeQty, openEditView, removeFromCatalog, toggleFavourite, escapeHtml, activeListId, productsSearchQuery);
 }
 
 function renderLists(){
@@ -489,14 +490,19 @@ function renderLists(){
 
 function removeActiveListEntries(filterFn = () => true) {
   const activeListId = getActiveListId();
+  let removedCount = 0;
 
   catalog.forEach((item) => {
     if (filterFn(item) && item.lists?.[activeListId]) {
-      window.shoppingListStorage.removeProductFromList(item.id, activeListId);
+      delete item.lists[activeListId];
+      removedCount += 1;
     }
   });
 
-  catalog = window.shoppingListStorage.saveCatalog(catalog);
+  if (removedCount > 0) {
+    catalog = window.shoppingListStorage.saveCatalog(catalog);
+  }
+
   return catalog;
 }
 
@@ -779,9 +785,10 @@ if (bottomNav) {
 // Clear All Selected Items Listener (Using Custom Modal)
 if (clearAllBtn) {
   clearAllBtn.addEventListener('click', () => {
-    showConfirm("Are you sure you want to unselect all items from this week's list?", (confirmed) => {
+    showConfirm("Are you sure you want to clear all completed items from this week's list?", (confirmed) => {
       if (confirmed) {
-        removeActiveListEntries();
+        const activeListId = getActiveListId();
+        removeActiveListEntries((item) => Boolean(item.lists?.[activeListId]));
         renderMain();
       }
     });
