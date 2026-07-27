@@ -756,7 +756,7 @@ header{
 .catalog-item.selected .checkbox{background:var(--sage);}
 .catalog-item.selected .checkbox svg{opacity:1;}
 .catalog-item .name{font-size:0.9375rem;}
-.catalog-item.selected .name{color:var(--sage-dark); font-weight:700;}
+.catalog-item.selected .name{color:var(--sage-dark);}
 .aisle-tag{
   font-size:0.625rem;
   text-transform:uppercase;
