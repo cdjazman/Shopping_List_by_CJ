@@ -40,12 +40,7 @@
   <button id="settingsGearBtn" class="settings-gear-btn" type="button" aria-label="Open settings">⚙️</button>
 
   <header class="branding-header">
-    <div class="brand-mark">
-      <div class="brand-icon" aria-hidden="true">
-        <img src="assets/images/icon LOGO.png" alt="" />
-      </div>
-      <div class="brand-pill" aria-label="Shopping List by CJ">Shopping List by CJ</div>
-    </div>
+    <img class="brand-image" src="assets/images/LOGO pill dark.png" alt="Shopping List by CJ" />
   </header>
 
   <div class="tabs hidden" id="topTabs">
@@ -218,14 +213,49 @@
     
     <div class="settings-stack">
       <button type="button" id="checkUpdateBtn" class="settings-option-btn">⬆ Check for Updates</button>
-      <button type="button" class="settings-option-btn settings-option-btn--placeholder">💾 Backup Shopping Data (placeholder)</button>
-      <button type="button" class="settings-option-btn settings-option-btn--placeholder">📥 Restore Shopping Data (placeholder)</button>
+      <button type="button" id="exportBtn" class="settings-option-btn">💾 Backup Shopping Data</button>
+      <button type="button" id="restoreBtn" class="settings-option-btn">📥 Restore Shopping Data</button>
+      <input type="file" id="importFile" accept=".json,application/json" class="hidden" aria-hidden="true">
     </div>
 
     <div class="settings-stack">
       <div class="settings-section-title">ℹ About</div>
-      <button type="button" class="settings-option-btn settings-option-btn--placeholder">📜 Privacy Policy (placeholder)</button>
-      <button type="button" class="settings-option-btn settings-option-btn--placeholder">📄 Licences</button>
+      <button type="button" id="openPrivacyPolicyBtn" class="settings-option-btn">📜 Privacy Policy</button>
+      <button type="button" id="openLicencesBtn" class="settings-option-btn">📄 Licences</button>
+    </div>
+
+    <div class="settings-stack">
+      <div class="settings-section-title">Status Icons</div>
+      <ul class="status-icons-list" aria-label="Status icons guide">
+        <li class="status-icons-item">
+          <div class="status-icons-icon" aria-hidden="true">⭐</div>
+          <div class="status-icons-copy">
+            <div class="status-icons-name">Favourite</div>
+            <p>Saved as one of your favourite products for quick access.</p>
+          </div>
+        </li>
+        <li class="status-icons-item">
+          <div class="status-icons-icon" aria-hidden="true">📍</div>
+          <div class="status-icons-copy">
+            <div class="status-icons-name">Pinned</div>
+            <p>Always appears at the top of your shopping list.</p>
+          </div>
+        </li>
+        <li class="status-icons-item">
+          <div class="status-icons-icon" aria-hidden="true">🖊️</div>
+          <div class="status-icons-copy">
+            <div class="status-icons-name">Edit Product</div>
+            <p>Edit the product's details, category, notes or pricing.</p>
+          </div>
+        </li>
+        <li class="status-icons-item">
+          <div class="status-icons-icon" aria-hidden="true">❌</div>
+          <div class="status-icons-copy">
+            <div class="status-icons-name">Unpin</div>
+            <p>Removes a product from the pinned section.</p>
+          </div>
+        </li>
+      </ul>
     </div>
 
     <div class="settings-stack">
@@ -241,6 +271,136 @@
 
     <div class="footer-actions">
       <button class="ghost-btn" id="backFromSettingsBtn">← Back to Lists</button>
+    </div>
+  </div>
+
+  <!-- PRIVACY POLICY VIEW -->
+  <div id="privacyPolicyView" class="hidden">
+    <div class="aisle-heading" style="margin-bottom: 16px;">Privacy Policy</div>
+
+    <div class="privacy-policy-scroll" aria-label="Privacy Policy content">
+      <h1 class="privacy-policy-title">Privacy Policy</h1>
+      <p class="privacy-policy-updated">Last Updated: 27 July 2026</p>
+
+      <h2 class="privacy-policy-heading">Privacy Policy for Shopping List by CJ</h2>
+      <p>Shopping List by CJ ("the App") is committed to protecting your privacy. This Privacy Policy explains what information the App collects, how it is used, and the choices you have regarding your data.</p>
+
+      <h2 class="privacy-policy-heading">Information We Collect</h2>
+      <p>Shopping List by CJ is designed with privacy in mind.</p>
+      <p>The App stores information that you create, including:</p>
+      <p>• Shopping lists</p>
+      <p>• Product names</p>
+      <p>• Categories</p>
+      <p>• Favourite items</p>
+      <p>• Budgets</p>
+      <p>• Shopping preferences</p>
+      <p>• App settings</p>
+      <p>This information is stored locally on your device unless you choose to export it.</p>
+
+      <h2 class="privacy-policy-heading">Personal Information</h2>
+      <p>Shopping List by CJ does not require you to create an account.</p>
+      <p>The App does not intentionally collect personal information such as:</p>
+      <p>• Name</p>
+      <p>• Email address</p>
+      <p>• Phone number</p>
+      <p>• Home address</p>
+      <p>• Payment information</p>
+
+      <h2 class="privacy-policy-heading">How Your Data Is Used</h2>
+      <p>Your shopping data is used solely to provide the features of the application, including:</p>
+      <p>• Managing shopping lists</p>
+      <p>• Organising products</p>
+      <p>• Calculating budgets and totals</p>
+      <p>• Remembering your preferences</p>
+      <p>• Restoring your data from backups</p>
+
+      <h2 class="privacy-policy-heading">Data Storage</h2>
+      <p>Your data is stored locally on your device using your browser's local storage.</p>
+      <p>If Backup and Restore are used:</p>
+      <p>• Backups are created only when you choose to export them.</p>
+      <p>• Backup files are stored wherever you choose to save them.</p>
+      <p>• Restoring a backup replaces the current application data after confirmation.</p>
+
+      <h2 class="privacy-policy-heading">Internet Access</h2>
+      <p>Shopping List by CJ may access the internet for limited purposes such as:</p>
+      <p>• Checking for application updates.</p>
+      <p>• Retrieving product or pricing information (where supported).</p>
+      <p>• Downloading future application updates.</p>
+      <p>The App does not upload your shopping lists or personal data to our servers.</p>
+
+      <h2 class="privacy-policy-heading">Third-Party Services</h2>
+      <p>The App may interact with third-party retailers or services to obtain product information or pricing.</p>
+      <p>Those services operate under their own privacy policies.</p>
+      <p>Shopping List by CJ is not responsible for the privacy practices of third-party providers.</p>
+
+      <h2 class="privacy-policy-heading">Data Security</h2>
+      <p>Reasonable measures are taken to protect your information.</p>
+      <p>However, no method of electronic storage or internet transmission is completely secure.</p>
+
+      <h2 class="privacy-policy-heading">Children's Privacy</h2>
+      <p>Shopping List by CJ is not directed toward children under 13 years of age and does not knowingly collect personal information from children.</p>
+
+      <h2 class="privacy-policy-heading">Changes to This Policy</h2>
+      <p>This Privacy Policy may be updated from time to time.</p>
+      <p>Changes become effective when published within the App or included in a future release.</p>
+
+      <h2 class="privacy-policy-heading">Your Rights</h2>
+      <p>You remain in control of your data.</p>
+      <p>You may:</p>
+      <p>• Delete your shopping data at any time.</p>
+      <p>• Export your data using the Backup feature.</p>
+      <p>• Restore your data from a previous backup.</p>
+      <p>• Uninstall the App to remove locally stored information.</p>
+
+      <h2 class="privacy-policy-heading">Contact</h2>
+      <p>If you have questions about this Privacy Policy or Shopping List by CJ, please contact us through the official Shopping List by CJ GitHub repository.</p>
+    </div>
+
+    <div class="footer-actions">
+      <button class="ghost-btn" id="backToSettingsFromPrivacyBtn">← Back to Settings</button>
+    </div>
+  </div>
+
+  <!-- LICENCES VIEW -->
+  <div id="licencesView" class="hidden">
+    <div class="aisle-heading" style="margin-bottom: 16px;">Licences</div>
+
+    <div class="licences-scroll" aria-label="Licences content">
+      <h1 class="licences-title">Licences</h1>
+      <p class="licences-version">Version 1.0.0</p>
+
+      <p>Shopping List by CJ is licensed under the MIT License.</p>
+
+      <h2 class="licences-heading">MIT License</h2>
+      <p>Copyright (c) 2026 Shopping List by CJ</p>
+
+      <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+
+      <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+
+      <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+
+      <h2 class="licences-heading">Third-Party Components</h2>
+      <p>Shopping List by CJ may include or make use of open-source software and libraries.</p>
+      <p>Where applicable, the licences for those libraries should be listed below automatically.</p>
+
+      <ul id="thirdPartyLicencesList" class="licences-third-party-list hidden" aria-live="polite"></ul>
+      <p id="noThirdPartyLicencesMessage">No third-party licences are currently required.</p>
+
+      <h2 class="licences-heading">Icons &amp; Assets</h2>
+      <p>Application branding, logos and original graphics are the intellectual property of Shopping List by CJ unless otherwise stated.</p>
+      <p>Any third-party icons, fonts or assets must comply with their respective licences.</p>
+
+      <h2 class="licences-heading">Google Fonts</h2>
+      <p>This application uses the Montserrat font from Google Fonts, licensed under the SIL Open Font License 1.1.</p>
+      <p><a class="licences-link" href="https://scripts.sil.org/OFL" target="_blank" rel="noopener noreferrer">https://scripts.sil.org/OFL</a></p>
+
+      <h2 class="licences-heading">Contact</h2>
+      <p>For licence enquiries, please refer to the official Shopping List by CJ GitHub repository.</p>
+    </div>
+
+    <div class="footer-actions">
+      <button class="ghost-btn" id="backToSettingsFromLicencesBtn">← Back to Settings</button>
     </div>
   </div>
 

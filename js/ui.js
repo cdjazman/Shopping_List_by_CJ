@@ -251,7 +251,7 @@
       const wrap = document.createElement('div');
       wrap.className='aisle-group';
       const collectedInGroup = groupItems.filter((item) => Boolean(item.lists?.[activeListId]?.checked)).length;
-      wrap.innerHTML = `<div class="aisle-heading">${escapeHtml(aisle)} <span style="font-family:'DM Sans',sans-serif;font-weight:400;font-size:0.6875rem;color:var(--ink-soft);">(${collectedInGroup}/${groupItems.length})</span></div>`;
+      wrap.innerHTML = `<div class="aisle-heading">${escapeHtml(aisle)} <span style="font-weight:400;font-size:0.6875rem;color:var(--ink-soft);">(${collectedInGroup}/${groupItems.length})</span></div>`;
       groupItems.forEach((item)=>{
         const entry = item.lists?.[activeListId];
         const qty = Number(entry?.qty || 1);

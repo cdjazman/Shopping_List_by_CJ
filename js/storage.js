@@ -133,7 +133,9 @@
     return catalogState;
   }
 
-  function loadCatalog(defaultItems) {
+  function loadCatalog(defaultItems, options = {}) {
+    const shouldSeedDefaults = Boolean(options && options.seedDefaults);
+
     try {
       const raw = global.localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -147,7 +149,11 @@
       }
     } catch (e) {}
 
-    const seededCatalog = (Array.isArray(defaultItems) ? defaultItems : []).map(
+    const sourceDefaults = shouldSeedDefaults && Array.isArray(defaultItems)
+      ? defaultItems
+      : [];
+
+    const seededCatalog = sourceDefaults.map(
       ([name, aisle, qty, store, price]) => ({
         id: uid(),
         name,

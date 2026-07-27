@@ -34,6 +34,8 @@ const tabSettings = document.getElementById('tabSettings');
 const mainView = document.getElementById('mainView');
 const shopView = document.getElementById('shopView');
 const settingsView = document.getElementById('settingsView');
+const privacyPolicyView = document.getElementById('privacyPolicyView');
+const licencesView = document.getElementById('licencesView');
 const aisleGroups = document.getElementById('aisleGroups');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
@@ -64,6 +66,15 @@ const newListIconSelect = document.getElementById('newListIconSelect');
 const newListColourSelect = document.getElementById('newListColourSelect');
 const newListBudgetInput = document.getElementById('newListBudgetInput');
 const newListCancelBtn = document.getElementById('newListCancelBtn');
+const openPrivacyPolicyBtn = document.getElementById('openPrivacyPolicyBtn');
+const backToSettingsFromPrivacyBtn = document.getElementById('backToSettingsFromPrivacyBtn');
+const openLicencesBtn = document.getElementById('openLicencesBtn');
+const backToSettingsFromLicencesBtn = document.getElementById('backToSettingsFromLicencesBtn');
+const thirdPartyLicencesList = document.getElementById('thirdPartyLicencesList');
+const noThirdPartyLicencesMessage = document.getElementById('noThirdPartyLicencesMessage');
+
+const THIRD_PARTY_LICENCES = [];
+const DEMO_SEED_DONE_KEY = 'shopping-demo-seeded-v1';
 
 let selectedStore = "Aldi";
 let activeView = 'lists';
@@ -97,9 +108,47 @@ function save(){
   catalog = shoppingListStorage.saveCatalog(catalog);
 }
 
+function shouldSeedFirstRunDemoData() {
+  try {
+    const alreadySeeded = localStorage.getItem(DEMO_SEED_DONE_KEY) === '1';
+    if (alreadySeeded) return false;
+
+    const hasLists = localStorage.getItem('shopping-lists') != null;
+    const hasCatalog = localStorage.getItem(shoppingListStorage.STORAGE_KEY) != null;
+    const hasLegacyActive = localStorage.getItem('shopping-active-list') != null;
+    const hasActive = localStorage.getItem('shopping-lists-active') != null;
+
+    return !hasLists && !hasCatalog && !hasLegacyActive && !hasActive;
+  } catch (e) {
+    return false;
+  }
+}
+
+function applyDemoSeedToHomeList() {
+  const activeList = window.shoppingLists?.getActiveList?.();
+  if (!activeList || !activeList.id) return;
+
+  catalog.forEach((item) => {
+    if (!item || !item.id) return;
+    window.shoppingListStorage.addProductToList(item.id, activeList.id);
+  });
+
+  try {
+    localStorage.setItem(DEMO_SEED_DONE_KEY, '1');
+  } catch (e) {}
+}
+
 function load(){
-  catalog = shoppingListStorage.loadCatalog(DEFAULT_ITEMS);
+  const shouldSeedDemo = shouldSeedFirstRunDemoData();
+  catalog = shoppingListStorage.loadCatalog(DEFAULT_ITEMS, { seedDefaults: shouldSeedDemo });
   renderLists();
+
+  if (shouldSeedDemo) {
+    applyDemoSeedToHomeList();
+    save();
+    renderLists();
+  }
+
   showLists();
 }
 
@@ -224,6 +273,8 @@ function openAddView(){
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
   settingsView.classList.add('hidden');
+  if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (licencesView) licencesView.classList.add('hidden');
   addView.classList.remove('hidden');
   topTabs.classList.add('hidden');
   bottomNav.classList.add('hidden');
@@ -247,6 +298,8 @@ function openEditView(id){
       mainView.classList.add('hidden');
       shopView.classList.add('hidden');
       settingsView.classList.add('hidden');
+      if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+      if (licencesView) licencesView.classList.add('hidden');
       addView.classList.remove('hidden');
       topTabs.classList.add('hidden');
       bottomNav.classList.add('hidden');
@@ -474,17 +527,13 @@ function renderShop(){
 }
 
 function captureMainScrollPosition(){
-  if (catalogWrap) {
-    mainScrollTop = catalogWrap.scrollTop || 0;
-  }
+  mainScrollTop = window.scrollY || window.pageYOffset || 0;
 }
 
 function restoreMainScrollPosition(){
-  if (catalogWrap) {
-    requestAnimationFrame(() => {
-      catalogWrap.scrollTop = mainScrollTop;
-    });
-  }
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: mainScrollTop, left: 0, behavior: 'auto' });
+  });
 }
 
 function showLists(){
@@ -494,6 +543,8 @@ function showLists(){
   shopView.classList.add('hidden');
   addView.classList.add('hidden');
   settingsView.classList.add('hidden');
+  if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (licencesView) licencesView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'lists');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -504,6 +555,8 @@ function showLists(){
 function showMain(){
   activeView = 'main';
   myListsView.classList.add('hidden');
+  if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (licencesView) licencesView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'main');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -515,6 +568,8 @@ function showMain(){
 function showShop(){
   activeView = 'shop';
   myListsView.classList.add('hidden');
+  if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (licencesView) licencesView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'shop');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -524,7 +579,89 @@ function showSettings(){
   captureMainScrollPosition();
   activeView = 'settings';
   myListsView.classList.add('hidden');
+  if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (licencesView) licencesView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'settings');
+  topTabs.classList.add('hidden');
+  bottomNav.classList.add('hidden');
+}
+
+function showPrivacyPolicy() {
+  captureMainScrollPosition();
+  activeView = 'privacy-policy';
+  myListsView.classList.add('hidden');
+  mainView.classList.add('hidden');
+  shopView.classList.add('hidden');
+  addView.classList.add('hidden');
+  settingsView.classList.add('hidden');
+  if (licencesView) licencesView.classList.add('hidden');
+  if (privacyPolicyView) {
+    privacyPolicyView.classList.remove('hidden');
+    privacyPolicyView.scrollTop = 0;
+  }
+  topTabs.classList.add('hidden');
+  bottomNav.classList.add('hidden');
+}
+
+function renderThirdPartyLicences() {
+  if (!thirdPartyLicencesList || !noThirdPartyLicencesMessage) return;
+
+  thirdPartyLicencesList.innerHTML = '';
+
+  if (!Array.isArray(THIRD_PARTY_LICENCES) || THIRD_PARTY_LICENCES.length === 0) {
+    thirdPartyLicencesList.classList.add('hidden');
+    noThirdPartyLicencesMessage.classList.remove('hidden');
+    return;
+  }
+
+  THIRD_PARTY_LICENCES.forEach((entry) => {
+    const item = document.createElement('li');
+    item.className = 'licences-third-party-item';
+
+    const title = document.createElement('div');
+    title.className = 'licences-third-party-title';
+    title.textContent = entry.name || 'Unnamed component';
+    item.appendChild(title);
+
+    if (entry.licence) {
+      const licence = document.createElement('p');
+      licence.textContent = `Licence: ${entry.licence}`;
+      item.appendChild(licence);
+    }
+
+    if (entry.url) {
+      const linkLine = document.createElement('p');
+      const link = document.createElement('a');
+      link.className = 'licences-link';
+      link.href = entry.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = entry.url;
+      linkLine.appendChild(link);
+      item.appendChild(linkLine);
+    }
+
+    thirdPartyLicencesList.appendChild(item);
+  });
+
+  noThirdPartyLicencesMessage.classList.add('hidden');
+  thirdPartyLicencesList.classList.remove('hidden');
+}
+
+function showLicences() {
+  captureMainScrollPosition();
+  activeView = 'licences';
+  myListsView.classList.add('hidden');
+  mainView.classList.add('hidden');
+  shopView.classList.add('hidden');
+  addView.classList.add('hidden');
+  settingsView.classList.add('hidden');
+  if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (licencesView) {
+    renderThirdPartyLicences();
+    licencesView.classList.remove('hidden');
+    licencesView.scrollTop = 0;
+  }
   topTabs.classList.add('hidden');
   bottomNav.classList.add('hidden');
 }
@@ -596,6 +733,18 @@ if (backFromSettingsBtn) {
     showLists();
     renderLists();
   });
+}
+if (openPrivacyPolicyBtn) {
+  openPrivacyPolicyBtn.addEventListener('click', showPrivacyPolicy);
+}
+if (backToSettingsFromPrivacyBtn) {
+  backToSettingsFromPrivacyBtn.addEventListener('click', showSettings);
+}
+if (openLicencesBtn) {
+  openLicencesBtn.addEventListener('click', showLicences);
+}
+if (backToSettingsFromLicencesBtn) {
+  backToSettingsFromLicencesBtn.addEventListener('click', showSettings);
 }
 if (backToListsBtn) {
   backToListsBtn.addEventListener('click', showLists);
@@ -717,20 +866,21 @@ if (newRunBtn) {
 
 // Export Catalog (Prompts user to choose save location via File System Access API)
 async function exportCatalog() {
-  await shoppingListSettings.exportCatalog(catalog, showConfirm, save, showMain);
+  await shoppingListSettings.exportCatalog();
 }
 
 // Import Catalog from a JSON file (Using Custom Modal for confirmation)
 function importCatalog(event) {
   shoppingListSettings.importCatalog(event, {
     showConfirm,
-    setCatalog: (value) => { catalog = value; },
-    save,
-    showMain
+    refreshUI: () => {
+      window.location.reload();
+    }
   });
 }
 
 const exportBtn = document.getElementById('exportBtn');
+const restoreBtn = document.getElementById('restoreBtn');
 const importFileInput = document.getElementById('importFile');
 const searchApiBtn = document.getElementById('searchApiBtn');
 const liveSearchInput = document.getElementById('liveSearchInput');
@@ -740,6 +890,11 @@ if (exportBtn) {
 }
 if (importFileInput) {
   importFileInput.addEventListener('change', importCatalog);
+}
+if (restoreBtn && importFileInput) {
+  restoreBtn.addEventListener('click', () => {
+    importFileInput.click();
+  });
 }
 
 // Search Store Toggle Listener

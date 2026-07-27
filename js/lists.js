@@ -1,8 +1,8 @@
 (function (global) {
   const STORAGE_KEY = 'shopping-lists';
   const ACTIVE_STORAGE_KEY = 'shopping-lists-active';
-  const DEFAULT_LIST_NAME = 'Weekly Shop';
-  const DEFAULT_LIST_ICON = 'shopping_cart';
+  const DEFAULT_LIST_NAME = 'Home';
+  const DEFAULT_LIST_ICON = 'home';
   const DEFAULT_LIST_BUDGET = 200;
 
   const ICON_LOOKUP = {
@@ -22,6 +22,7 @@
   let listsWrap = null;
   let activeListMenu = null;
   let activeDeleteDialog = null;
+  let activeRenameDialog = null;
   let latestOnOpen = null;
 
   function uid() {
@@ -326,6 +327,109 @@
     activeDeleteDialog = null;
   }
 
+  function closeRenameDialog() {
+    if (activeRenameDialog && activeRenameDialog.parentNode) {
+      activeRenameDialog.parentNode.removeChild(activeRenameDialog);
+    }
+    activeRenameDialog = null;
+  }
+
+  function hasDuplicateListName(nextName, currentListId) {
+    const normalizedNext = String(nextName || '').trim().toLowerCase();
+    if (!normalizedNext) return false;
+
+    return lists.some((item) => (
+      item &&
+      item.id !== currentListId &&
+      String(item.name || '').trim().toLowerCase() === normalizedNext
+    ));
+  }
+
+  function showRenameDialog(list) {
+    closeRenameDialog();
+
+    const dialog = document.createElement('div');
+    dialog.className = 'modal-overlay';
+    dialog.innerHTML = `
+      <div class="modal-card">
+        <div class="modal-title">Rename List</div>
+        <form class="list-rename-form">
+          <div class="form-field" style="margin-bottom:12px;">
+            <label for="renameListNameInput">List Name</label>
+            <input type="text" id="renameListNameInput" value="${escapeText(list.name)}" autocomplete="off" required>
+          </div>
+          <div class="list-rename-error hidden" role="alert" aria-live="polite"></div>
+          <div class="modal-actions">
+            <button type="button" class="ghost-btn list-rename-cancel">Cancel</button>
+            <button type="submit" class="go-shop-btn" style="flex:1; padding:10px;">Save</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    const form = dialog.querySelector('.list-rename-form');
+    const input = dialog.querySelector('#renameListNameInput');
+    const cancelButton = dialog.querySelector('.list-rename-cancel');
+    const errorNode = dialog.querySelector('.list-rename-error');
+
+    function setValidationMessage(message) {
+      if (!errorNode) return;
+      if (!message) {
+        errorNode.textContent = '';
+        errorNode.classList.add('hidden');
+        return;
+      }
+
+      errorNode.textContent = message;
+      errorNode.classList.remove('hidden');
+    }
+
+    cancelButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      closeRenameDialog();
+    });
+
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) {
+        closeRenameDialog();
+      }
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const currentName = String(list.name || '').trim();
+      const nextName = String(input.value || '').trim();
+
+      if (!nextName) {
+        setValidationMessage('Please enter a list name.');
+        input.focus();
+        return;
+      }
+
+      if (hasDuplicateListName(nextName, list.id)) {
+        setValidationMessage('A list with that name already exists. Please choose a different name.');
+        input.focus();
+        return;
+      }
+
+      if (nextName === currentName) {
+        closeRenameDialog();
+        return;
+      }
+
+      updateList(list.id, { name: nextName });
+      closeRenameDialog();
+    });
+
+    document.body.appendChild(dialog);
+    activeRenameDialog = dialog;
+
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 30);
+  }
+
   function showDeleteDialog(list, onConfirm) {
     closeDeleteDialog();
 
@@ -376,10 +480,7 @@
     renameBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       closeListMenu();
-      const nextName = global.prompt('Rename list', list.name);
-      const trimmedName = (nextName || '').trim();
-      if (!trimmedName || trimmedName === list.name) return;
-      updateList(list.id, { name: trimmedName });
+      showRenameDialog(list);
     });
 
     pinBtn.addEventListener('click', (event) => {
@@ -432,6 +533,7 @@
 
     closeListMenu();
     closeDeleteDialog();
+    closeRenameDialog();
     listsWrap = targetContainer;
 
     if (typeof onOpen === 'function') {
