@@ -106,11 +106,12 @@
       emptyState.classList.add('hidden');
     }
     goShopBtn.disabled = selectedCount===0;
-    goShopBtn.textContent = selectedCount===0 ? "Start Shopping →" : `Start Shopping (${selectedCount}) →`;
+    goShopBtn.textContent = selectedCount===0 ? 'Start ▶' : `Start (${selectedCount}) ▶`;
 
     if(selectedCount > 0) {
       costSummaryBox.classList.remove('hidden');
       clearAllBtn.classList.remove('hidden');
+      clearAllBtn.textContent = `Clear Completed (${selectedCount})`;
       estimatedTotalAmount.textContent = new Intl.NumberFormat('en-AU', {
         style: 'currency',
         currency: 'AUD',
@@ -120,6 +121,7 @@
     } else {
       costSummaryBox.classList.add('hidden');
       clearAllBtn.classList.add('hidden');
+      clearAllBtn.textContent = '';
     }
 
     function appendItems(items) {
@@ -284,8 +286,8 @@
       addView.classList.add('hidden');
       settingsView.classList.add('hidden');
       tabMain.classList.remove('active');
-      tabShop.classList.add('active');
-      tabSettings.classList.remove('active');
+      tabShop.classList.remove('active');
+      tabSettings.classList.add('active');
     } else if (view === 'settings') {
       mainView.classList.add('hidden');
       shopView.classList.add('hidden');
@@ -293,14 +295,22 @@
       settingsView.classList.remove('hidden');
       tabMain.classList.remove('active');
       tabShop.classList.remove('active');
-      tabSettings.classList.add('active');
-    } else {
-      mainView.classList.remove('hidden');
+      tabSettings.classList.remove('active');
+    } else if (view === 'lists') {
+      mainView.classList.add('hidden');
       shopView.classList.add('hidden');
       addView.classList.add('hidden');
       settingsView.classList.add('hidden');
       tabMain.classList.add('active');
       tabShop.classList.remove('active');
+      tabSettings.classList.remove('active');
+    } else {
+      mainView.classList.remove('hidden');
+      shopView.classList.add('hidden');
+      addView.classList.add('hidden');
+      settingsView.classList.add('hidden');
+      tabMain.classList.remove('active');
+      tabShop.classList.add('active');
       tabSettings.classList.remove('active');
     }
   }

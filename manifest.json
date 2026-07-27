@@ -1,6 +1,6 @@
 {
-  "name": "Shopping List",
-  "short_name": "Shopping List",
+  "name": "Shopping List by CJ",
+  "short_name": "Shopping List by CJ",
   "description": "Tick your usual items, then check them off aisle by aisle while you shop.",
   "start_url": "./index.html",
   "scope": "./",

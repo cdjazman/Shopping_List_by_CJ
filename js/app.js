@@ -47,6 +47,8 @@ const newRunBtn = document.getElementById('newRunBtn');
 const storeFilterBar = document.getElementById('storeFilterBar');
 const checkUpdateBtn = document.getElementById('checkUpdateBtn');
 const clearAllBtn = document.getElementById('clearAllBtn');
+const addFavouritesBtn = document.getElementById('addFavouritesBtn');
+const settingsGearBtn = document.getElementById('settingsGearBtn');
 const deleteCatalogBtn = document.getElementById('deleteCatalogBtn');
 const costSummaryBox = document.getElementById('costSummaryBox');
 const estimatedTotalAmount = document.getElementById('estimatedTotalAmount');
@@ -322,6 +324,33 @@ function escapeHtml(str){
   return shoppingListUI.escapeHtml(str);
 }
 
+function addFavouriteProductsToCurrentList() {
+  const activeListId = getActiveListId();
+  const favouriteProducts = catalog.filter((item) => Boolean(item.favourite));
+  const addedProducts = [];
+
+  favouriteProducts.forEach((item) => {
+    if (!item.lists?.[activeListId]) {
+      window.shoppingListStorage.addProductToList(item.id, activeListId);
+      addedProducts.push(item);
+    }
+  });
+
+  save();
+  renderMain();
+  renderLists();
+  updateActiveListHeader();
+
+  const alreadyExistingCount = favouriteProducts.length - addedProducts.length;
+  const message = addedProducts.length === 0
+    ? 'All favourite products are already in this list.'
+    : alreadyExistingCount > 0
+      ? `${addedProducts.length} added, ${alreadyExistingCount} already existed.`
+      : `${addedProducts.length} favourite products added.`;
+
+  showConfirm(message, () => {});
+}
+
 function getFilteredProducts() {
   const query = (productsSearchQuery || '').trim().toLowerCase();
   const favouritesOnly = productsFavouriteFilter === 'favourites';
@@ -347,6 +376,31 @@ function updateProductsSearchUI() {
   if (!searchInput || !clearBtn) return;
 
   clearBtn.classList.toggle('hidden', !searchInput.value.trim());
+}
+
+function bindNavAction(element, handler) {
+  if (!element) return;
+
+  let touchHandled = false;
+
+  const invoke = (event) => {
+    if (event?.type === 'touchend') {
+      touchHandled = true;
+      handler(event);
+      return;
+    }
+
+    if (event?.type === 'click') {
+      if (touchHandled) {
+        touchHandled = false;
+        return;
+      }
+      handler(event);
+    }
+  };
+
+  element.addEventListener('click', invoke);
+  element.addEventListener('touchend', invoke, { passive: false });
 }
 
 function renderMain(){
@@ -440,8 +494,9 @@ function showLists(){
   shopView.classList.add('hidden');
   addView.classList.add('hidden');
   settingsView.classList.add('hidden');
-  topTabs.classList.add('hidden');
-  bottomNav.classList.remove('hidden');
+  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'lists');
+  topTabs.classList.remove('hidden');
+  bottomNav.classList.add('hidden');
   updateActiveListHeader();
   renderLists();
 }
@@ -470,7 +525,7 @@ function showSettings(){
   activeView = 'settings';
   myListsView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'settings');
-  topTabs.classList.remove('hidden');
+  topTabs.classList.add('hidden');
   bottomNav.classList.add('hidden');
 }
 
@@ -482,6 +537,9 @@ saveProductBtn.addEventListener('click', addItem);
 itemInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addItem(); });
 goShopBtn.addEventListener('click', showShop);
 backToListBtn.addEventListener('click', showMain);
+if (settingsGearBtn) {
+  bindNavAction(settingsGearBtn, showSettings);
+}
 
 const productsSearchInput = document.getElementById('productsSearchInput');
 const productsSearchClearBtn = document.getElementById('productsSearchClearBtn');
@@ -533,67 +591,129 @@ if (productsFilterFavouritesBtn) {
 }
 
 updateFavouriteFilterUI();
-backFromSettingsBtn.addEventListener('click', () => {
-  showLists();
-  renderLists();
-});
-backToListsBtn.addEventListener('click', showLists);
-tabMain.addEventListener('click', showMain);
-tabShop.addEventListener('click', ()=>{ if(catalog.some((item) => Boolean(item.lists?.[getActiveListId()]))) showShop(); });
-tabSettings.addEventListener('click', showSettings);
-newListBtn.addEventListener('click', openNewListModal);
-newListCancelBtn.addEventListener('click', closeNewListModal);
-newListForm.addEventListener('submit', saveNewList);
-Array.from(bottomNav.querySelectorAll('[data-nav]')).forEach((btn) => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.nav === 'settings') showSettings();
-    else showLists();
+if (backFromSettingsBtn) {
+  backFromSettingsBtn.addEventListener('click', () => {
+    showLists();
+    renderLists();
   });
-});
+}
+if (backToListsBtn) {
+  backToListsBtn.addEventListener('click', showLists);
+}
+if (tabMain) {
+  bindNavAction(tabMain, showLists);
+}
+if (tabShop) {
+  bindNavAction(tabShop, showMain);
+}
+if (tabSettings) {
+  bindNavAction(tabSettings, showShop);
+}
+if (newListBtn) {
+  newListBtn.addEventListener('click', openNewListModal);
+}
+if (newListCancelBtn) {
+  newListCancelBtn.addEventListener('click', closeNewListModal);
+}
+if (newListForm) {
+  newListForm.addEventListener('submit', saveNewList);
+}
+if (bottomNav) {
+  Array.from(bottomNav.querySelectorAll('[data-nav]')).forEach((btn) => {
+    bindNavAction(btn, () => {
+      if (btn.dataset.nav === 'settings') showSettings();
+      else showLists();
+    });
+  });
+}
 
 // Clear All Selected Items Listener (Using Custom Modal)
-clearAllBtn.addEventListener('click', () => {
-  showConfirm("Are you sure you want to unselect all items from this week's list?", (confirmed) => {
-    if(confirmed) {
-      removeActiveListEntries();
-      renderMain();
-    }
+if (clearAllBtn) {
+  clearAllBtn.addEventListener('click', () => {
+    showConfirm("Are you sure you want to unselect all items from this week's list?", (confirmed) => {
+      if (confirmed) {
+        removeActiveListEntries();
+        renderMain();
+      }
+    });
   });
-});
+}
+
+if (addFavouritesBtn) {
+  addFavouritesBtn.addEventListener('click', () => {
+    const favouriteProducts = catalog.filter((item) => Boolean(item.favourite));
+    if (favouriteProducts.length === 0) {
+      showConfirm('You do not have any favourite products yet.', () => {});
+      return;
+    }
+
+    showConfirm('Add all favourite products to this shopping list?', (confirmed) => {
+      if (!confirmed) return;
+
+      const activeListId = getActiveListId();
+      const addedProducts = [];
+
+      favouriteProducts.forEach((item) => {
+        if (!item.lists?.[activeListId]) {
+          window.shoppingListStorage.addProductToList(item.id, activeListId);
+          addedProducts.push(item);
+        }
+      });
+
+      save();
+      renderMain();
+      renderLists();
+      updateActiveListHeader();
+
+      const alreadyExistingCount = favouriteProducts.length - addedProducts.length;
+      const message = addedProducts.length === 0
+        ? 'All favourite products are already in this list.'
+        : alreadyExistingCount > 0
+          ? `${addedProducts.length} added, ${alreadyExistingCount} already existed.`
+          : `${addedProducts.length} favourite products added.`;
+
+      showConfirm(message, () => {});
+    });
+  });
+}
 
 // Delete Unpinned Catalogue Listener (Using Custom Modal)
-deleteCatalogBtn.addEventListener('click', () => {
-  showConfirm("⚠️ This will permanently delete all unpinned items in your catalogue. Pinned items will be kept safe. Continue?", (confirmed) => {
-    if(confirmed) {
-      catalog = catalog.filter(i => i.pinned);
-      save();
-      showMain();
-    }
-  });
-});
-
-// Store-Specific or Global Shop Done Listener (Using Custom Modal)
-newRunBtn.addEventListener('click', async ()=>{
-  if(currentStoreFilter === 'ALL') {
-    showConfirm("Reset the list? This will unselect, uncheck, and reset all quantities to 1 ready for next time.", (confirmed) => {
-      if(confirmed){
-        removeActiveListEntries();
+if (deleteCatalogBtn) {
+  deleteCatalogBtn.addEventListener('click', () => {
+    showConfirm("⚠️ This will permanently delete all unpinned items in your catalogue. Pinned items will be kept safe. Continue?", (confirmed) => {
+      if(confirmed) {
+        catalog = catalog.filter(i => i.pinned);
+        save();
         showMain();
       }
     });
-  } else {
-    showConfirm(`Finish shopping for ${currentStoreFilter}? This will clear only the ${currentStoreFilter} items from your current run.`, (confirmed) => {
-      if(confirmed){
-        removeActiveListEntries((item) => item.store === currentStoreFilter);
-        if(!catalog.some((item) => Boolean(item.lists?.[getActiveListId()]))) {
+  });
+}
+
+// Store-Specific or Global Shop Done Listener (Using Custom Modal)
+if (newRunBtn) {
+  newRunBtn.addEventListener('click', async () => {
+    if (currentStoreFilter === 'ALL') {
+      showConfirm("Reset the list? This will unselect, uncheck, and reset all quantities to 1 ready for next time.", (confirmed) => {
+        if (confirmed) {
+          removeActiveListEntries();
           showMain();
-        } else {
-          renderShop();
         }
-      }
-    });
-  }
-});
+      });
+    } else {
+      showConfirm(`Finish shopping for ${currentStoreFilter}? This will clear only the ${currentStoreFilter} items from your current run.`, (confirmed) => {
+        if (confirmed) {
+          removeActiveListEntries((item) => item.store === currentStoreFilter);
+          if (!catalog.some((item) => Boolean(item.lists?.[getActiveListId()]))) {
+            showMain();
+          } else {
+            renderShop();
+          }
+        }
+      });
+    }
+  });
+}
 
 // Export Catalog (Prompts user to choose save location via File System Access API)
 async function exportCatalog() {
@@ -610,39 +730,52 @@ function importCatalog(event) {
   });
 }
 
-document.getElementById('exportBtn').addEventListener('click', exportCatalog);
-document.getElementById('importFile').addEventListener('change', importCatalog);
+const exportBtn = document.getElementById('exportBtn');
+const importFileInput = document.getElementById('importFile');
+const searchApiBtn = document.getElementById('searchApiBtn');
+const liveSearchInput = document.getElementById('liveSearchInput');
+
+if (exportBtn) {
+  exportBtn.addEventListener('click', exportCatalog);
+}
+if (importFileInput) {
+  importFileInput.addEventListener('change', importCatalog);
+}
 
 // Search Store Toggle Listener
-shoppingListSettings.attachSearchStoreHandlers(
-  Array.from(document.querySelectorAll('#searchStoreSelect .filter-btn')),
-  (value) => { selectedSearchStore = value; }
-);
+if (shoppingListSettings?.attachSearchStoreHandlers) {
+  shoppingListSettings.attachSearchStoreHandlers(
+    Array.from(document.querySelectorAll('#searchStoreSelect .filter-btn')),
+    (value) => { selectedSearchStore = value; }
+  );
+}
 
 // Direct Web Search Handler
-document.getElementById('searchApiBtn').addEventListener('click', () => {
-  const query = document.getElementById('liveSearchInput').value.trim();
-  
-  if(!query) {
-    alert("Please enter a search term first.");
-    return;
-  }
+if (searchApiBtn && liveSearchInput) {
+  searchApiBtn.addEventListener('click', () => {
+    const query = liveSearchInput.value.trim();
 
-  let searchUrl = '';
-  const encodedQuery = encodeURIComponent(query);
+    if (!query) {
+      alert("Please enter a search term first.");
+      return;
+    }
 
-  if (selectedSearchStore === 'Woolworths') {
-    searchUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${encodedQuery}`;
-  } else if (selectedSearchStore === 'Coles') {
-    searchUrl = `https://www.coles.com.au/search?q=${encodedQuery}`;
-  } else if (selectedSearchStore === 'Aldi') {
-    searchUrl = `https://www.aldi.com.au/products/search?q=${encodedQuery}`;
-  }
+    let searchUrl = '';
+    const encodedQuery = encodeURIComponent(query);
 
-  if (searchUrl) {
-    window.open(searchUrl, '_blank');
-  }
-});
+    if (selectedSearchStore === 'Woolworths') {
+      searchUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${encodedQuery}`;
+    } else if (selectedSearchStore === 'Coles') {
+      searchUrl = `https://www.coles.com.au/search?q=${encodedQuery}`;
+    } else if (selectedSearchStore === 'Aldi') {
+      searchUrl = `https://www.aldi.com.au/products/search?q=${encodedQuery}`;
+    }
+
+    if (searchUrl) {
+      window.open(searchUrl, '_blank');
+    }
+  });
+}
 
 load();
 
