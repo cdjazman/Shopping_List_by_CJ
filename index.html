@@ -11,6 +11,25 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Shopping List">
+<script>
+(function () {
+  try {
+    var stored = localStorage.getItem('shopping-theme-preference') || 'system';
+    var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var resolved = stored === 'system' ? (isDark ? 'dark' : 'light') : (stored === 'light' ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme-preference', stored);
+    document.documentElement.setAttribute('data-theme', resolved);
+
+    var metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', resolved === 'dark' ? '#C85A1F' : '#F7F7F5');
+    }
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme-preference', 'system');
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+</script>
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/style.css">
 <style>
@@ -216,6 +235,15 @@
       <button type="button" id="exportBtn" class="settings-option-btn">💾 Backup Shopping Data</button>
       <button type="button" id="restoreBtn" class="settings-option-btn">📥 Restore Shopping Data</button>
       <input type="file" id="importFile" accept=".json,application/json" class="hidden" aria-hidden="true">
+    </div>
+
+    <div class="settings-stack">
+      <div class="settings-section-title">Appearance</div>
+      <div class="appearance-theme-grid" role="group" aria-label="Theme selection">
+        <button type="button" id="themeLightBtn" class="appearance-theme-btn" data-theme-option="light" aria-pressed="false">Light</button>
+        <button type="button" id="themeDarkBtn" class="appearance-theme-btn" data-theme-option="dark" aria-pressed="false">Dark</button>
+        <button type="button" id="themeSystemBtn" class="appearance-theme-btn" data-theme-option="system" aria-pressed="false">System Default</button>
+      </div>
     </div>
 
     <div class="settings-stack">

@@ -75,6 +75,11 @@ const noThirdPartyLicencesMessage = document.getElementById('noThirdPartyLicence
 
 const THIRD_PARTY_LICENCES = [];
 const DEMO_SEED_DONE_KEY = 'shopping-demo-seeded-v1';
+const THEME_PREFERENCE_KEY = 'shopping-theme-preference';
+const THEME_OPTIONS = ['light', 'dark', 'system'];
+const systemThemeMediaQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+let currentThemePreference = 'system';
 
 let selectedStore = "Aldi";
 let activeView = 'lists';
@@ -84,6 +89,85 @@ let activeProductDeleteDialog = null;
 let productsSearchQuery = '';
 let productsFavouriteFilter = 'all';
 window.__shoppingAppOpenList = null;
+
+const appearanceThemeButtons = Array.from(document.querySelectorAll('[data-theme-option]'));
+
+function getStoredThemePreference() {
+  const saved = localStorage.getItem(THEME_PREFERENCE_KEY);
+  return THEME_OPTIONS.includes(saved) ? saved : 'system';
+}
+
+function resolveTheme(preference) {
+  if (preference === 'system') {
+    return systemThemeMediaQuery && systemThemeMediaQuery.matches ? 'dark' : 'light';
+  }
+  return preference === 'light' ? 'light' : 'dark';
+}
+
+function getThemeColorForMeta(theme) {
+  return theme === 'dark' ? '#C85A1F' : '#F7F7F5';
+}
+
+function updateAppearanceThemeUI() {
+  appearanceThemeButtons.forEach((button) => {
+    const isActive = button.dataset.themeOption === currentThemePreference;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+}
+
+function syncBrandLogo(theme) {
+  const brandImage = document.querySelector('.brand-image');
+  if (!brandImage) return;
+
+  const nextSource = theme === 'dark'
+    ? 'assets/images/LOGO pill dark.png'
+    : 'assets/images/LOGO pill.png';
+
+  if (brandImage.getAttribute('src') !== nextSource) {
+    brandImage.setAttribute('src', nextSource);
+  }
+}
+
+function applyTheme(preference, options = {}) {
+  const shouldPersist = options.persist !== false;
+  currentThemePreference = THEME_OPTIONS.includes(preference) ? preference : 'system';
+  const resolvedTheme = resolveTheme(currentThemePreference);
+
+  document.documentElement.setAttribute('data-theme-preference', currentThemePreference);
+  document.documentElement.setAttribute('data-theme', resolvedTheme);
+
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) {
+    themeMeta.setAttribute('content', getThemeColorForMeta(resolvedTheme));
+  }
+
+  syncBrandLogo(resolvedTheme);
+  updateAppearanceThemeUI();
+
+  if (shouldPersist) {
+    localStorage.setItem(THEME_PREFERENCE_KEY, currentThemePreference);
+  }
+}
+
+function handleSystemThemeChange() {
+  if (currentThemePreference !== 'system') return;
+  applyTheme('system', { persist: false });
+}
+
+function initializeTheme() {
+  applyTheme(getStoredThemePreference(), { persist: false });
+
+  if (!systemThemeMediaQuery) return;
+  if (typeof systemThemeMediaQuery.addEventListener === 'function') {
+    systemThemeMediaQuery.addEventListener('change', handleSystemThemeChange);
+    return;
+  }
+
+  if (typeof systemThemeMediaQuery.addListener === 'function') {
+    systemThemeMediaQuery.addListener(handleSystemThemeChange);
+  }
+}
 
 function getActiveListId() {
   return window.shoppingLists?.getActiveList?.()?.id || currentListId || 'default';
@@ -782,6 +866,12 @@ if (bottomNav) {
   });
 }
 
+appearanceThemeButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    applyTheme(button.dataset.themeOption || 'system');
+  });
+});
+
 // Clear All Selected Items Listener (Using Custom Modal)
 if (clearAllBtn) {
   clearAllBtn.addEventListener('click', () => {
@@ -939,6 +1029,7 @@ if (searchApiBtn && liveSearchInput) {
   });
 }
 
+initializeTheme();
 load();
 
 // Service Worker Registration

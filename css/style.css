@@ -990,6 +990,47 @@ header{
   color:var(--color-danger-strong);
 }
 
+.appearance-theme-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:8px;
+}
+
+.appearance-theme-btn{
+  min-height:42px;
+  padding:0 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper-dim);
+  color:var(--ink);
+  font-size:0.8125rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:background-color var(--transition-hover), color var(--transition-hover), border-color var(--transition-hover), transform var(--transition-fast);
+}
+
+.appearance-theme-btn:hover,
+.appearance-theme-btn:focus-visible{
+  border-color:var(--color-border-strong);
+  background:var(--color-surface-highlight);
+}
+
+.appearance-theme-btn:active{
+  transform:scale(0.98);
+}
+
+.appearance-theme-btn.is-active{
+  background:var(--color-primary);
+  border-color:var(--color-primary);
+  color:var(--color-text-inverse);
+}
+
+.appearance-theme-btn.is-active:hover,
+.appearance-theme-btn.is-active:focus-visible{
+  background:var(--color-primary-hover);
+  border-color:var(--color-primary-hover);
+}
+
 .status-icons-list{
   margin:0;
   padding:0;
@@ -1225,7 +1266,7 @@ header{
 }
 .filter-btn:hover,
 .filter-btn:focus-visible{
-  border-color:rgba(255,255,255,0.24);
+  border-color:var(--color-border-strong);
   color:var(--ink);
 }
 .filter-btn.active{
