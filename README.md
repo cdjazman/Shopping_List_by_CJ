@@ -5,6 +5,7 @@
 A clean, fast, offline-first Progressive Web App (PWA) designed to manage, estimate, and streamline your weekly grocery runs across major Australian supermarkets (Aldi, Coles, and Woolworths).
 
 ---
+Testing Cloudflare develop deployment
 
 ## ✨ Key Features
 
