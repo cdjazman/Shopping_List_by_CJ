@@ -1093,3 +1093,43 @@ if ('serviceWorker' in navigator) {
     }, 600);
   });
 }
+
+// --------------------------------------------------
+// PWA Install Prompt
+// --------------------------------------------------
+
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredPrompt = event;
+
+  const installButton = document.getElementById('installAppBtn');
+  if (installButton) {
+    installButton.classList.remove('hidden');
+  }
+});
+
+const installButton = document.getElementById('installAppBtn');
+
+if (installButton) {
+  installButton.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+
+    deferredPrompt = null;
+    installButton.classList.add('hidden');
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+
+  if (installButton) {
+    installButton.classList.add('hidden');
+  }
+
+  console.log('Shopping List by CJ installed');
+});
