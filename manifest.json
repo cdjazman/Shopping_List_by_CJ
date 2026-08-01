@@ -1,13 +1,16 @@
 {
+  "id": "/",
   "name": "Shopping List by CJ",
   "short_name": "Shopping List",
   "description": "Smart shopping lists for Aldi, Coles and Woolworths.",
+  "lang": "en-AU",
+  "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#111111",
-  "theme_color": "#F26522",
+  "background_color": "#121212",
+  "theme_color": "#C85A1F",
 
   "icons": [
     {
