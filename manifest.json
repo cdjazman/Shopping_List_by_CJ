@@ -1,37 +1,26 @@
 {
-  "id": "/",
   "name": "Shopping List by CJ",
   "short_name": "Shopping List",
-  "description": "A premium shopping list app for Aldi, Coles and Woolworths shoppers.",
+  "description": "The smart shopping list for Aldi, Coles and Woolworths.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": [
-    "window-controls-overlay",
-    "standalone"
-  ],
   "orientation": "portrait",
-  "background_color": "#F7F7F5",
-  "theme_color": "#C85A1F",
-  "categories": [
-    "shopping",
-    "productivity"
-  ],
+  "background_color": "#F26522",
+  "theme_color": "#F26522",
   "icons": [
     {
-      "src": "assets/icons/AppIcons/web/icon-192.png",
+      "src": "/assets/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "assets/icons/AppIcons/web/icon-512.png",
+      "src": "/assets/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "assets/icons/AppIcons/web/icon-512-maskable.png",
+      "src": "/assets/icons/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
