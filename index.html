@@ -236,8 +236,34 @@
   <div id="settingsView" class="hidden">
     <div class="aisle-heading" style="margin-bottom: 16px;">App Settings</div>
     
-    <div class="settings-stack">
+   <div class="settings-stack">
       <button type="button" id="checkUpdateBtn" class="settings-option-btn">⬆ Check for Updates</button>
+
+      <div id="installCard" class="settings-option-card hidden">
+        <div class="settings-option-title">📱 Install Shopping List by CJ</div>
+        <div class="settings-option-text">
+          Install the app for faster loading, offline shopping and a native app experience.
+        </div>
+        <button type="button" id="installAppBtn" class="settings-option-btn">
+          Install App
+        </button>
+      </div>
+
+      <div id="iosInstallCard" class="settings-option-card hidden">
+        <button type="button" id="iosInstallToggleBtn" class="settings-option-title ios-install-toggle" aria-expanded="false" aria-controls="iosInstallSteps">
+          <span>📱 Install Shopping List by CJ</span>
+          <span class="ios-install-toggle__chevron" aria-hidden="true">▾</span>
+        </button>
+        <div id="iosInstallSteps" class="ios-install-steps hidden">
+          <p class="settings-option-text">Safari doesn't support one-tap install, but adding this app to your Home Screen only takes a few seconds:</p>
+          <ol class="ios-install-steps__list">
+            <li>Tap the <strong>Share</strong> icon <span aria-hidden="true">⬆️</span> in Safari's toolbar.</li>
+            <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+            <li>Tap <strong>Add</strong> in the top-right corner.</li>
+          </ol>
+        </div>
+      </div>
+
       <button type="button" id="exportBtn" class="settings-option-btn">💾 Backup Shopping Data</button>
       <button type="button" id="restoreBtn" class="settings-option-btn">📥 Restore Shopping Data</button>
       <input type="file" id="importFile" accept=".json,application/json" class="hidden" aria-hidden="true">
@@ -510,5 +536,6 @@
 <script src="js/settings.js"></script>
 <script src="js/lists.js"></script>
 <script src="js/app.js"></script>
+<script src="js/pwa.js"></script>
 </body>
 </html>
