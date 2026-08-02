@@ -111,12 +111,14 @@ The repository is intentionally lightweight, with the refactor split into focuse
 │   ├── app.js
 │   ├── catalog.js
 │   ├── defaults.js
+│   ├── pwa.js
 │   ├── settings.js
 │   ├── shopping.js
 │   ├── storage.js
 │   └── ui.js
 ├── index.html
 ├── manifest.json
+├── _headers
 ├── service-worker.js
 ├── PROJECT.md
 ├── DECISIONS.md
@@ -136,6 +138,7 @@ The JavaScript layer is now split into focused modules:
 - shopping.js: shopping list selection, quantity changes, and list creation
 - settings.js: backup export/import and search-store preference handling
 - defaults.js: seed catalogue data for first use
+- pwa.js: owns service worker registration, update detection, the update banner, and the install experience (Android/Desktop native prompt, iOS Safari instructions, standalone detection). Has no dependency on app.js or any shopping-list module.
 
 ---
 
@@ -241,6 +244,12 @@ Responsibilities include:
 The service worker should cache core application assets so the app remains available without a network connection.
 
 When updates are published, the app should handle the refresh flow in a controlled way so users do not lose their current experience.
+
+## Service Worker Update and Edge Caching Requirements
+
+Any change to a precached file (CSS, JS, manifest, icons) requires bumping `CACHE_VERSION` in `service-worker.js`, or users may not see the update until they happen to hard-refresh.
+
+Cloudflare Pages edge caching is controlled separately via the `_headers` file. `service-worker.js` and `manifest.json` must always be served with `Cache-Control: no-cache` there so browsers can discover updates promptly.
 
 ---
 
