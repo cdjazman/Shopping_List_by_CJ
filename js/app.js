@@ -31,6 +31,7 @@ const goShopBtn = document.getElementById('goShopBtn');
 const tabMain = document.getElementById('tabMain');
 const tabShop = document.getElementById('tabShop');
 const tabSettings = document.getElementById('tabSettings');
+const brandLogoBtn = document.getElementById('brandLogoBtn');
 const mainView = document.getElementById('mainView');
 const shopView = document.getElementById('shopView');
 const settingsView = document.getElementById('settingsView');
@@ -47,7 +48,6 @@ const backToListsBtn = document.getElementById('backToListsBtn');
 const activeListHeaderName = document.getElementById('activeListHeaderName');
 const newRunBtn = document.getElementById('newRunBtn');
 const storeFilterBar = document.getElementById('storeFilterBar');
-const checkUpdateBtn = document.getElementById('checkUpdateBtn');
 const clearAllBtn = document.getElementById('clearAllBtn');
 const addFavouritesBtn = document.getElementById('addFavouritesBtn');
 const settingsGearBtn = document.getElementById('settingsGearBtn');
@@ -839,6 +839,9 @@ if (backToSettingsFromLicencesBtn) {
 if (backToListsBtn) {
   backToListsBtn.addEventListener('click', showLists);
 }
+if (brandLogoBtn) {
+  bindNavAction(brandLogoBtn, showLists);
+}
 if (tabMain) {
   bindNavAction(tabMain, showLists);
 }
@@ -1031,65 +1034,3 @@ if (searchApiBtn && liveSearchInput) {
 
 initializeTheme();
 load();
-
-// Service Worker Registration
-let swRegistration = null;
-let newWorker = null;
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').then(reg => {
-      swRegistration = reg;
-      reg.update();
-
-      reg.addEventListener('updatefound', () => {
-        newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            document.getElementById('updateBanner').classList.remove('hidden');
-          }
-        });
-      });
-    }).catch(()=>{});
-
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!refreshing) {
-        refreshing = true;
-        window.location.reload();
-      }
-    });
-  });
-
-  checkUpdateBtn.addEventListener('click', () => {
-    checkUpdateBtn.textContent = "🔄 Checking...";
-    if (swRegistration) {
-      swRegistration.update().then(() => {
-        setTimeout(() => {
-          if (!newWorker) {
-            checkUpdateBtn.textContent = "✓ Up to date";
-            setTimeout(() => { checkUpdateBtn.textContent = "🔄 Check for updates"; }, 2000);
-          }
-        }, 1000);
-      }).catch(() => {
-        checkUpdateBtn.textContent = "🔄 Check for updates";
-      });
-    } else {
-      window.location.reload();
-    }
-  });
-
-  document.getElementById('reloadAppBtn').addEventListener('click', () => {
-    const banner = document.getElementById('updateBanner');
-    banner.querySelector('span').textContent = "⚡ Updating...";
-    banner.querySelector('button').style.display = 'none';
-    
-    setTimeout(() => {
-      if (newWorker) {
-        newWorker.postMessage({ action: 'skipWaiting' });
-      } else {
-        window.location.reload();
-      }
-    }, 600);
-  });
-}

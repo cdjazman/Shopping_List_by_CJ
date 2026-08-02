@@ -4,13 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Shopping List by CJ</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#C85A1F">
-<link rel="icon" href="assets/icons/launcher-logo-192.png">
-<link rel="apple-touch-icon" href="assets/icons/launcher-logo-192.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#F26522">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192.png">
+
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Shopping List">
+<meta name="apple-mobile-web-app-title" content="Shopping List by CJ">
 <script>
 (function () {
   try {
@@ -59,7 +65,9 @@
   <button id="settingsGearBtn" class="settings-gear-btn" type="button" aria-label="Open settings">⚙️</button>
 
   <header class="branding-header">
-    <img class="brand-image" src="assets/images/LOGO pill dark.png" alt="Shopping List by CJ" />
+    <button type="button" id="brandLogoBtn" class="brand-logo-btn" aria-label="Go to My Lists">
+      <img class="brand-image" src="assets/images/LOGO pill dark.png" alt="Shopping List by CJ" />
+    </button>
   </header>
 
   <div class="tabs hidden" id="topTabs">
@@ -230,8 +238,34 @@
   <div id="settingsView" class="hidden">
     <div class="aisle-heading" style="margin-bottom: 16px;">App Settings</div>
     
-    <div class="settings-stack">
+   <div class="settings-stack">
       <button type="button" id="checkUpdateBtn" class="settings-option-btn">⬆ Check for Updates</button>
+
+      <div id="installCard" class="settings-option-card hidden">
+        <div class="settings-option-title">📱 Install Shopping List by CJ</div>
+        <div class="settings-option-text">
+          Install the app for faster loading, offline shopping and a native app experience.
+        </div>
+        <button type="button" id="installAppBtn" class="settings-option-btn">
+          Install App
+        </button>
+      </div>
+
+      <div id="iosInstallCard" class="settings-option-card hidden">
+        <button type="button" id="iosInstallToggleBtn" class="settings-option-title ios-install-toggle" aria-expanded="false" aria-controls="iosInstallSteps">
+          <span>📱 Install Shopping List by CJ</span>
+          <span class="ios-install-toggle__chevron" aria-hidden="true">▾</span>
+        </button>
+        <div id="iosInstallSteps" class="ios-install-steps hidden">
+          <p class="settings-option-text">Safari doesn't support one-tap install, but adding this app to your Home Screen only takes a few seconds:</p>
+          <ol class="ios-install-steps__list">
+            <li>Tap the <strong>Share</strong> icon <span aria-hidden="true">⬆️</span> in Safari's toolbar.</li>
+            <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+            <li>Tap <strong>Add</strong> in the top-right corner.</li>
+          </ol>
+        </div>
+      </div>
+
       <button type="button" id="exportBtn" class="settings-option-btn">💾 Backup Shopping Data</button>
       <button type="button" id="restoreBtn" class="settings-option-btn">📥 Restore Shopping Data</button>
       <input type="file" id="importFile" accept=".json,application/json" class="hidden" aria-hidden="true">
@@ -504,5 +538,6 @@
 <script src="js/settings.js"></script>
 <script src="js/lists.js"></script>
 <script src="js/app.js"></script>
+<script src="js/pwa.js"></script>
 </body>
 </html>
