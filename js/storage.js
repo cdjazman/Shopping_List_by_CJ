@@ -30,10 +30,11 @@
     }
   }
 
+  // Field names from the pre-migration single-list data format.
   const LEGACY_FIELDS = {
-    selected: 'in' + 'List',
-    quantity: 'q' + 'ty',
-    completion: 'check' + 'ed'
+    selected: 'inList',
+    quantity: 'qty',
+    completion: 'checked'
   };
 
   function normalizeListState(state) {

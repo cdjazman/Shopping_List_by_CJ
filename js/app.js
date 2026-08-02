@@ -29,8 +29,8 @@ const catalogWrap = document.getElementById('catalogWrap');
 const emptyState = document.getElementById('emptyState');
 const goShopBtn = document.getElementById('goShopBtn');
 const tabMain = document.getElementById('tabMain');
+const tabProducts = document.getElementById('tabProducts');
 const tabShop = document.getElementById('tabShop');
-const tabSettings = document.getElementById('tabSettings');
 const brandLogoBtn = document.getElementById('brandLogoBtn');
 const mainView = document.getElementById('mainView');
 const shopView = document.getElementById('shopView');
@@ -592,14 +592,7 @@ function removeActiveListEntries(filterFn = () => true) {
 
 function syncStoreFilterButtons(activeButton) {
   storeFilterBar.querySelectorAll('.filter-btn').forEach((btn) => {
-    const isActive = btn === activeButton;
-    btn.classList.toggle('active', isActive);
-
-    if (isActive) {
-      btn.setAttribute('style', 'background-color:var(--color-text) !important;color:var(--color-bg) !important;border-color:var(--color-text) !important;font-weight:700;');
-    } else {
-      btn.removeAttribute('style');
-    }
+    btn.classList.toggle('active', btn === activeButton);
   });
 }
 
@@ -635,7 +628,7 @@ function showLists(){
   settingsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
-  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'lists');
+  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'lists');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
   updateActiveListHeader();
@@ -647,7 +640,7 @@ function showMain(){
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
-  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'main');
+  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'main');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
   updateActiveListHeader();
@@ -660,7 +653,7 @@ function showShop(){
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
-  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'shop');
+  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'shop');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
   renderShop();
@@ -671,7 +664,7 @@ function showSettings(){
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
-  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, 'settings');
+  shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'settings');
   topTabs.classList.add('hidden');
   bottomNav.classList.add('hidden');
 }
@@ -845,11 +838,11 @@ if (brandLogoBtn) {
 if (tabMain) {
   bindNavAction(tabMain, showLists);
 }
-if (tabShop) {
-  bindNavAction(tabShop, showMain);
+if (tabProducts) {
+  bindNavAction(tabProducts, showMain);
 }
-if (tabSettings) {
-  bindNavAction(tabSettings, showShop);
+if (tabShop) {
+  bindNavAction(tabShop, showShop);
 }
 if (newListBtn) {
   newListBtn.addEventListener('click', openNewListModal);
