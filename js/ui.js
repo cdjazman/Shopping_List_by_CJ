@@ -289,39 +289,39 @@
     });
   }
 
-  function showView(mainView, shopView, addView, settingsView, tabMain, tabShop, tabSettings, view) {
+  function showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, view) {
     if (view === 'shop') {
       mainView.classList.add('hidden');
       shopView.classList.remove('hidden');
       addView.classList.add('hidden');
       settingsView.classList.add('hidden');
       tabMain.classList.remove('active');
-      tabShop.classList.remove('active');
-      tabSettings.classList.add('active');
+      tabProducts.classList.remove('active');
+      tabShop.classList.add('active');
     } else if (view === 'settings') {
       mainView.classList.add('hidden');
       shopView.classList.add('hidden');
       addView.classList.add('hidden');
       settingsView.classList.remove('hidden');
       tabMain.classList.remove('active');
+      tabProducts.classList.remove('active');
       tabShop.classList.remove('active');
-      tabSettings.classList.remove('active');
     } else if (view === 'lists') {
       mainView.classList.add('hidden');
       shopView.classList.add('hidden');
       addView.classList.add('hidden');
       settingsView.classList.add('hidden');
       tabMain.classList.add('active');
+      tabProducts.classList.remove('active');
       tabShop.classList.remove('active');
-      tabSettings.classList.remove('active');
     } else {
       mainView.classList.remove('hidden');
       shopView.classList.add('hidden');
       addView.classList.add('hidden');
       settingsView.classList.add('hidden');
       tabMain.classList.remove('active');
-      tabShop.classList.add('active');
-      tabSettings.classList.remove('active');
+      tabProducts.classList.add('active');
+      tabShop.classList.remove('active');
     }
   }
 
