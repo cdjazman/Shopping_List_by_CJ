@@ -226,14 +226,15 @@
         }
 
         const activeListId = window.shoppingLists?.getActiveList?.()?.id;
-        const entry = active.find((item) => item.id === shopRow.dataset.id);
 
-        if (entry) {
-          window.shoppingListStorage.toggleChecked(entry.id, activeListId);
-        } else {
-          const created = window.shoppingListStorage.addProductToList(shopRow.dataset.id, activeListId);
-          if (created) created.checked = true;
-        }
+        // Any row currently in the DOM was, by construction, already part
+        // of the active list at the time it was rendered - so we can
+        // always toggle it by id directly against live storage, rather
+        // than re-checking it against `active`, which is a snapshot
+        // captured only once (when this listener was first bound) and
+        // never updates on later renders. Relying on that stale snapshot
+        // was the cause of items becoming permanently un-untickable.
+        window.shoppingListStorage.toggleChecked(shopRow.dataset.id, activeListId);
         save();
         renderShopFn();
       });

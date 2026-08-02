@@ -31,6 +31,7 @@ const goShopBtn = document.getElementById('goShopBtn');
 const tabMain = document.getElementById('tabMain');
 const tabShop = document.getElementById('tabShop');
 const tabSettings = document.getElementById('tabSettings');
+const brandLogoBtn = document.getElementById('brandLogoBtn');
 const mainView = document.getElementById('mainView');
 const shopView = document.getElementById('shopView');
 const settingsView = document.getElementById('settingsView');
@@ -837,6 +838,9 @@ if (backToSettingsFromLicencesBtn) {
 }
 if (backToListsBtn) {
   backToListsBtn.addEventListener('click', showLists);
+}
+if (brandLogoBtn) {
+  bindNavAction(brandLogoBtn, showLists);
 }
 if (tabMain) {
   bindNavAction(tabMain, showLists);

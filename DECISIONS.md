@@ -119,6 +119,22 @@ Consequences:
 
 ---
 
+## Decision 009 - Logo Tap Navigation Exception to Decision 005
+
+Status: Accepted
+
+Same situation as Decision 008: the header logo now navigates back to
+My Lists on tap/click, which is new behaviour rather than a like-for-like
+refactor. Approved by the project owner on 2026-08-02 as a small,
+explicitly requested exception.
+
+Implementation reused the existing showLists() function and the existing
+bindNavAction() touch/click handler already used by the bottom nav and
+tabs, so no new interaction pattern was introduced - just a new entry
+point into an existing one.
+
+---
+
 ## Future Decisions
 
 Leave space for future architectural decisions.
