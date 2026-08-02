@@ -592,14 +592,7 @@ function removeActiveListEntries(filterFn = () => true) {
 
 function syncStoreFilterButtons(activeButton) {
   storeFilterBar.querySelectorAll('.filter-btn').forEach((btn) => {
-    const isActive = btn === activeButton;
-    btn.classList.toggle('active', isActive);
-
-    if (isActive) {
-      btn.setAttribute('style', 'background-color:var(--color-text) !important;color:var(--color-bg) !important;border-color:var(--color-text) !important;font-weight:700;');
-    } else {
-      btn.removeAttribute('style');
-    }
+    btn.classList.toggle('active', btn === activeButton);
   });
 }
 
