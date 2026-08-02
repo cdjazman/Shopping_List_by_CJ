@@ -360,7 +360,7 @@ function openAddView(){
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
   addView.classList.remove('hidden');
-  topTabs.classList.add('hidden');
+  topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
   setTimeout(()=> itemInput.focus(), 50);
 }
@@ -385,7 +385,7 @@ function openEditView(id){
       if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
       if (licencesView) licencesView.classList.add('hidden');
       addView.classList.remove('hidden');
-      topTabs.classList.add('hidden');
+      topTabs.classList.remove('hidden');
       bottomNav.classList.add('hidden');
     }
   );
@@ -665,7 +665,7 @@ function showSettings(){
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'settings');
-  topTabs.classList.add('hidden');
+  topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
 }
 
@@ -682,7 +682,7 @@ function showPrivacyPolicy() {
     privacyPolicyView.classList.remove('hidden');
     privacyPolicyView.scrollTop = 0;
   }
-  topTabs.classList.add('hidden');
+  topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
 }
 
@@ -745,7 +745,7 @@ function showLicences() {
     licencesView.classList.remove('hidden');
     licencesView.scrollTop = 0;
   }
-  topTabs.classList.add('hidden');
+  topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
 }
 
