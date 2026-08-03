@@ -61,12 +61,10 @@
   }
 
   function sortCatalogItems(catalog) {
-    return [...catalog].sort((a, b) => {
-      if (Boolean(a.favourite) !== Boolean(b.favourite)) {
-        return Boolean(a.favourite) ? -1 : 1;
-      }
-      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-    });
+    // Products stay in a single alphabetical order regardless of favourite
+    // status - favouriting an item marks it with a star but must not move
+    // it around the list.
+    return [...catalog].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
   }
 
   function createShoppingList(catalog, currentStoreFilter) {
