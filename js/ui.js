@@ -181,33 +181,10 @@
       });
     }
 
-    const favouriteItems = sorted.filter((item) => item.favourite);
-    const otherItems = sorted.filter((item) => !item.favourite);
-
-    if (searchQuery && favouriteItems.length === 0 && otherItems.length === 0) {
-      // handled by empty state above
-    } else if (favouriteItems.length > 0 && otherItems.length > 0) {
-      const heading = document.createElement('div');
-      heading.className = 'products-section-heading';
-      heading.textContent = '⭐ Favourite Products';
-      catalogWrap.appendChild(heading);
-      appendItems(favouriteItems);
-
-      const allHeading = document.createElement('div');
-      allHeading.className = 'products-section-heading';
-      allHeading.textContent = 'All Products';
-      catalogWrap.appendChild(allHeading);
-      appendItems(otherItems);
-    } else if (favouriteItems.length > 0) {
-      const heading = document.createElement('div');
-      heading.className = 'products-section-heading';
-      heading.textContent = '⭐ Favourite Products';
-      catalogWrap.appendChild(heading);
-      appendItems(favouriteItems);
-    } else {
-      appendItems(otherItems);
-    }
-
+    // Products render as a single alphabetical list - favouriting an item
+    // marks it with a star but no longer splits it into its own section
+    // or moves it out of alphabetical order.
+    appendItems(sorted);
   }
 
   function renderShop(aisleGroups, active, AISLES, STORE_LETTER, escapeHtml, cycleStore, save, renderShopFn) {
