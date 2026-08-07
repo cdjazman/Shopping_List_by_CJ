@@ -26,6 +26,11 @@
   // (see the companion change in that file).
   const SKIP_WAITING_MESSAGE = { type: 'SKIP_WAITING' };
 
+  // Remembers which version the person explicitly said "Not Now" to, so
+  // the banner doesn't nag again about that same version. A genuinely
+  // new version (different CACHE_VERSION) always shows the banner again.
+  const DECLINED_UPDATE_KEY = 'shopping-list-declined-update-version';
+
   // ------------------------------------------------------------------
   // DOM references
   // ------------------------------------------------------------------
@@ -35,7 +40,9 @@
 
   function cacheElements() {
     els.updateBanner = document.getElementById('updateBanner');
+    els.updateBannerLabel = els.updateBanner?.querySelector('span') || null;
     els.reloadAppBtn = document.getElementById('reloadAppBtn');
+    els.dismissUpdateBtn = document.getElementById('dismissUpdateBtn');
     els.checkUpdateBtn = document.getElementById('checkUpdateBtn');
 
     els.installCard = document.getElementById('installCard');
@@ -178,6 +185,45 @@
 
   let swRegistration = null;
   let waitingWorker = null;
+  // CACHE_VERSION string of the update currently sitting in `waitingWorker`,
+  // read directly out of the deployed service-worker.js. Used to compare
+  // against DECLINED_UPDATE_KEY so a "Not Now" only silences *that*
+  // version, not every future update.
+  let pendingUpdateVersion = null;
+
+  function getDeclinedVersion() {
+    try {
+      return global.localStorage.getItem(DECLINED_UPDATE_KEY);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function setDeclinedVersion(version) {
+    if (!version) return;
+    try {
+      global.localStorage.setItem(DECLINED_UPDATE_KEY, version);
+    } catch (error) {
+      // Ignore storage failures (e.g. private browsing) - worst case the
+      // banner reappears next visit, which is a safe default.
+    }
+  }
+
+  /**
+   * Reads CACHE_VERSION straight out of the live service-worker.js file.
+   * `cache: 'no-store'` bypasses the HTTP cache so this always reflects
+   * whatever was just deployed, not a stale copy.
+   */
+  async function getServiceWorkerVersion() {
+    try {
+      const response = await fetch(SW_URL, { cache: 'no-store' });
+      const text = await response.text();
+      const match = text.match(/CACHE_VERSION\s*=\s*["']([^"']+)["']/);
+      return match ? match[1] : null;
+    } catch (error) {
+      return null;
+    }
+  }
 
   function showUpdateBanner() {
     els.updateBanner?.classList.remove('hidden');
@@ -185,10 +231,34 @@
 
   function resetUpdateBannerUI() {
     if (!els.updateBanner) return;
-    const label = els.updateBanner.querySelector('span');
-    const button = els.updateBanner.querySelector('button');
-    if (label) label.textContent = '🎉 New version available!';
-    if (button) button.style.display = '';
+    if (els.updateBannerLabel) els.updateBannerLabel.textContent = '🎉 New version available!';
+    if (els.reloadAppBtn) {
+      els.reloadAppBtn.style.display = '';
+      els.reloadAppBtn.disabled = false;
+    }
+    if (els.dismissUpdateBtn) els.dismissUpdateBtn.style.display = '';
+  }
+
+  /**
+   * A worker is waiting to activate. By default this respects a prior
+   * "Not Now" for this exact version and stays silent - the update is
+   * still there (and reachable via "Check for updates") but doesn't nag.
+   * `forceShow` (used by the manual check-for-updates button) always
+   * surfaces the banner, since that's an explicit ask.
+   */
+  async function handleWaitingWorker(worker, { forceShow = false } = {}) {
+    if (!worker) return;
+    waitingWorker = worker;
+
+    const version = await getServiceWorkerVersion();
+    pendingUpdateVersion = version;
+
+    if (!forceShow && version && version === getDeclinedVersion()) {
+      return;
+    }
+
+    resetUpdateBannerUI();
+    showUpdateBanner();
   }
 
   function trackInstallingWorker(installingWorker) {
@@ -199,9 +269,7 @@
       // "installed" + an existing controller means this is an update to
       // an already-running app, not the very first install.
       if (installingWorker.state === 'installed' && hasExistingController) {
-        waitingWorker = installingWorker;
-        resetUpdateBannerUI();
-        showUpdateBanner();
+        handleWaitingWorker(installingWorker);
       }
     });
   }
@@ -216,11 +284,9 @@
           swRegistration = registration;
 
           // A worker may already be waiting from a previous session, e.g.
-          // the person closed the tab before clicking "Update Now".
+          // the person closed the tab before deciding on "Update Now".
           if (registration.waiting && navigator.serviceWorker.controller) {
-            waitingWorker = registration.waiting;
-            resetUpdateBannerUI();
-            showUpdateBanner();
+            handleWaitingWorker(registration.waiting);
           }
 
           registration.addEventListener('updatefound', () => {
@@ -263,6 +329,10 @@
           // Give it a moment, then report "up to date" if nothing showed up.
           setTimeout(() => {
             if (waitingWorker) {
+              // Explicit ask - show the banner even if this exact version
+              // was previously dismissed with "Not Now".
+              resetUpdateBannerUI();
+              showUpdateBanner();
               els.checkUpdateBtn.textContent = IDLE_LABEL;
               return;
             }
@@ -282,10 +352,9 @@
     if (!els.reloadAppBtn) return;
 
     els.reloadAppBtn.addEventListener('click', () => {
-      const label = els.updateBanner?.querySelector('span');
-      const button = els.updateBanner?.querySelector('button');
-      if (label) label.textContent = '⚡ Updating...';
-      if (button) button.style.display = 'none';
+      if (els.updateBannerLabel) els.updateBannerLabel.textContent = '⚡ Updating...';
+      if (els.reloadAppBtn) els.reloadAppBtn.style.display = 'none';
+      if (els.dismissUpdateBtn) els.dismissUpdateBtn.style.display = 'none';
 
       setTimeout(() => {
         if (waitingWorker) {
@@ -294,6 +363,22 @@
           global.location.reload();
         }
       }, 600);
+    });
+  }
+
+  /**
+   * "Not Now": the person has seen the update and chosen to keep using
+   * the current version. Remembers *this* version as declined (so the
+   * banner won't reappear for it) and hides the banner. The update
+   * itself isn't discarded — `waitingWorker` stays set, so "Check for
+   * updates" or a future genuinely-new version will still surface it.
+   */
+  function initDismissButton() {
+    if (!els.dismissUpdateBtn) return;
+
+    els.dismissUpdateBtn.addEventListener('click', () => {
+      setDeclinedVersion(pendingUpdateVersion);
+      els.updateBanner?.classList.add('hidden');
     });
   }
 
@@ -308,6 +393,7 @@
     initIOSInstallCard();
     initUpdateCheckButton();
     initReloadButton();
+    initDismissButton();
     registerServiceWorker();
   }
 
