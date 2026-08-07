@@ -96,6 +96,13 @@ html{
   font-weight: 500;
 }
 
+.update-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .update-banner button {
   background: var(--sage);
   color: var(--color-text);
@@ -105,6 +112,13 @@ html{
   font-weight: 700;
   font-size: 0.8125rem;
   cursor: pointer;
+}
+
+.update-banner button.update-banner-secondary {
+  background: transparent;
+  color: var(--paper);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-weight: 600;
 }
 
 header{
