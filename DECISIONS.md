@@ -135,6 +135,47 @@ point into an existing one.
 
 ---
 
+## Decision 010 - Develop Branch for Staging, Main for Production
+
+Status: Accepted
+
+The project uses two long-lived branches: `develop` and `main`.
+
+Reason:
+The project owner wants to personally test upcoming changes (and have
+early testers try them) before they reach the app's day-to-day users.
+A single production branch made that impossible without exposing
+untested work to everyone using the app.
+
+Details:
+- `main` is the production branch. It is what day-to-day users have
+  installed, and should always reflect a working, tested state.
+- `develop` is the staging branch. All new feature and fix branches are
+  created from `develop`, and their pull requests target `develop`,
+  not `main`.
+- Once changes on `develop` have been tested - ideally via its own
+  separate deployment/preview build, installed and used directly -
+  they are promoted to `main` via a single pull request from `develop`
+  into `main`.
+- `develop` should be kept reasonably close to `main`. It exists to
+  buy a short testing window, not to become a long-diverging branch.
+
+Consequences:
+- Shipping a change to production now takes two pull requests: one
+  merging a feature branch into `develop`, and one later promoting
+  `develop` into `main`.
+- The project owner can install and use a separate build (e.g. a
+  Cloudflare Pages preview deployment of `develop`) to test changes on
+  a real device before they reach anyone else.
+- If `develop` is ever accidentally deleted (as happened once before
+  this decision was written, likely via a "delete branch on merge"
+  repo setting), it can simply be recreated from `main` - its own
+  history isn't meaningful, only its role as a staging branch is.
+
+Approved by the project owner on 2026-08-02.
+
+---
+
 ## Future Decisions
 
 Leave space for future architectural decisions.
