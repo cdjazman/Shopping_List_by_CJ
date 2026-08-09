@@ -176,6 +176,46 @@ Approved by the project owner on 2026-08-02.
 
 ---
 
+## Decision 011 - Recipe Import via URL Deep Link
+
+Status: Accepted
+
+The marketing website (`shoppinglistbycj-website`, a separate repo) gained
+recipe pages with an "Add to Shopping List" button. The app receives that
+data via a `?import=` URL query parameter read on load, not via any API —
+see `RECIPE_IMPORT_CONTRACT.md` for the full schema and validation rules,
+which is mirrored in both repos and must be kept in sync between them.
+
+Reason:
+The app has no backend (Decision 002 - Offline First), so the website has
+no way to "push" data into it. A URL carrying the payload, read by the app
+on load, is the only mechanism available that doesn't require adding a
+server, an account system, or a cloud dependency to either project. A Web
+Share Target (`share_target` in the manifest) was considered and rejected
+for the initial version — iOS Safari's support for PWAs *receiving* shares
+is limited/unreliable, and it adds more moving parts than needed.
+
+Consequences:
+- This is purely additive: it never touches Settings → Backup/Restore (the
+  existing destructive import), never removes data, and only ever adds to
+  the current active list.
+- The payload is untrusted input (it arrives via a URL) and is validated
+  accordingly: capped array length, capped string lengths, clamped
+  quantities, malformed entries dropped rather than erroring.
+- The website and app repos now share a documented interface
+  (`RECIPE_IMPORT_CONTRACT.md`) that isn't enforced by any build tooling —
+  keeping both copies of that file in sync is a manual discipline, not an
+  automated one. Any change to the payload shape on either side must update
+  both copies in the same change.
+- The website currently points at a placeholder app URL
+  (`SHOPPING_LIST_APP_URL` in the website's `js/recipes.js`) since the app
+  isn't deployed to a stable production URL yet. This needs updating once
+  it is, along with flipping `OPEN_IMPORT_IN_NEW_TAB` to `false`.
+
+Approved by the project owner on 2026-08-09.
+
+---
+
 ## Future Decisions
 
-Leave space for future architectural decisions.
+Leave space for future architectural decisions.

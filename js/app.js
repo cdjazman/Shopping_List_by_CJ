@@ -212,9 +212,20 @@ function applyDemoSeedToHomeList() {
   const activeList = window.shoppingLists?.getActiveList?.();
   if (!activeList || !activeList.id) return;
 
+  // Mutate `catalog` directly and let the caller's save() persist it once,
+  // rather than calling shoppingListStorage.addProductToList per item (each
+  // call internally re-saves and hands back a freshly migrated array, which
+  // desyncs from this `catalog` reference after the first iteration and
+  // silently drops every item after the first — see applyRecipeImport's
+  // comment above for the full explanation).
   catalog.forEach((item) => {
     if (!item || !item.id) return;
-    window.shoppingListStorage.addProductToList(item.id, activeList.id);
+    if (!item.lists || typeof item.lists !== 'object') {
+      item.lists = {};
+    }
+    if (!item.lists[activeList.id]) {
+      item.lists[activeList.id] = { qty: 1, checked: false, added: Date.now() };
+    }
   });
 
   try {
@@ -234,6 +245,155 @@ function load(){
   }
 
   showLists();
+}
+
+/* ------------------------------------------------------------------ */
+/* Recipe import (via ?import= deep link from the marketing website)   */
+/*                                                                      */
+/* The website's recipe pages build { recipeName, items: [{name, qty}] } */
+/* append it as ?import=<encodeURIComponent(JSON.stringify(payload))>   */
+/* to a link/redirect pointing at this app, and let the browser/OS      */
+/* route it here. Everything below treats that payload as untrusted     */
+/* input from a URL, not as pre-validated data.                        */
+/* ------------------------------------------------------------------ */
+
+const RECIPE_IMPORT_MAX_ITEMS = 40;
+const RECIPE_IMPORT_MAX_NAME_LENGTH = 80;
+const RECIPE_IMPORT_MAX_RECIPE_NAME_LENGTH = 120;
+const RECIPE_IMPORT_DEFAULT_AISLE = 'Pantry & Dry Goods';
+const RECIPE_IMPORT_DEFAULT_STORE = 'Aldi';
+
+function generateImportedProductId() {
+  return Math.random().toString(36).slice(2, 9);
+}
+
+// Parses and validates the raw `import` query param value into
+// { recipeName, items: [{ name, qty }] }, or returns null if the
+// payload is missing, malformed, or contains no usable items.
+// URLSearchParams already percent-decodes the value for us, so this
+// receives the plain JSON string, not a re-encoded one.
+function parseRecipeImportPayload(rawValue) {
+  if (!rawValue) return null;
+
+  let decoded;
+  try {
+    decoded = JSON.parse(rawValue);
+  } catch (e) {
+    return null;
+  }
+
+  if (!decoded || typeof decoded !== 'object' || !Array.isArray(decoded.items)) {
+    return null;
+  }
+
+  const recipeName = (typeof decoded.recipeName === 'string' && decoded.recipeName.trim())
+    ? decoded.recipeName.trim().slice(0, RECIPE_IMPORT_MAX_RECIPE_NAME_LENGTH)
+    : 'your recipe';
+
+  const items = decoded.items
+    .filter((entry) => entry && typeof entry.name === 'string' && entry.name.trim())
+    .slice(0, RECIPE_IMPORT_MAX_ITEMS)
+    .map((entry) => {
+      const qty = Number(entry.qty);
+      return {
+        name: entry.name.trim().slice(0, RECIPE_IMPORT_MAX_NAME_LENGTH),
+        qty: Number.isFinite(qty) && qty > 0 ? Math.min(Math.round(qty), 99) : 1
+      };
+    });
+
+  if (!items.length) return null;
+
+  return { recipeName, items };
+}
+
+// Adds each imported ingredient to the catalogue (matching an existing
+// product case-insensitively by name, or creating a new one with default
+// aisle/store) and puts it on the current active list with the given qty.
+// This is purely additive — it never removes or overwrites existing data,
+// unlike the destructive Settings > backup restore import.
+//
+// Deliberately mutates the `catalog` array in place and calls save() only
+// once at the end, rather than calling shoppingListStorage.addProductToList
+// / setQty per item. Those functions each call saveCatalog() internally,
+// which migrates storage's catalogState into a brand-new array of new
+// object references every time — several calls back-to-back desync it from
+// this file's `catalog` variable (new items pushed onto `catalog` after the
+// first call become invisible to storage's copy, and per-item edits made on
+// storage's copy get discarded when `catalog` is saved afterwards). Doing
+// every mutation on `catalog` first and saving once avoids that entirely.
+function applyRecipeImport(payload) {
+  const activeListId = getActiveListId();
+  let addedCount = 0;
+
+  payload.items.forEach((importItem) => {
+    const nameLower = importItem.name.toLowerCase();
+    let product = catalog.find((entry) => (entry.name || '').trim().toLowerCase() === nameLower);
+
+    if (!product) {
+      product = {
+        id: generateImportedProductId(),
+        name: importItem.name,
+        aisle: RECIPE_IMPORT_DEFAULT_AISLE,
+        store: RECIPE_IMPORT_DEFAULT_STORE,
+        price: null,
+        pinned: false,
+        favourite: false,
+        lists: {}
+      };
+      catalog.push(product);
+    }
+
+    if (!product.lists || typeof product.lists !== 'object') {
+      product.lists = {};
+    }
+
+    if (!product.lists[activeListId]) {
+      product.lists[activeListId] = { qty: importItem.qty, checked: false, added: Date.now() };
+    } else {
+      product.lists[activeListId].qty = importItem.qty;
+    }
+
+    addedCount += 1;
+  });
+
+  save();
+  return addedCount;
+}
+
+// Removes ?import=... from the URL (keeping any other params/hash) so a
+// page refresh doesn't silently re-run the import and duplicate items.
+function stripRecipeImportParam() {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('import');
+    window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+  } catch (e) {}
+}
+
+function handleRecipeImportFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const rawImport = params.get('import');
+  if (!rawImport) return;
+
+  const payload = parseRecipeImportPayload(rawImport);
+  stripRecipeImportParam();
+
+  if (!payload) {
+    alert("That recipe link couldn't be read, so nothing was added to your list. Please try importing it again from the recipe page.");
+    return;
+  }
+
+  const addedCount = applyRecipeImport(payload);
+
+  renderLists();
+  updateActiveListHeader();
+  showMain();
+
+  const activeList = window.shoppingLists?.getActiveList?.();
+  const listName = activeList?.name || 'My List';
+  const itemWord = addedCount === 1 ? 'ingredient' : 'ingredients';
+
+  alert(`Added ${addedCount} ${itemWord} from "${payload.recipeName}" to your ${listName} list.`);
 }
 
 function openNewListModal() {
@@ -1027,3 +1187,4 @@ if (searchApiBtn && liveSearchInput) {
 
 initializeTheme();
 load();
+handleRecipeImportFromUrl();

@@ -229,6 +229,24 @@ If the data format changes, the app should support migration from older versions
 
 ---
 
+# Recipe Import
+
+Separate from the Backup Format above, the app also accepts a lightweight,
+purely additive import from the marketing website's recipe pages, via a
+`?import=` URL query parameter read on load — since the app has no backend
+for the website to call directly.
+
+Full payload schema, validation rules, and the exact behaviour on receipt
+are documented in `RECIPE_IMPORT_CONTRACT.md`, which is mirrored in the
+website repo (`shoppinglistbycj-website`) and must be kept in sync with it.
+See also Decision 011 in `DECISIONS.md`.
+
+This must never be confused with, or share code paths with, the Backup
+Format import above — that one is destructive (replaces all Local Storage);
+recipe import only ever adds to the current active list.
+
+---
+
 # Service Worker
 
 The service worker is responsible for enabling PWA behaviour.
