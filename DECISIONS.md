@@ -207,10 +207,10 @@ Consequences:
   keeping both copies of that file in sync is a manual discipline, not an
   automated one. Any change to the payload shape on either side must update
   both copies in the same change.
-- The website currently points at a placeholder app URL
-  (`SHOPPING_LIST_APP_URL` in the website's `js/recipes.js`) since the app
-  isn't deployed to a stable production URL yet. This needs updating once
-  it is, along with flipping `OPEN_IMPORT_IN_NEW_TAB` to `false`.
+- The website's `SHOPPING_LIST_APP_URL` (in `js/recipes.js`) now points at
+  the real production URL, `https://shopping-list-by-cj.pages.dev`, with
+  `OPEN_IMPORT_IN_NEW_TAB` flipped to `false` — updated 2026-08-09, the
+  same day the app's real deployment URL was confirmed.
 
 Approved by the project owner on 2026-08-09.
 
@@ -218,4 +218,4 @@ Approved by the project owner on 2026-08-09.
 
 ## Future Decisions
 
-Leave space for future architectural decisions.
+Leave space for future architectural decisions.
