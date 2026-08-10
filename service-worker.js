@@ -13,7 +13,7 @@
  * ------------------------------------------------------------------------
  */
 
-const CACHE_VERSION = "v10";
+const CACHE_VERSION = "v12";
 const SHELL_CACHE = `shopping-list-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `shopping-list-runtime-${CACHE_VERSION}`;
 const CURRENT_CACHES = [SHELL_CACHE, RUNTIME_CACHE];

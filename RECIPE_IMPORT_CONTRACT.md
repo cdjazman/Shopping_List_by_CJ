@@ -52,7 +52,8 @@ it must not call `decodeURIComponent` on it again.
   "items": [
     { "name": "Chicken thigh fillets", "qty": 1 },
     { "name": "Garam masala", "qty": 1 }
-  ]
+  ],
+  "returnUrl": "https://shoppinglistbycj.app/recipes/butter-chicken.html"
 }
 ```
 
@@ -65,10 +66,17 @@ it must not call `decodeURIComponent` on it again.
     for this reason, separately from the human-readable ingredient text.
   - `qty` — number, optional. How many of the item to add (packs/units, not
     grams/ml) — defaults to `1` if omitted.
+- `returnUrl` — string, optional. The recipe page's own URL
+  (`window.location.href` at send time). If present and valid, the app
+  navigates back here once the import is finished, so the person ends up
+  back on the recipe they just added, not stranded in the app. See
+  Validation below — this is the one field the app is strict rather than
+  lenient about, since blindly following an arbitrary URL from untrusted
+  input is an open-redirect risk.
 
 The website is the producer here and can send whatever it wants in these
-two fields; everything below this line describes what the **app** does
-with it, since the app is the side actually enforcing the contract.
+fields; everything below this line describes what the **app** does with
+it, since the app is the side actually enforcing the contract.
 
 ---
 
@@ -89,19 +97,40 @@ The payload arrives via a URL, so the app never trusts it blindly:
   recipe"` if missing or not a string.
 - `qty` defaults to `1` if missing, non-numeric, zero, or negative; is
   rounded to the nearest integer; is clamped to the range **1–99**.
+- `returnUrl` must parse as an absolute `http:`/`https:` URL whose hostname
+  is on an allowlist (`shoppinglistbycj.app`, `www.shoppinglistbycj.app`,
+  plus `localhost`/`127.0.0.1` for local dev) — anything else (a different
+  host, a `javascript:`/`ftp:` scheme, unparseable text, or a string over
+  2000 characters) is dropped rather than followed. This is the one field
+  where a malformed value doesn't fall back to a default; it's simply
+  treated as absent, and the app just doesn't navigate anywhere afterwards.
 
 ## App behaviour on a valid import
 
-- Each item is matched **case-insensitively by name** against the existing
-  catalogue.
+- The person is asked **which list** to add the ingredients to, via a
+  dialog listing every existing list plus a **"Create new list"** option —
+  the import is never silently forced onto whichever list happens to be
+  active. This dialog always shows, even with only one existing list,
+  since "make a new list instead" is a real choice regardless of how many
+  lists already exist.
+  - Picking an existing list adds the ingredients there directly.
+  - Picking "Create new list" opens the app's normal new-list form, with
+    the name field pre-filled (and pre-selected, so it's easy to overwrite)
+    with the recipe's name — `payload.recipeName`. Any other field (icon,
+    colour, budget) uses the same defaults as creating a list normally.
+    Saving that form creates the list and finishes the import into it;
+    cancelling it abandons the import entirely, same as cancelling the
+    list-choice dialog itself.
+- Once a list is chosen (existing or newly created), each item is matched
+  **case-insensitively by name** against the existing catalogue.
   - If found, the existing catalogue entry is reused as-is — its aisle,
     store, and price are **never** overwritten by an import.
   - If not found, a new catalogue entry is created with default
     `aisle: "Pantry & Dry Goods"`, `store: "Aldi"`, `price: null` — the
     website's payload doesn't currently specify these, so the user
     re-categorises later if needed.
-- The item (existing or new) is added to the **current active list only**
-  (`shoppingLists.getActiveList()`), with the imported `qty`. It is never
+- The item (existing or new) is added to the **chosen list only**, with the
+  imported `qty`, and that list becomes the app's active list. It is never
   added to any other list, and existing list memberships elsewhere are
   untouched.
 - This is purely additive. It is a completely separate code path from
@@ -111,6 +140,14 @@ The payload arrives via a URL, so the app never trusts it blindly:
 - The user is shown a confirmation (currently a plain `alert()`, matching
   this codebase's existing convention — there is no toast/snackbar
   component to reuse, despite earlier assumptions to the contrary).
+- After the confirmation is dismissed, if `returnUrl` was present and
+  passed validation, the app navigates the browser there — back to the
+  recipe page the import started from. If there's no valid `returnUrl`,
+  the person just stays in the app on the list they picked.
+- If the person cancels the list-choice dialog, or opens the new-list form
+  from it and then cancels that instead of saving, nothing is imported and
+  there is no navigation — this matches the malformed-payload case in
+  leaving the person exactly where they were.
 - `?import=...` is stripped from the URL via `history.replaceState`
   immediately after the payload is read — whether valid or not — so a page
   refresh can never re-trigger or duplicate an import.
@@ -127,8 +164,12 @@ already loaded on the page.
 
 **App repo** (`js/app.js`):
 - `handleRecipeImportFromUrl()` — entry point, called once after `load()` on boot.
-- `parseRecipeImportPayload()` — validation described above.
-- `applyRecipeImport()` — catalogue matching/creation + list membership.
+- `parseRecipeImportPayload()` / `sanitizeRecipeImportReturnUrl()` — validation described above.
+- `showRecipeImportListPicker()` — the list-choice dialog (dynamically built, matching the existing `list-card__delete-dialog` pattern); always offers every existing list plus "Create new list".
+- `pendingRecipeImportPayload` — set when "Create new list" is chosen, so the existing `openNewListModal()` / `saveNewList()` flow knows to finish the import into the list it creates rather than just closing the modal; cleared on any modal close.
+- `finishRecipeImport()` — makes the chosen (or newly created) list active, applies the import, confirms, then navigates to `returnUrl` if present.
+- `applyRecipeImport()` — catalogue matching/creation + list membership for a given target list.
+- `js/lists.js` exposes `getSortedLists()` and `getIconDisplay()` on `window.shoppingLists` (previously internal-only) so the picker can enumerate and render every list.
 
 **Website repo** (`js/recipes.js`):
 - `collectRecipeIngredients()` — reads `data-ingredient-name` /

@@ -679,7 +679,9 @@
     togglePinned,
     render,
     setActiveList,
-    getActiveList
+    getActiveList,
+    getSortedLists,
+    getIconDisplay
   };
 
   if (document.readyState === 'loading') {
@@ -687,4 +689,4 @@
   } else {
     init();
   }
-})(window);
+})(window);

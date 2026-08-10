@@ -482,6 +482,79 @@ header{
   justify-content:flex-end;
 }
 
+.recipe-import-card{
+  width:min(100%, 380px);
+}
+
+.recipe-import-list-options{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:50vh;
+  overflow-y:auto;
+  margin-bottom:14px;
+}
+
+.recipe-import-list-option{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  border:1px solid var(--line);
+  background:var(--color-surface-subtle);
+  border-radius:14px;
+  padding:10px 12px;
+  text-align:left;
+  cursor:pointer;
+  font-size:0.92rem;
+  font-weight:600;
+  color:var(--ink);
+  transition:background-color var(--transition-hover), border-color var(--transition-hover);
+}
+
+.recipe-import-list-option:hover,
+.recipe-import-list-option:focus-visible{
+  background:var(--color-surface-highlight-hover);
+  border-color:var(--color-primary-outline);
+}
+
+.recipe-import-list-option__icon{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  background:var(--color-primary-soft);
+  display:grid;
+  place-items:center;
+  font-size:1.05rem;
+  flex-shrink:0;
+}
+
+.recipe-import-list-option__name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.recipe-import-list-option--new{
+  border-style:dashed;
+  border-color:var(--color-primary-outline);
+  background:transparent;
+  color:var(--color-primary);
+}
+
+.recipe-import-list-option--new:hover,
+.recipe-import-list-option--new:focus-visible{
+  background:var(--color-primary-soft);
+}
+
+.recipe-import-list-option__icon--new{
+  background:var(--color-primary-soft-strong);
+  color:var(--color-primary);
+  font-size:1.3rem;
+  font-weight:700;
+}
+
 .list-rename-error{
   margin:0 0 10px;
   font-size:0.8125rem;
@@ -1721,4 +1794,4 @@ header{
   gap: 10px;
   flex-shrink: 0;
   padding-top: 4px;
-}
+}

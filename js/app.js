@@ -260,11 +260,41 @@ function load(){
 const RECIPE_IMPORT_MAX_ITEMS = 40;
 const RECIPE_IMPORT_MAX_NAME_LENGTH = 80;
 const RECIPE_IMPORT_MAX_RECIPE_NAME_LENGTH = 120;
+const RECIPE_IMPORT_MAX_RETURN_URL_LENGTH = 2000;
 const RECIPE_IMPORT_DEFAULT_AISLE = 'Pantry & Dry Goods';
 const RECIPE_IMPORT_DEFAULT_STORE = 'Aldi';
 
+// Only send the browser back to a known website host after an import —
+// the payload arrives via an untrusted URL, so a `returnUrl` pointing
+// anywhere else (an attacker-crafted deep link) is dropped rather than
+// followed. 'localhost'/'127.0.0.1' are here for local dev/testing only.
+const RECIPE_IMPORT_ALLOWED_RETURN_HOSTS = [
+  'shoppinglistbycj.app',
+  'www.shoppinglistbycj.app',
+  'localhost',
+  '127.0.0.1'
+];
+
 function generateImportedProductId() {
   return Math.random().toString(36).slice(2, 9);
+}
+
+function sanitizeRecipeImportReturnUrl(rawUrl) {
+  if (typeof rawUrl !== 'string' || !rawUrl.trim() || rawUrl.length > RECIPE_IMPORT_MAX_RETURN_URL_LENGTH) {
+    return null;
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch (e) {
+    return null;
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+  if (!RECIPE_IMPORT_ALLOWED_RETURN_HOSTS.includes(parsed.hostname)) return null;
+
+  return parsed.href;
 }
 
 // Parses and validates the raw `import` query param value into
@@ -303,14 +333,17 @@ function parseRecipeImportPayload(rawValue) {
 
   if (!items.length) return null;
 
-  return { recipeName, items };
+  const returnUrl = sanitizeRecipeImportReturnUrl(decoded.returnUrl);
+
+  return { recipeName, items, returnUrl };
 }
 
 // Adds each imported ingredient to the catalogue (matching an existing
 // product case-insensitively by name, or creating a new one with default
-// aisle/store) and puts it on the current active list with the given qty.
-// This is purely additive — it never removes or overwrites existing data,
-// unlike the destructive Settings > backup restore import.
+// aisle/store) and puts it on `targetListId` (falling back to the current
+// active list if omitted) with the given qty. This is purely additive — it
+// never removes or overwrites existing data, unlike the destructive
+// Settings > backup restore import.
 //
 // Deliberately mutates the `catalog` array in place and calls save() only
 // once at the end, rather than calling shoppingListStorage.addProductToList
@@ -321,8 +354,8 @@ function parseRecipeImportPayload(rawValue) {
 // first call become invisible to storage's copy, and per-item edits made on
 // storage's copy get discarded when `catalog` is saved afterwards). Doing
 // every mutation on `catalog` first and saving once avoids that entirely.
-function applyRecipeImport(payload) {
-  const activeListId = getActiveListId();
+function applyRecipeImport(payload, targetListId) {
+  const activeListId = targetListId || getActiveListId();
   let addedCount = 0;
 
   payload.items.forEach((importItem) => {
@@ -383,7 +416,20 @@ function handleRecipeImportFromUrl() {
     return;
   }
 
-  const addedCount = applyRecipeImport(payload);
+  showRecipeImportListPicker(payload);
+}
+
+// Finishes an in-progress recipe import once a target list has been chosen
+// (either by the user, or automatically when there's only one list): makes
+// that list active, applies the import to it, confirms via alert(), then —
+// if the payload carried a validated returnUrl — navigates back to the
+// recipe page it came from.
+function finishRecipeImport(payload, targetListId) {
+  if (targetListId && window.shoppingLists?.setActiveList) {
+    window.shoppingLists.setActiveList(targetListId);
+  }
+
+  const addedCount = applyRecipeImport(payload, targetListId);
 
   renderLists();
   updateActiveListHeader();
@@ -394,22 +440,119 @@ function handleRecipeImportFromUrl() {
   const itemWord = addedCount === 1 ? 'ingredient' : 'ingredients';
 
   alert(`Added ${addedCount} ${itemWord} from "${payload.recipeName}" to your ${listName} list.`);
+
+  if (payload.returnUrl) {
+    window.location.href = payload.returnUrl;
+  }
 }
 
-function openNewListModal() {
+let activeRecipeImportDialog = null;
+
+// Set when the new-list modal was opened from the recipe import picker's
+// "Create new list" option, so saveNewList() knows to finish the import
+// into the list it creates instead of just closing the modal. Cleared
+// whenever the modal closes, by whatever path (save or cancel).
+let pendingRecipeImportPayload = null;
+
+function closeRecipeImportDialog() {
+  if (activeRecipeImportDialog && activeRecipeImportDialog.parentNode) {
+    activeRecipeImportDialog.parentNode.removeChild(activeRecipeImportDialog);
+  }
+  activeRecipeImportDialog = null;
+}
+
+// Lets the user choose which list a recipe's ingredients land on — an
+// existing list, or a brand new one (pre-named after the recipe). Always
+// shown, even with only one existing list, since "create a new list
+// instead" is a real choice regardless of how many lists already exist.
+function showRecipeImportListPicker(payload) {
+  closeRecipeImportDialog();
+
+  const lists = window.shoppingLists?.getSortedLists?.() || [];
+  const escapeHtml = window.shoppingListUI?.escapeHtml || ((value) => String(value ?? ''));
+  const itemWord = payload.items.length === 1 ? 'ingredient' : 'ingredients';
+
+  const optionsHtml = lists.map((list) => {
+    const icon = window.shoppingLists?.getIconDisplay?.(list.icon) || '🛒';
+    return `
+      <button type="button" class="recipe-import-list-option" data-list-id="${escapeHtml(list.id)}">
+        <span class="recipe-import-list-option__icon">${icon}</span>
+        <span class="recipe-import-list-option__name">${escapeHtml(list.name || 'My List')}</span>
+      </button>
+    `;
+  }).join('');
+
+  const dialog = document.createElement('div');
+  dialog.className = 'list-card__delete-dialog recipe-import-dialog';
+  dialog.innerHTML = `
+    <div class="list-card__delete-card recipe-import-card">
+      <div class="list-card__delete-title">Add &ldquo;${escapeHtml(payload.recipeName)}&rdquo; to which list?</div>
+      <div class="list-card__delete-copy">${payload.items.length} ${itemWord} will be added.</div>
+      <div class="recipe-import-list-options">
+        ${optionsHtml}
+        <button type="button" class="recipe-import-list-option recipe-import-list-option--new">
+          <span class="recipe-import-list-option__icon recipe-import-list-option__icon--new">+</span>
+          <span class="recipe-import-list-option__name">Create new list</span>
+        </button>
+      </div>
+      <div class="list-card__delete-actions">
+        <button class="ghost-btn recipe-import-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  dialog.querySelectorAll('.recipe-import-list-option[data-list-id]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const listId = button.getAttribute('data-list-id');
+      closeRecipeImportDialog();
+      finishRecipeImport(payload, listId);
+    });
+  });
+
+  dialog.querySelector('.recipe-import-list-option--new').addEventListener('click', () => {
+    closeRecipeImportDialog();
+    // openNewListModal() takes it from here — saveNewList() checks
+    // pendingRecipeImportPayload and finishes the import into whatever
+    // list comes out of that form, instead of the normal create-list flow.
+    pendingRecipeImportPayload = payload;
+    openNewListModal(payload.recipeName);
+  });
+
+  dialog.querySelector('.recipe-import-cancel').addEventListener('click', (event) => {
+    event.stopPropagation();
+    closeRecipeImportDialog();
+  });
+
+  document.body.appendChild(dialog);
+  activeRecipeImportDialog = dialog;
+}
+
+function openNewListModal(suggestedName) {
   if (!newListModal) return;
 
   newListForm.reset();
   newListIconSelect.value = 'shopping_cart';
   newListColourSelect.value = 'orange';
   newListBudgetInput.value = '200';
+
+  if (suggestedName) {
+    newListNameInput.value = suggestedName;
+  }
+
   newListModal.classList.remove('hidden');
-  setTimeout(() => newListNameInput.focus(), 50);
+  setTimeout(() => {
+    newListNameInput.focus();
+    if (suggestedName) newListNameInput.select();
+  }, 50);
 }
 
 function closeNewListModal() {
   if (!newListModal) return;
   newListModal.classList.add('hidden');
+  // Cancelling (or any other way the modal closes) abandons a pending
+  // recipe import the same way cancelling the list-choice dialog does —
+  // nothing gets imported. saveNewList() reads this before calling here.
+  pendingRecipeImportPayload = null;
 }
 
 function saveNewList(event) {
@@ -424,6 +567,7 @@ function saveNewList(event) {
   const icon = newListIconSelect.value || 'shopping_cart';
   const colour = newListColourSelect.value || 'orange';
   const budget = Number(newListBudgetInput.value || 0);
+  const importPayload = pendingRecipeImportPayload;
 
   const createdList = window.shoppingLists.createList({
     name,
@@ -433,8 +577,13 @@ function saveNewList(event) {
   });
 
   if (createdList) {
-    renderLists();
     closeNewListModal();
+
+    if (importPayload) {
+      finishRecipeImport(importPayload, createdList.id);
+    } else {
+      renderLists();
+    }
   }
 }
 

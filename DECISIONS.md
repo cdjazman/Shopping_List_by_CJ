@@ -216,6 +216,84 @@ Approved by the project owner on 2026-08-09.
 
 ---
 
+## Decision 012 - Recipe Import Lets the User Choose the Target List
+
+Status: Accepted
+
+Decision 011 originally had recipe imports land silently on whichever list
+happened to be active. That's now changed: the person is shown a dialog
+listing every existing list and picks which one the ingredients go to
+(skipped automatically when there's only one list — nothing to choose
+between). Once they pick, the app also navigates back to the recipe page
+it came from, via a new `returnUrl` field the website now includes in the
+payload.
+
+Reason:
+Landing ingredients on "whatever list happens to be active" is surprising
+when someone keeps separate lists (e.g. a weekly groceries list vs. a
+party-planning list) and imports a recipe while the wrong one is active.
+Letting them choose removes that guesswork. Returning to the recipe page
+afterwards closes the loop the same way a native "open in app" flow would,
+rather than leaving the person stranded in the shopping list app.
+
+Consequences:
+- `RECIPE_IMPORT_CONTRACT.md` (mirrored in both repos) documents the new
+  optional `returnUrl` payload field and the list-choice behaviour — see
+  that file for the full validation rules and app behaviour.
+- `returnUrl` is validated against a host allowlist
+  (`shoppinglistbycj.app`, `www.shoppinglistbycj.app`, plus `localhost`/
+  `127.0.0.1` for local dev) before the app ever navigates to it, since
+  it's untrusted input carried in a URL — an unrecognised host is simply
+  dropped, not followed. This mirrors the existing "untrusted input"
+  posture from Decision 011.
+- `js/lists.js` gained two previously-internal functions on the public
+  `window.shoppingLists` object — `getSortedLists()` and
+  `getIconDisplay()` — needed so the picker dialog can enumerate and
+  render the person's lists. No other behaviour of that module changed.
+- Cancelling the list-choice dialog imports nothing and navigates nowhere,
+  same as an unreadable/malformed import link.
+
+Approved by the project owner on 2026-08-09.
+
+---
+
+## Decision 013 - Recipe Import Can Create a New List, Named After the Recipe
+
+Status: Accepted
+
+Extends Decision 012's list-choice dialog: alongside every existing list,
+it now always offers a "Create new list" option too, even when there's
+only one existing list. Picking it opens the app's normal new-list form
+with the name field pre-filled with the recipe's name (e.g. "Butter
+Chicken"), pre-selected so it's a one-keystroke overwrite if the person
+wants something else. Saving that form creates the list and finishes the
+import into it; cancelling it abandons the import, same as cancelling the
+list-choice dialog itself.
+
+Reason:
+Decision 012 covered "add to one of my existing lists," but recipes are
+often their own occasion — a dinner party, a meal-prep batch — that
+doesn't belong on an existing list at all. Requiring the person to
+manually create a list first, then separately re-trigger the import, was
+extra friction the app can remove by folding list creation into the same
+flow and defaulting the name to something already meaningful.
+
+Consequences:
+- The single-list auto-skip behaviour introduced in Decision 012 (jump
+  straight to the only list, no dialog) is removed. There's always a real
+  choice now — the one existing list, or a new one — so the dialog always
+  shows.
+- Reuses the existing new-list form and `createList()` as-is; no new list
+  fields or storage shape were introduced. `openNewListModal()` gained an
+  optional pre-fill argument, and `saveNewList()` gained a check for a
+  pending recipe import so it can finish that import into the list it just
+  created instead of the normal "just close the modal" behaviour.
+- `RECIPE_IMPORT_CONTRACT.md` (mirrored in both repos) documents this.
+
+Approved by the project owner on 2026-08-09.
+
+---
+
 ## Future Decisions
 
-Leave space for future architectural decisions.
+Leave space for future architectural decisions.
