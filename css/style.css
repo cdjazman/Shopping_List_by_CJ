@@ -1,4 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+/*
+ * Montserrat is self-hosted from assets/fonts/ (Latin subset, weights
+ * 400/500/600/700/800) rather than loaded from fonts.googleapis.com.
+ * This keeps the app genuinely offline-first - the previous @import
+ * was a cross-origin request that the service worker's fetch handler
+ * deliberately skips (same-origin only), so it never worked offline
+ * and sent the visitor's IP to Google on every fresh load. See
+ * assets/fonts/MONTSERRAT-LICENSE.txt (SIL Open Font License 1.1).
+ */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-800-normal.woff2') format('woff2');
+}
 
 :root{
   --paper:var(--color-bg);
