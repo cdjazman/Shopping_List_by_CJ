@@ -888,7 +888,7 @@ header{
   overflow-wrap:anywhere;
   line-height:1.35;
 }
-.catalog-item.selected .name{color:var(--sage-dark);}
+.catalog-item.selected .name{color:var(--sage);}
 .aisle-tag{
   font-size:0.625rem;
   text-transform:uppercase;
