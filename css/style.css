@@ -180,9 +180,9 @@ header{
   min-height:var(--header-row-height);
   padding-right:52px;
   margin-bottom:8px;
-  position:sticky;
-  top:env(safe-area-inset-top);
-  z-index:22;
+  /* Scrolls away with the page content. Only the tab pills below (.tabs)
+     stay pinned to the top on every screen. */
+  position:static;
   background:var(--paper);
 }
 
@@ -785,7 +785,10 @@ header{
   margin:4px 0 16px;
   min-height:var(--tabs-row-height);
   position:sticky;
-  top:calc(env(safe-area-inset-top) + var(--header-row-height));
+  /* Logo (.branding-header) is no longer sticky, so the tab pills are now
+     the topmost pinned element on every screen — offset only by the
+     safe-area inset, not the logo's height. */
+  top:env(safe-area-inset-top);
   z-index:21;
   background:var(--paper);
 }
@@ -1261,13 +1264,21 @@ a.settings-option-btn{
   overflow:visible;
 }
 
-.main-view__sticky-header{
+.main-view__header{
   flex-shrink:0;
-  position:sticky;
-  top:calc(env(safe-area-inset-top) + var(--header-row-height) + var(--tabs-row-height));
-  z-index:4;
+  /* Scrolls away normally with the page. Only the search box below
+     (.main-view__search-sticky) stays pinned under the tab pills. */
   background:var(--paper);
   padding-top:2px;
+}
+
+.main-view__search-sticky{
+  flex-shrink:0;
+  position:sticky;
+  top:calc(env(safe-area-inset-top) + var(--tabs-row-height));
+  z-index:4;
+  background:var(--paper);
+  padding-bottom:8px;
 }
 
 .products-filter-bar{

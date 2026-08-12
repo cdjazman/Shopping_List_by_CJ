@@ -83,6 +83,25 @@ let currentThemePreference = 'system';
 
 let selectedStore = "Aldi";
 let activeView = 'lists';
+
+// Which top-level screen the user was on is remembered for the lifetime of
+// the browser tab (sessionStorage, not localStorage — this is navigation
+// state, not user data, so it shouldn't survive closing the tab or carry
+// over to a different tab). load() reads this on startup so a manual
+// refresh returns you to the screen you were looking at instead of always
+// resetting to My Lists.
+const ACTIVE_VIEW_STORAGE_KEY = 'shopping-active-view';
+const RESTORABLE_VIEWS = ['lists', 'main', 'shop', 'settings', 'privacy-policy', 'licences'];
+
+function setActiveView(view) {
+  activeView = view;
+  try {
+    sessionStorage.setItem(ACTIVE_VIEW_STORAGE_KEY, view);
+  } catch (e) {
+    // sessionStorage unavailable (e.g. private browsing) — view just won't
+    // be restored on refresh, which is a harmless fallback to My Lists.
+  }
+}
 let currentListId = 'weekly';
 let mainScrollTop = 0;
 let activeProductDeleteDialog = null;
@@ -244,7 +263,34 @@ function load(){
     renderLists();
   }
 
-  showLists();
+  restoreLastView();
+}
+
+// Returns to whichever top-level screen (Products, Shop, Settings, etc.)
+// the user was on before a refresh, falling back to My Lists if nothing
+// was saved, the saved value isn't a recognised view, or this is a fresh
+// tab/first launch.
+function restoreLastView() {
+  let savedView = null;
+  try {
+    savedView = sessionStorage.getItem(ACTIVE_VIEW_STORAGE_KEY);
+  } catch (e) {
+    // sessionStorage unavailable — fall through to My Lists below.
+  }
+
+  if (!RESTORABLE_VIEWS.includes(savedView)) {
+    showLists();
+    return;
+  }
+
+  switch (savedView) {
+    case 'main': showMain(); break;
+    case 'shop': showShop(); break;
+    case 'settings': showSettings(); break;
+    case 'privacy-policy': showPrivacyPolicy(); break;
+    case 'licences': showLicences(); break;
+    default: showLists();
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -929,7 +975,7 @@ function restoreMainScrollPosition(){
 }
 
 function showLists(){
-  activeView = 'lists';
+  setActiveView('lists');
   myListsView.classList.remove('hidden');
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
@@ -945,7 +991,7 @@ function showLists(){
 }
 
 function showMain(){
-  activeView = 'main';
+  setActiveView('main');
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
@@ -958,7 +1004,7 @@ function showMain(){
   restoreMainScrollPosition();
 }
 function showShop(){
-  activeView = 'shop';
+  setActiveView('shop');
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
@@ -969,7 +1015,7 @@ function showShop(){
 }
 function showSettings(){
   captureMainScrollPosition();
-  activeView = 'settings';
+  setActiveView('settings');
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
@@ -980,7 +1026,7 @@ function showSettings(){
 
 function showPrivacyPolicy() {
   captureMainScrollPosition();
-  activeView = 'privacy-policy';
+  setActiveView('privacy-policy');
   myListsView.classList.add('hidden');
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
@@ -1042,7 +1088,7 @@ function renderThirdPartyLicences() {
 
 function showLicences() {
   captureMainScrollPosition();
-  activeView = 'licences';
+  setActiveView('licences');
   myListsView.classList.add('hidden');
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
@@ -1154,7 +1200,7 @@ if (tabShop) {
   bindNavAction(tabShop, showShop);
 }
 if (newListBtn) {
-  newListBtn.addEventListener('click', openNewListModal);
+  newListBtn.addEventListener('click', () => openNewListModal());
 }
 if (newListCancelBtn) {
   newListCancelBtn.addEventListener('click', closeNewListModal);
