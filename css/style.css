@@ -1132,6 +1132,10 @@ header{
   background:rgba(200,90,31,0.06);
 }
 
+a.settings-option-btn{
+  text-decoration:none;
+}
+
 .settings-section-title{
   font-size:0.82rem;
   font-weight:700;
