@@ -1,4 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+/*
+ * Montserrat is self-hosted from assets/fonts/ (Latin subset, weights
+ * 400/500/600/700/800) rather than loaded from fonts.googleapis.com.
+ * This keeps the app genuinely offline-first - the previous @import
+ * was a cross-origin request that the service worker's fetch handler
+ * deliberately skips (same-origin only), so it never worked offline
+ * and sent the visitor's IP to Google on every fresh load. See
+ * assets/fonts/MONTSERRAT-LICENSE.txt (SIL Open Font License 1.1).
+ */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../assets/fonts/montserrat-latin-800-normal.woff2') format('woff2');
+}
 
 :root{
   --paper:var(--color-bg);
@@ -137,9 +180,9 @@ header{
   min-height:var(--header-row-height);
   padding-right:52px;
   margin-bottom:8px;
-  position:sticky;
-  top:env(safe-area-inset-top);
-  z-index:22;
+  /* Scrolls away with the page content. Only the tab pills below (.tabs)
+     stay pinned to the top on every screen. */
+  position:static;
   background:var(--paper);
 }
 
@@ -418,8 +461,8 @@ header{
   min-width:148px;
   padding:8px;
   border-radius:14px;
-  background:rgba(20,20,20,0.96);
-  border:1px solid rgba(255,255,255,0.12);
+  background:var(--color-surface-2);
+  border:1px solid var(--color-border-strong);
   box-shadow:0 10px 24px rgba(0,0,0,0.28);
   z-index:3;
 }
@@ -440,7 +483,7 @@ header{
 }
 
 .list-card__menu-item--danger{
-  color:#ff8a80;
+  color:var(--color-danger);
 }
 
 .list-card__delete-dialog{
@@ -742,7 +785,10 @@ header{
   margin:4px 0 16px;
   min-height:var(--tabs-row-height);
   position:sticky;
-  top:calc(env(safe-area-inset-top) + var(--header-row-height));
+  /* Logo (.branding-header) is no longer sticky, so the tab pills are now
+     the topmost pinned element on every screen — offset only by the
+     safe-area inset, not the logo's height. */
+  top:env(safe-area-inset-top);
   z-index:21;
   background:var(--paper);
 }
@@ -1089,6 +1135,10 @@ header{
   background:rgba(200,90,31,0.06);
 }
 
+a.settings-option-btn{
+  text-decoration:none;
+}
+
 .settings-section-title{
   font-size:0.82rem;
   font-weight:700;
@@ -1214,13 +1264,21 @@ header{
   overflow:visible;
 }
 
-.main-view__sticky-header{
+.main-view__header{
   flex-shrink:0;
-  position:sticky;
-  top:calc(env(safe-area-inset-top) + var(--header-row-height) + var(--tabs-row-height));
-  z-index:4;
+  /* Scrolls away normally with the page. Only the search box below
+     (.main-view__search-sticky) stays pinned under the tab pills. */
   background:var(--paper);
   padding-top:2px;
+}
+
+.main-view__search-sticky{
+  flex-shrink:0;
+  position:sticky;
+  top:calc(env(safe-area-inset-top) + var(--tabs-row-height));
+  z-index:4;
+  background:var(--paper);
+  padding-bottom:8px;
 }
 
 .products-filter-bar{

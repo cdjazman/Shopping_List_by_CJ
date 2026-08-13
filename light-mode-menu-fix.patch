@@ -1,0 +1,37 @@
+diff --git a/css/style.css b/css/style.css
+index 265d1be..bf1254f 100644
+--- a/css/style.css
++++ b/css/style.css
+@@ -461,8 +461,8 @@ header{
+   min-width:148px;
+   padding:8px;
+   border-radius:14px;
+-  background:rgba(20,20,20,0.96);
+-  border:1px solid rgba(255,255,255,0.12);
++  background:var(--color-surface-2);
++  border:1px solid var(--color-border-strong);
+   box-shadow:0 10px 24px rgba(0,0,0,0.28);
+   z-index:3;
+ }
+@@ -483,7 +483,7 @@ header{
+ }
+ 
+ .list-card__menu-item--danger{
+-  color:#ff8a80;
++  color:var(--color-danger);
+ }
+ 
+ .list-card__delete-dialog{
+diff --git a/service-worker.js b/service-worker.js
+index cfb8337..c885d9d 100644
+--- a/service-worker.js
++++ b/service-worker.js
+@@ -13,7 +13,7 @@
+  * ------------------------------------------------------------------------
+  */
+ 
+-const CACHE_VERSION = "v16";
++const CACHE_VERSION = "v17";
+ const SHELL_CACHE = `shopping-list-shell-${CACHE_VERSION}`;
+ const RUNTIME_CACHE = `shopping-list-runtime-${CACHE_VERSION}`;
+ const CURRENT_CACHES = [SHELL_CACHE, RUNTIME_CACHE];

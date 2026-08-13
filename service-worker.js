@@ -13,7 +13,7 @@
  * ------------------------------------------------------------------------
  */
 
-const CACHE_VERSION = "v13";
+const CACHE_VERSION = "v17";
 const SHELL_CACHE = `shopping-list-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `shopping-list-runtime-${CACHE_VERSION}`;
 const CURRENT_CACHES = [SHELL_CACHE, RUNTIME_CACHE];
@@ -21,6 +21,7 @@ const CURRENT_CACHES = [SHELL_CACHE, RUNTIME_CACHE];
 const PRECACHE_URLS = [
   "/",
   "/index.html",
+  "/privacy.html",
   "/manifest.json",
 
   "/css/style.css",
@@ -43,7 +44,13 @@ const PRECACHE_URLS = [
   "/assets/icons/icon-512-maskable.png",
   "/assets/icons/favicon-16.png",
   "/assets/icons/favicon-32.png",
-  "/assets/icons/apple-touch-icon.png"
+  "/assets/icons/apple-touch-icon.png",
+
+  "/assets/fonts/montserrat-latin-400-normal.woff2",
+  "/assets/fonts/montserrat-latin-500-normal.woff2",
+  "/assets/fonts/montserrat-latin-600-normal.woff2",
+  "/assets/fonts/montserrat-latin-700-normal.woff2",
+  "/assets/fonts/montserrat-latin-800-normal.woff2"
 ];
 
 // ------------------------------------------------------------------
