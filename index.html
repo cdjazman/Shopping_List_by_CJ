@@ -115,7 +115,7 @@
 
   <!-- PRODUCTS VIEW -->
   <div id="mainView" class="products-view hidden">
-    <div class="main-view__sticky-header">
+    <div class="main-view__header">
       <div class="list-nav-header">
         <div id="activeListHeaderName" class="active-list-header-name">My List</div>
         <button class="compact-go-shop-btn" id="goShopBtn" disabled type="button">Start ▶</button>
@@ -138,7 +138,9 @@
         <button class="products-filter-btn active" id="productsFilterAllBtn" type="button">All</button>
         <button class="products-filter-btn" id="productsFilterFavouritesBtn" type="button">⭐ Favourites</button>
       </div>
+    </div>
 
+    <div class="main-view__search-sticky">
       <div class="products-search-wrap">
         <div class="products-search">
           <input id="productsSearchInput" class="products-search__input" type="text" placeholder="Search products..." autocomplete="off" aria-label="Search products">
@@ -271,8 +273,15 @@
 
     <div class="settings-stack">
       <div class="settings-section-title">ℹ About</div>
+      <button type="button" id="openHelpGuideBtn" class="settings-option-btn">❓ Help Guide</button>
       <button type="button" id="openPrivacyPolicyBtn" class="settings-option-btn">📜 Privacy Policy</button>
       <button type="button" id="openLicencesBtn" class="settings-option-btn">📄 Licences</button>
+    </div>
+
+    <div class="settings-stack">
+      <div class="settings-section-title">Support</div>
+      <a href="https://buymeacoffee.com/shoppinglistbycj?new=1" target="_blank" rel="noopener" class="settings-option-btn">☕ Buy Me a Coffee</a>
+      <a href="mailto:support@shoppinglistbycj.app" class="settings-option-btn">✉️ Contact Support</a>
     </div>
 
     <div class="settings-stack">
@@ -452,6 +461,91 @@
 
     <div class="footer-actions">
       <button class="ghost-btn" id="backToSettingsFromLicencesBtn">← Back to Settings</button>
+    </div>
+  </div>
+
+  <!-- HELP GUIDE VIEW -->
+  <div id="helpGuideView" class="hidden">
+    <div class="aisle-heading" style="margin-bottom: 16px;">Help Guide</div>
+
+    <div class="privacy-policy-scroll" aria-label="Help Guide content">
+      <h1 class="privacy-policy-title">User Guide</h1>
+      <p class="privacy-policy-updated">Everything you need to know to get the most out of Shopping List by CJ — from your first list to backing up your data.</p>
+
+      <h2 class="privacy-policy-heading">1. Getting started</h2>
+      <p>Shopping List by CJ is a free web app — there's nothing to buy, no sign-up, and no account to create. You're already using it, so you're set.</p>
+      <p><strong>Installing it like a real app:</strong> Shopping List by CJ is a Progressive Web App (PWA), which means you can install it to your phone or desktop so it opens instantly, works offline and feels like a native app — no app store required.</p>
+      <p>• <strong>Android &amp; desktop Chrome</strong> — look for the Install App card on the My Lists screen, or the install icon in your browser's address bar. Tap it and confirm.</p>
+      <p>• <strong>iPhone &amp; iPad (Safari)</strong> — tap the Share icon in Safari's toolbar, scroll down and tap Add to Home Screen, then tap Add. The app also walks you through these steps on the My Lists screen.</p>
+      <p>Once installed, the app keeps working even with no signal — handy for supermarkets with patchy reception.</p>
+
+      <h2 class="privacy-policy-heading">2. My Lists</h2>
+      <p>My Lists is the home screen — it's where all your shopping lists live. Each card shows the list's name, an estimated total based on what's in it, the budget you've set, and how much of that budget is remaining.</p>
+      <p><strong>Creating a list:</strong> tap + New List and set a List Name (e.g. "Weekly Shop", "Mum's", "BBQ Sunday"), an Icon, a Colour, and a Budget for how much you're aiming to spend.</p>
+      <p>There's no limit on how many lists you can have — keep one for the weekly groceries and separate ones for anything else you shop for.</p>
+      <p>As you tick items into a list, its card updates automatically: the progress bar fills up as your estimated total gets closer to your budget, and turns to a warning colour if you go over.</p>
+
+      <h2 class="privacy-policy-heading">3. Your product catalogue</h2>
+      <p>The Products tab is your personal catalogue — every item you've ever added to the app, all in one place, listed alphabetically. It starts empty on purpose, so it only ever fills up with things you actually buy.</p>
+      <p>From the Products tab you can search your catalogue, filter to ⭐ Favourites only, tap any product to add or remove it from the list you're currently working on, or use Add Favourites to drop every favourited product into the current list in one tap.</p>
+
+      <h2 class="privacy-policy-heading">4. Adding &amp; editing products</h2>
+      <p>Tap + Add Product from either the My Lists or Products screen to open the product form. You can fill this in manually, or use the search shortcut first.</p>
+      <p><strong>Search Store Page Direct:</strong> pick Aldi, Coles or Woolworths, type what you're after, and tap ↗ Search Web to jump straight to that store's website in a new tab — handy for checking the current price before you enter it.</p>
+      <p><strong>Product details:</strong> item name (e.g. "Bananas"), category (the aisle it belongs to, used to group items in Shopping mode), store (Aldi, Coles or Woolworths), and price &amp; quantity — price is optional, but it's what powers your budget tracking.</p>
+      <p>To edit a product later, tap the pencil 🖊️ icon next to it in your catalogue. To remove one, delete it from the catalogue — note that pinned items are protected and can't be deleted until you unpin them first (see below).</p>
+
+      <h2 class="privacy-policy-heading">5. Building your weekly list</h2>
+      <p>With products in your catalogue, building a week's shop is just a matter of tapping the ones you need from the Products tab. Tapping a product adds it to your active list; tapping it again removes it. Use the quantity controls to bump the amount up or down.</p>
+      <p>The Estimated Total bar at the top of the Products screen updates live as you add and remove items, so you always know roughly where you stand before you even get to Shopping mode.</p>
+
+      <h2 class="privacy-policy-heading">6. Favourites &amp; pinning</h2>
+      <p>Two small icons sit next to each product in your catalogue, and they do different jobs:</p>
+      <p>• <strong>⭐ Favourite</strong> — marks a product you buy often, so it shows up in the Favourites filter and can be bulk-added with Add Favourites. Favouriting doesn't change where the item sits in the list — your catalogue always stays in alphabetical order.</p>
+      <p>• <strong>📍 Pin</strong> — locks a product against accidental deletion. A pinned item can't be removed by the Delete Unpinned Catalogue tool in Settings, so it's a good way to protect your regulars. Tap the pin icon again (now shown as ❌) to unpin it.</p>
+
+      <h2 class="privacy-policy-heading">7. Shopping mode</h2>
+      <p>Once your list is built, tap Start ▶ to switch into Shopping mode — a distraction-free, tap-to-check view designed for walking the aisles rather than staring at a spreadsheet.</p>
+      <p>Items are grouped by aisle/category, so you can work through the shop in order. Use the store filter bar (All / Aldi / Coles / Woolworths) to focus on one store at a time if your list spans more than one.</p>
+      <p>Tap an item to check it off. The progress bar and "X of Y collected" counter at the top track how far through the shop you are. When everything's ticked, you'll see a "🎉 Trolley's full!" banner.</p>
+      <p>← Edit List takes you back to the Products view if you need to add or remove something. Shop Done wraps up the run.</p>
+
+      <h2 class="privacy-policy-heading">8. Budget tracking</h2>
+      <p>Every list has its own budget, set when you create it (editable any time). As you add priced items, the app calculates an estimated total and shows you how much budget you have left — right on the list card and again at the top of the Products screen.</p>
+      <p>If your estimated total goes over budget, the progress bar changes colour so it's obvious at a glance. This is an estimate based on the prices you've entered, not a live receipt total — it's there to help you plan, not to replace checking the till.</p>
+
+      <h2 class="privacy-policy-heading">9. Backup &amp; restore</h2>
+      <p>Because your data lives on your device (see Your data &amp; privacy below), it's worth backing up before you clear your browser data, switch devices, or just for peace of mind. From Settings:</p>
+      <p>• <strong>💾 Backup Shopping Data</strong> — exports your entire catalogue, lists, favourites, pins and budgets to a .json file you can save anywhere.</p>
+      <p>• <strong>📥 Restore Shopping Data</strong> — pick a previously exported backup file to restore. This replaces your current data after you confirm, so double-check you've got the right file first.</p>
+
+      <h2 class="privacy-policy-heading">10. Settings &amp; appearance</h2>
+      <p>Tap the ⚙️ icon (top-right of the app) to open Settings, where you'll find:</p>
+      <p>• <strong>⬆ Check for Updates</strong> — manually check you're on the latest version. The app will also show an "Update Now" banner automatically when a new version is ready.</p>
+      <p>• <strong>Appearance</strong> — switch between Light, Dark, or System Default (matches your device's setting).</p>
+      <p>• <strong>About</strong> — the app's Privacy Policy and open-source Licences.</p>
+      <p>• <strong>Support</strong> — buy the developer a coffee or get in touch (see Feedback &amp; support below).</p>
+      <p>• <strong>Danger Zone</strong> — Delete Unpinned Catalogue clears out everything except pinned items. Handy for a fresh start, but there's no undo, so back up first if you're not sure.</p>
+
+      <h2 class="privacy-policy-heading">11. Your data &amp; privacy</h2>
+      <p>Shopping List by CJ doesn't require an account and doesn't upload your shopping lists anywhere. Everything — your catalogue, lists, favourites, pins and budgets — is stored locally on your device using your browser's local storage.</p>
+      <p>This has a couple of practical side effects worth knowing: your data is tied to the specific browser and device you used it on (it won't automatically appear on a second phone or a different browser), and clearing your browser's site data will remove it. That's exactly what the Backup &amp; Restore feature above is for.</p>
+      <p>For the full details, see the Privacy Policy in Settings → About.</p>
+
+      <h2 class="privacy-policy-heading">12. Feedback &amp; support</h2>
+      <p>This app is built and maintained by one person, and tester feedback genuinely shapes what gets fixed and built next. If something breaks, feels confusing, or you've got an idea for a feature, use Contact Support in Settings to get in touch.</p>
+      <p>If you're enjoying the app and want to chip in towards its development, there's a Buy Me a Coffee link in Settings too — completely optional, always appreciated.</p>
+
+      <h2 class="privacy-policy-heading">13. Troubleshooting &amp; FAQ</h2>
+      <p><strong>The app doesn't seem to have my latest data.</strong> Data is stored per-browser, per-device (see Your data &amp; privacy). If you're opening the app somewhere new, use Restore from a backup you exported earlier.</p>
+      <p><strong>I deleted something by accident.</strong> There's no undo for deletions or restores, which is why regular backups are worth doing — especially before using Restore or Delete Unpinned Catalogue in Settings.</p>
+      <p><strong>A product I want to delete won't go away.</strong> It's probably pinned. Tap the pin icon (shown as ❌ once pinned) to unpin it, then delete as normal.</p>
+      <p><strong>Does it work without internet?</strong> Yes — once installed, the app is offline-first and will keep working without a connection. You only need the internet for the optional "Search Store Page Direct" web search and for checking app updates.</p>
+      <p><strong>Is it really free?</strong> Yes, no catches. If you'd like to support development, there's an optional Buy Me a Coffee link in Settings.</p>
+    </div>
+
+    <div class="footer-actions">
+      <button class="ghost-btn" id="backToSettingsFromHelpGuideBtn">← Back to Settings</button>
     </div>
   </div>
 

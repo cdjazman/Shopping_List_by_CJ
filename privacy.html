@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Privacy Policy — Shopping List by CJ</title>
+<meta name="description" content="Privacy Policy for Shopping List by CJ, a local-only, offline-first shopping list app.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#C85A1F">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+
+<!--
+  This page duplicates the Privacy Policy content that also lives inside
+  the app itself (index.html, #privacyPolicyView), so that it has a
+  direct, linkable URL for use in Google Play Console's Data Safety
+  section and Apple's App Privacy details - both require a standalone
+  URL, not content buried behind in-app navigation. If you edit the
+  policy text in the app, mirror the change here too.
+-->
+<script>
+(function () {
+  try {
+    var stored = localStorage.getItem('shopping-theme-preference') || 'system';
+    var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var resolved = stored === 'system' ? (isDark ? 'dark' : 'light') : (stored === 'light' ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme-preference', stored);
+    document.documentElement.setAttribute('data-theme', resolved);
+
+    var metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', resolved === 'dark' ? '#C85A1F' : '#F7F7F5');
+    }
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme-preference', 'system');
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+</script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main id="app" class="app">
+
+  <div id="privacyPolicyView">
+    <div class="aisle-heading" style="margin-bottom: 16px;">Privacy Policy</div>
+
+    <div class="privacy-policy-scroll" aria-label="Privacy Policy content">
+      <h1 class="privacy-policy-title">Privacy Policy</h1>
+      <p class="privacy-policy-updated">Last Updated: 27 July 2026</p>
+
+      <h2 class="privacy-policy-heading">Privacy Policy for Shopping List by CJ</h2>
+      <p>Shopping List by CJ ("the App") is committed to protecting your privacy. This Privacy Policy explains what information the App collects, how it is used, and the choices you have regarding your data.</p>
+
+      <h2 class="privacy-policy-heading">Information We Collect</h2>
+      <p>Shopping List by CJ is designed with privacy in mind.</p>
+      <p>The App stores information that you create, including:</p>
+      <p>• Shopping lists</p>
+      <p>• Product names</p>
+      <p>• Categories</p>
+      <p>• Favourite items</p>
+      <p>• Budgets</p>
+      <p>• Shopping preferences</p>
+      <p>• App settings</p>
+      <p>This information is stored locally on your device unless you choose to export it.</p>
+
+      <h2 class="privacy-policy-heading">Personal Information</h2>
+      <p>Shopping List by CJ does not require you to create an account.</p>
+      <p>The App does not intentionally collect personal information such as:</p>
+      <p>• Name</p>
+      <p>• Email address</p>
+      <p>• Phone number</p>
+      <p>• Home address</p>
+      <p>• Payment information</p>
+
+      <h2 class="privacy-policy-heading">How Your Data Is Used</h2>
+      <p>Your shopping data is used solely to provide the features of the application, including:</p>
+      <p>• Managing shopping lists</p>
+      <p>• Organising products</p>
+      <p>• Calculating budgets and totals</p>
+      <p>• Remembering your preferences</p>
+      <p>• Restoring your data from backups</p>
+
+      <h2 class="privacy-policy-heading">Data Storage</h2>
+      <p>Your data is stored locally on your device using your browser's local storage.</p>
+      <p>If Backup and Restore are used:</p>
+      <p>• Backups are created only when you choose to export them.</p>
+      <p>• Backup files are stored wherever you choose to save them.</p>
+      <p>• Restoring a backup replaces the current application data after confirmation.</p>
+
+      <h2 class="privacy-policy-heading">Internet Access</h2>
+      <p>Shopping List by CJ may access the internet for limited purposes such as:</p>
+      <p>• Checking for application updates.</p>
+      <p>• Retrieving product or pricing information (where supported).</p>
+      <p>• Downloading future application updates.</p>
+      <p>The App does not upload your shopping lists or personal data to our servers.</p>
+
+      <h2 class="privacy-policy-heading">Third-Party Services</h2>
+      <p>The App may interact with third-party retailers or services to obtain product information or pricing.</p>
+      <p>Those services operate under their own privacy policies.</p>
+      <p>Shopping List by CJ is not responsible for the privacy practices of third-party providers.</p>
+
+      <h2 class="privacy-policy-heading">Data Security</h2>
+      <p>Reasonable measures are taken to protect your information.</p>
+      <p>However, no method of electronic storage or internet transmission is completely secure.</p>
+
+      <h2 class="privacy-policy-heading">Children's Privacy</h2>
+      <p>Shopping List by CJ is not directed toward children under 13 years of age and does not knowingly collect personal information from children.</p>
+
+      <h2 class="privacy-policy-heading">Changes to This Policy</h2>
+      <p>This Privacy Policy may be updated from time to time.</p>
+      <p>Changes become effective when published within the App or included in a future release.</p>
+
+      <h2 class="privacy-policy-heading">Your Rights</h2>
+      <p>You remain in control of your data.</p>
+      <p>You may:</p>
+      <p>• Delete your shopping data at any time.</p>
+      <p>• Export your data using the Backup feature.</p>
+      <p>• Restore your data from a previous backup.</p>
+      <p>• Uninstall the App to remove locally stored information.</p>
+
+      <h2 class="privacy-policy-heading">Contact</h2>
+      <p>If you have questions about this Privacy Policy or Shopping List by CJ, please contact us through the official Shopping List by CJ GitHub repository.</p>
+    </div>
+
+    <div class="footer-actions">
+      <a class="ghost-btn" href="/" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">← Back to the App</a>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

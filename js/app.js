@@ -37,6 +37,7 @@ const shopView = document.getElementById('shopView');
 const settingsView = document.getElementById('settingsView');
 const privacyPolicyView = document.getElementById('privacyPolicyView');
 const licencesView = document.getElementById('licencesView');
+const helpGuideView = document.getElementById('helpGuideView');
 const aisleGroups = document.getElementById('aisleGroups');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
@@ -70,6 +71,8 @@ const openPrivacyPolicyBtn = document.getElementById('openPrivacyPolicyBtn');
 const backToSettingsFromPrivacyBtn = document.getElementById('backToSettingsFromPrivacyBtn');
 const openLicencesBtn = document.getElementById('openLicencesBtn');
 const backToSettingsFromLicencesBtn = document.getElementById('backToSettingsFromLicencesBtn');
+const openHelpGuideBtn = document.getElementById('openHelpGuideBtn');
+const backToSettingsFromHelpGuideBtn = document.getElementById('backToSettingsFromHelpGuideBtn');
 const thirdPartyLicencesList = document.getElementById('thirdPartyLicencesList');
 const noThirdPartyLicencesMessage = document.getElementById('noThirdPartyLicencesMessage');
 
@@ -83,6 +86,25 @@ let currentThemePreference = 'system';
 
 let selectedStore = "Aldi";
 let activeView = 'lists';
+
+// Which top-level screen the user was on is remembered for the lifetime of
+// the browser tab (sessionStorage, not localStorage — this is navigation
+// state, not user data, so it shouldn't survive closing the tab or carry
+// over to a different tab). load() reads this on startup so a manual
+// refresh returns you to the screen you were looking at instead of always
+// resetting to My Lists.
+const ACTIVE_VIEW_STORAGE_KEY = 'shopping-active-view';
+const RESTORABLE_VIEWS = ['lists', 'main', 'shop', 'settings', 'privacy-policy', 'licences', 'help-guide'];
+
+function setActiveView(view) {
+  activeView = view;
+  try {
+    sessionStorage.setItem(ACTIVE_VIEW_STORAGE_KEY, view);
+  } catch (e) {
+    // sessionStorage unavailable (e.g. private browsing) — view just won't
+    // be restored on refresh, which is a harmless fallback to My Lists.
+  }
+}
 let currentListId = 'weekly';
 let mainScrollTop = 0;
 let activeProductDeleteDialog = null;
@@ -244,7 +266,52 @@ function load(){
     renderLists();
   }
 
-  showLists();
+  requestPersistentStorage();
+  restoreLastView();
+}
+
+// Best-effort request for persistent (harder-to-evict) storage. This app's
+// entire data model is localStorage, and iOS Safari's Intelligent Tracking
+// Prevention can silently clear it for a home-screen PWA that hasn't been
+// opened in about 7 days. Asking for persistence doesn't guarantee the
+// browser grants it, and unsupported/denied cases fail silently — this is
+// a mitigation, not a fix, so it's fine to fire-and-forget on every load.
+function requestPersistentStorage() {
+  if (!navigator.storage || typeof navigator.storage.persist !== 'function') return;
+
+  navigator.storage.persist().catch(() => {
+    // Ignore — some browsers reject rather than resolve false for
+    // unsupported/denied requests. Either way there's nothing actionable
+    // to do here.
+  });
+}
+
+// Returns to whichever top-level screen (Products, Shop, Settings, etc.)
+// the user was on before a refresh, falling back to My Lists if nothing
+// was saved, the saved value isn't a recognised view, or this is a fresh
+// tab/first launch.
+function restoreLastView() {
+  let savedView = null;
+  try {
+    savedView = sessionStorage.getItem(ACTIVE_VIEW_STORAGE_KEY);
+  } catch (e) {
+    // sessionStorage unavailable — fall through to My Lists below.
+  }
+
+  if (!RESTORABLE_VIEWS.includes(savedView)) {
+    showLists();
+    return;
+  }
+
+  switch (savedView) {
+    case 'main': showMain(); break;
+    case 'shop': showShop(); break;
+    case 'settings': showSettings(); break;
+    case 'privacy-policy': showPrivacyPolicy(); break;
+    case 'licences': showLicences(); break;
+    case 'help-guide': showHelpGuide(); break;
+    default: showLists();
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -668,6 +735,7 @@ function openAddView(){
   settingsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   addView.classList.remove('hidden');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -693,6 +761,7 @@ function openEditView(id){
       settingsView.classList.add('hidden');
       if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
       if (licencesView) licencesView.classList.add('hidden');
+      if (helpGuideView) helpGuideView.classList.add('hidden');
       addView.classList.remove('hidden');
       topTabs.classList.remove('hidden');
       bottomNav.classList.add('hidden');
@@ -929,7 +998,7 @@ function restoreMainScrollPosition(){
 }
 
 function showLists(){
-  activeView = 'lists';
+  setActiveView('lists');
   myListsView.classList.remove('hidden');
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
@@ -937,6 +1006,7 @@ function showLists(){
   settingsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'lists');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -945,10 +1015,11 @@ function showLists(){
 }
 
 function showMain(){
-  activeView = 'main';
+  setActiveView('main');
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'main');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -958,10 +1029,11 @@ function showMain(){
   restoreMainScrollPosition();
 }
 function showShop(){
-  activeView = 'shop';
+  setActiveView('shop');
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'shop');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -969,10 +1041,11 @@ function showShop(){
 }
 function showSettings(){
   captureMainScrollPosition();
-  activeView = 'settings';
+  setActiveView('settings');
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'settings');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -980,13 +1053,14 @@ function showSettings(){
 
 function showPrivacyPolicy() {
   captureMainScrollPosition();
-  activeView = 'privacy-policy';
+  setActiveView('privacy-policy');
   myListsView.classList.add('hidden');
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
   addView.classList.add('hidden');
   settingsView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   if (privacyPolicyView) {
     privacyPolicyView.classList.remove('hidden');
     privacyPolicyView.scrollTop = 0;
@@ -1042,17 +1116,36 @@ function renderThirdPartyLicences() {
 
 function showLicences() {
   captureMainScrollPosition();
-  activeView = 'licences';
+  setActiveView('licences');
   myListsView.classList.add('hidden');
   mainView.classList.add('hidden');
   shopView.classList.add('hidden');
   addView.classList.add('hidden');
   settingsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   if (licencesView) {
     renderThirdPartyLicences();
     licencesView.classList.remove('hidden');
     licencesView.scrollTop = 0;
+  }
+  topTabs.classList.remove('hidden');
+  bottomNav.classList.add('hidden');
+}
+
+function showHelpGuide() {
+  captureMainScrollPosition();
+  setActiveView('help-guide');
+  myListsView.classList.add('hidden');
+  mainView.classList.add('hidden');
+  shopView.classList.add('hidden');
+  addView.classList.add('hidden');
+  settingsView.classList.add('hidden');
+  if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) {
+    helpGuideView.classList.remove('hidden');
+    helpGuideView.scrollTop = 0;
   }
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -1138,6 +1231,12 @@ if (openLicencesBtn) {
 if (backToSettingsFromLicencesBtn) {
   backToSettingsFromLicencesBtn.addEventListener('click', showSettings);
 }
+if (openHelpGuideBtn) {
+  openHelpGuideBtn.addEventListener('click', showHelpGuide);
+}
+if (backToSettingsFromHelpGuideBtn) {
+  backToSettingsFromHelpGuideBtn.addEventListener('click', showSettings);
+}
 if (backToListsBtn) {
   backToListsBtn.addEventListener('click', showLists);
 }
@@ -1154,7 +1253,7 @@ if (tabShop) {
   bindNavAction(tabShop, showShop);
 }
 if (newListBtn) {
-  newListBtn.addEventListener('click', openNewListModal);
+  newListBtn.addEventListener('click', () => openNewListModal());
 }
 if (newListCancelBtn) {
   newListCancelBtn.addEventListener('click', closeNewListModal);
