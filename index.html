@@ -273,6 +273,7 @@
 
     <div class="settings-stack">
       <div class="settings-section-title">ℹ About</div>
+      <button type="button" id="openHelpGuideBtn" class="settings-option-btn">❓ Help Guide</button>
       <button type="button" id="openPrivacyPolicyBtn" class="settings-option-btn">📜 Privacy Policy</button>
       <button type="button" id="openLicencesBtn" class="settings-option-btn">📄 Licences</button>
     </div>
@@ -460,6 +461,53 @@
 
     <div class="footer-actions">
       <button class="ghost-btn" id="backToSettingsFromLicencesBtn">← Back to Settings</button>
+    </div>
+  </div>
+
+  <!-- HELP GUIDE VIEW -->
+  <div id="helpGuideView" class="hidden">
+    <div class="aisle-heading" style="margin-bottom: 16px;">Help Guide</div>
+
+    <div class="privacy-policy-scroll" aria-label="Help Guide content">
+      <h1 class="privacy-policy-title">Help Guide</h1>
+      <p class="privacy-policy-updated">A quick tour of how the app works.</p>
+
+      <h2 class="privacy-policy-heading">My Lists</h2>
+      <p>Your shopping lists live here — create as many as you like (e.g. "Weekly Shop", "Party"), each with its own icon, colour and optional budget.</p>
+      <p>Tap a list to open it. Use the menu on a list card to rename, re-colour, pin or delete it.</p>
+
+      <h2 class="privacy-policy-heading">Products</h2>
+      <p>This is your full product catalogue — every item you've ever added, listed alphabetically. Tap an item to add or remove it from the active list.</p>
+      <p>• ⭐ <strong>Favourite</strong> — marks the item for quick access in the Favourites filter, without moving it in the main list.</p>
+      <p>• 📍 <strong>Pin</strong> — keeps an item at the top of your active shopping run.</p>
+      <p>• 🖊️ <strong>Edit</strong> — change an item's name, category, price or store.</p>
+      <p>• ❌ <strong>Remove</strong> — delete an item from your catalogue entirely.</p>
+      <p>Use <strong>Add Favourites</strong> to quickly add all your starred items to the active list at once, or <strong>+ Add Product</strong> to create a brand new item.</p>
+      <p>The <strong>Search products</strong> box filters the catalogue as you type. The <strong>All / Favourites</strong> pills switch between your full catalogue and just your starred items.</p>
+
+      <h2 class="privacy-policy-heading">Shop</h2>
+      <p>Once you've built your list, tap <strong>Start</strong> to enter Shop mode — a focused, aisle-by-aisle view of just what's on your active list, so you're not scrolling past everything else in your catalogue while you're actually shopping.</p>
+      <p>Check items off as you go. Your estimated total updates live at the top.</p>
+
+      <h2 class="privacy-policy-heading">Settings</h2>
+      <p>• <strong>Backup / Restore Shopping Data</strong> — export your entire catalogue and lists to a file, or restore from a previous backup. Restoring replaces all current data, so use it as a full backup/restore tool, not a way to merge in a few items.</p>
+      <p>• <strong>Appearance</strong> — switch between Light, Dark, or match your device's system setting.</p>
+      <p>• <strong>Check for Updates</strong> — manually check whether a newer version of the app is available.</p>
+
+      <h2 class="privacy-policy-heading">Staying Up to Date</h2>
+      <p>Shopping List by CJ is a Progressive Web App — when a new version is released, you'll see an "Update Now" banner the next time you open the app. Tap it to update immediately, or "Not Now" to keep using the current version until you're ready.</p>
+      <p>Updates never happen silently in the background without your say-so, so your app won't change mid-shop.</p>
+
+      <h2 class="privacy-policy-heading">Installing the App</h2>
+      <p>On Android and Desktop, look for the Install App prompt to add Shopping List by CJ to your home screen or app list, just like a native app. On iPhone, use Safari's "Add to Home Screen" option from the Share menu.</p>
+      <p>Installed or not, the app works fully offline once it's loaded — your data is stored on your device, not in the cloud.</p>
+
+      <h2 class="privacy-policy-heading">Need More Help?</h2>
+      <p>If something isn't working as expected, use <strong>Contact Support</strong> in Settings to get in touch.</p>
+    </div>
+
+    <div class="footer-actions">
+      <button class="ghost-btn" id="backToSettingsFromHelpGuideBtn">← Back to Settings</button>
     </div>
   </div>
 

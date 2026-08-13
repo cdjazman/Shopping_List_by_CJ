@@ -37,6 +37,7 @@ const shopView = document.getElementById('shopView');
 const settingsView = document.getElementById('settingsView');
 const privacyPolicyView = document.getElementById('privacyPolicyView');
 const licencesView = document.getElementById('licencesView');
+const helpGuideView = document.getElementById('helpGuideView');
 const aisleGroups = document.getElementById('aisleGroups');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
@@ -70,6 +71,8 @@ const openPrivacyPolicyBtn = document.getElementById('openPrivacyPolicyBtn');
 const backToSettingsFromPrivacyBtn = document.getElementById('backToSettingsFromPrivacyBtn');
 const openLicencesBtn = document.getElementById('openLicencesBtn');
 const backToSettingsFromLicencesBtn = document.getElementById('backToSettingsFromLicencesBtn');
+const openHelpGuideBtn = document.getElementById('openHelpGuideBtn');
+const backToSettingsFromHelpGuideBtn = document.getElementById('backToSettingsFromHelpGuideBtn');
 const thirdPartyLicencesList = document.getElementById('thirdPartyLicencesList');
 const noThirdPartyLicencesMessage = document.getElementById('noThirdPartyLicencesMessage');
 
@@ -91,7 +94,7 @@ let activeView = 'lists';
 // refresh returns you to the screen you were looking at instead of always
 // resetting to My Lists.
 const ACTIVE_VIEW_STORAGE_KEY = 'shopping-active-view';
-const RESTORABLE_VIEWS = ['lists', 'main', 'shop', 'settings', 'privacy-policy', 'licences'];
+const RESTORABLE_VIEWS = ['lists', 'main', 'shop', 'settings', 'privacy-policy', 'licences', 'help-guide'];
 
 function setActiveView(view) {
   activeView = view;
@@ -306,6 +309,7 @@ function restoreLastView() {
     case 'settings': showSettings(); break;
     case 'privacy-policy': showPrivacyPolicy(); break;
     case 'licences': showLicences(); break;
+    case 'help-guide': showHelpGuide(); break;
     default: showLists();
   }
 }
@@ -731,6 +735,7 @@ function openAddView(){
   settingsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   addView.classList.remove('hidden');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -756,6 +761,7 @@ function openEditView(id){
       settingsView.classList.add('hidden');
       if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
       if (licencesView) licencesView.classList.add('hidden');
+      if (helpGuideView) helpGuideView.classList.add('hidden');
       addView.classList.remove('hidden');
       topTabs.classList.remove('hidden');
       bottomNav.classList.add('hidden');
@@ -1000,6 +1006,7 @@ function showLists(){
   settingsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'lists');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -1012,6 +1019,7 @@ function showMain(){
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'main');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -1025,6 +1033,7 @@ function showShop(){
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'shop');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -1036,6 +1045,7 @@ function showSettings(){
   myListsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   shoppingListUI.showView(mainView, shopView, addView, settingsView, tabMain, tabProducts, tabShop, 'settings');
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -1050,6 +1060,7 @@ function showPrivacyPolicy() {
   addView.classList.add('hidden');
   settingsView.classList.add('hidden');
   if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   if (privacyPolicyView) {
     privacyPolicyView.classList.remove('hidden');
     privacyPolicyView.scrollTop = 0;
@@ -1112,10 +1123,29 @@ function showLicences() {
   addView.classList.add('hidden');
   settingsView.classList.add('hidden');
   if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (helpGuideView) helpGuideView.classList.add('hidden');
   if (licencesView) {
     renderThirdPartyLicences();
     licencesView.classList.remove('hidden');
     licencesView.scrollTop = 0;
+  }
+  topTabs.classList.remove('hidden');
+  bottomNav.classList.add('hidden');
+}
+
+function showHelpGuide() {
+  captureMainScrollPosition();
+  setActiveView('help-guide');
+  myListsView.classList.add('hidden');
+  mainView.classList.add('hidden');
+  shopView.classList.add('hidden');
+  addView.classList.add('hidden');
+  settingsView.classList.add('hidden');
+  if (privacyPolicyView) privacyPolicyView.classList.add('hidden');
+  if (licencesView) licencesView.classList.add('hidden');
+  if (helpGuideView) {
+    helpGuideView.classList.remove('hidden');
+    helpGuideView.scrollTop = 0;
   }
   topTabs.classList.remove('hidden');
   bottomNav.classList.add('hidden');
@@ -1200,6 +1230,12 @@ if (openLicencesBtn) {
 }
 if (backToSettingsFromLicencesBtn) {
   backToSettingsFromLicencesBtn.addEventListener('click', showSettings);
+}
+if (openHelpGuideBtn) {
+  openHelpGuideBtn.addEventListener('click', showHelpGuide);
+}
+if (backToSettingsFromHelpGuideBtn) {
+  backToSettingsFromHelpGuideBtn.addEventListener('click', showSettings);
 }
 if (backToListsBtn) {
   backToListsBtn.addEventListener('click', showLists);
