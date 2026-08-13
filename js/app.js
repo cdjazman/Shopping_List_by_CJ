@@ -263,7 +263,24 @@ function load(){
     renderLists();
   }
 
+  requestPersistentStorage();
   restoreLastView();
+}
+
+// Best-effort request for persistent (harder-to-evict) storage. This app's
+// entire data model is localStorage, and iOS Safari's Intelligent Tracking
+// Prevention can silently clear it for a home-screen PWA that hasn't been
+// opened in about 7 days. Asking for persistence doesn't guarantee the
+// browser grants it, and unsupported/denied cases fail silently — this is
+// a mitigation, not a fix, so it's fine to fire-and-forget on every load.
+function requestPersistentStorage() {
+  if (!navigator.storage || typeof navigator.storage.persist !== 'function') return;
+
+  navigator.storage.persist().catch(() => {
+    // Ignore — some browsers reject rather than resolve false for
+    // unsupported/denied requests. Either way there's nothing actionable
+    // to do here.
+  });
 }
 
 // Returns to whichever top-level screen (Products, Shop, Settings, etc.)
