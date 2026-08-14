@@ -839,33 +839,6 @@ function escapeHtml(str){
   return shoppingListUI.escapeHtml(str);
 }
 
-function addFavouriteProductsToCurrentList() {
-  const activeListId = getActiveListId();
-  const favouriteProducts = catalog.filter((item) => Boolean(item.favourite));
-  const addedProducts = [];
-
-  favouriteProducts.forEach((item) => {
-    if (!item.lists?.[activeListId]) {
-      window.shoppingListStorage.addProductToList(item.id, activeListId);
-      addedProducts.push(item);
-    }
-  });
-
-  save();
-  renderMain();
-  renderLists();
-  updateActiveListHeader();
-
-  const alreadyExistingCount = favouriteProducts.length - addedProducts.length;
-  const message = addedProducts.length === 0
-    ? 'All favourite products are already in this list.'
-    : alreadyExistingCount > 0
-      ? `${addedProducts.length} added, ${alreadyExistingCount} already existed.`
-      : `${addedProducts.length} favourite products added.`;
-
-  showConfirm(message, () => {});
-}
-
 function getFilteredProducts() {
   const query = (productsSearchQuery || '').trim().toLowerCase();
   const favouritesOnly = productsFavouriteFilter === 'favourites';
@@ -1303,9 +1276,20 @@ if (addFavouritesBtn) {
       const activeListId = getActiveListId();
       const addedProducts = [];
 
+      // Mutate each favourited item's `lists` entry directly and persist
+      // once at the end (same pattern as removeActiveListEntries below),
+      // rather than calling shoppingListStorage.addProductToList per item.
+      // That storage function re-saves (and internally re-clones every
+      // catalog item into new object instances) on every single call, so
+      // looping it here silently detached `catalog`'s item references from
+      // the storage module's own copy after the first iteration - only the
+      // first favourite actually stuck, and the final save() below then
+      // overwrote the correctly-saved data for the rest with this stale
+      // pre-loop snapshot, even though the toast reported them all added.
       favouriteProducts.forEach((item) => {
         if (!item.lists?.[activeListId]) {
-          window.shoppingListStorage.addProductToList(item.id, activeListId);
+          if (!item.lists || typeof item.lists !== 'object') item.lists = {};
+          item.lists[activeListId] = { qty: 1, checked: false, added: Date.now() };
           addedProducts.push(item);
         }
       });
