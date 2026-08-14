@@ -262,6 +262,7 @@ header{
   color:var(--color-primary);
   font-size:0.95rem;
   font-weight:600;
+  text-decoration:none;
   cursor:pointer;
   transition:background-color var(--transition-hover), color var(--transition-hover), border-color var(--transition-hover), transform var(--transition-fast);
   flex-shrink:0;
