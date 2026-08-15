@@ -167,18 +167,19 @@
       <div class="active-list-header-name">Add Product</div>
     </div>
 
-    <!-- DIRECT WEB SEARCH BAR -->
+    <!-- SEARCH STORE FOR PRODUCTS -->
     <div class="form-field">
-      <label>Search Store Page Direct</label>
+      <label>Search a Store</label>
       <div style="display:flex; gap:6px; margin-bottom:8px;" id="searchStoreSelect">
         <button type="button" class="filter-btn active" data-searchstore="Aldi">Aldi</button>
         <button type="button" class="filter-btn" data-searchstore="Coles">Coles</button>
         <button type="button" class="filter-btn" data-searchstore="Woolworths">Woolworths</button>
       </div>
       <div style="display:flex; gap:8px;">
-        <input type="text" id="liveSearchInput" placeholder="Enter search term (e.g. Chicken Chips)">
-        <button type="button" class="ghost-btn" id="searchApiBtn" style="padding:0 14px; font-weight:700; background:var(--paper-dim);">↗ Search Web</button>
+        <input type="text" id="liveSearchInput" placeholder="Enter search term (e.g. Coffee)">
+        <button type="button" class="ghost-btn" id="searchApiBtn" style="padding:0 14px; font-weight:700; background:var(--paper-dim);">Search</button>
       </div>
+      <div id="searchResultsWrap" class="search-results hidden" aria-live="polite"></div>
     </div>
 
     <div class="form-field">
