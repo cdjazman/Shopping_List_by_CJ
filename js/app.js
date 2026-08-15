@@ -726,6 +726,10 @@ function openAddView(){
   priceInput.value = '';
   qtyInput.value = '1';
   document.getElementById('liveSearchInput').value = '';
+  if (searchResultsWrap) {
+    searchResultsWrap.classList.add('hidden');
+    searchResultsWrap.innerHTML = '';
+  }
   selectedStore = "Aldi";
   saveProductBtn.textContent = "Save Product";
   updateStoreToggleUI();
@@ -1369,6 +1373,7 @@ const restoreBtn = document.getElementById('restoreBtn');
 const importFileInput = document.getElementById('importFile');
 const searchApiBtn = document.getElementById('searchApiBtn');
 const liveSearchInput = document.getElementById('liveSearchInput');
+const searchResultsWrap = document.getElementById('searchResultsWrap');
 
 if (exportBtn) {
   exportBtn.addEventListener('click', exportCatalog);
@@ -1390,9 +1395,104 @@ if (shoppingListSettings?.attachSearchStoreHandlers) {
   );
 }
 
-// Direct Web Search Handler
+function storeSearchPageUrl(store, query) {
+  const encodedQuery = encodeURIComponent(query);
+  if (store === 'Woolworths') {
+    return `https://www.woolworths.com.au/shop/search/products?searchTerm=${encodedQuery}`;
+  } else if (store === 'Coles') {
+    return `https://www.coles.com.au/search?q=${encodedQuery}`;
+  } else if (store === 'Aldi') {
+    return `https://www.aldi.com.au/products/search?q=${encodedQuery}`;
+  }
+  return '';
+}
+
+function setSearchResultsStatus(message) {
+  if (!searchResultsWrap) return;
+  searchResultsWrap.classList.remove('hidden');
+  searchResultsWrap.innerHTML = `<div class="search-results__status">${escapeHtml(message)}</div>`;
+}
+
+function catalogHasProductNamed(name) {
+  const target = name.trim().toLowerCase();
+  return catalog.some((item) => (item.name || '').trim().toLowerCase() === target);
+}
+
+// Adds a search result straight into the product catalogue (the
+// "Products" screen), the same place manually saving the Add Product
+// form puts things. It does NOT add the item to any shopping list —
+// that matches how manually adding a product already behaves; the user
+// ticks it onto a list afterwards from the Products screen.
+function addSearchResultToCatalog(result, store) {
+  if (catalogHasProductNamed(result.name)) {
+    return { added: false, reason: 'exists' };
+  }
+
+  catalog.push({
+    id: Math.random().toString(36).slice(2, 9),
+    name: result.name,
+    aisle: 'Pantry & Dry Goods',
+    store: store,
+    price: typeof result.price === 'number' ? result.price : null,
+    pinned: false,
+    favourite: false,
+    lists: {}
+  });
+
+  save();
+  renderMain();
+  return { added: true };
+}
+
+function renderSearchResults(results, store, fallbackUrl) {
+  if (!searchResultsWrap) return;
+  searchResultsWrap.classList.remove('hidden');
+
+  if (!results.length) {
+    searchResultsWrap.innerHTML = `
+      <div class="search-results__status">No results came back from ${escapeHtml(store)}.</div>
+      <a class="ghost-btn" href="${fallbackUrl}" target="_blank" rel="noopener" style="text-align:center; text-decoration:none;">↗ Search on ${escapeHtml(store)} directly instead</a>
+    `;
+    return;
+  }
+
+  searchResultsWrap.innerHTML = '';
+
+  results.forEach((result) => {
+    const row = document.createElement('div');
+    row.className = 'search-result-row';
+
+    const priceText = typeof result.price === 'number' ? `$${result.price.toFixed(2)}` : '';
+    const metaText = [priceText, result.unit].filter(Boolean).join(' · ');
+    const alreadyAdded = catalogHasProductNamed(result.name);
+
+    row.innerHTML = `
+      ${result.image ? `<img class="search-result-row__image" src="${result.image}" alt="" loading="lazy">` : ''}
+      <div class="search-result-row__info">
+        <div class="search-result-row__name">${escapeHtml(result.name)}</div>
+        ${metaText ? `<div class="search-result-row__meta">${escapeHtml(metaText)}</div>` : ''}
+      </div>
+      <button type="button" class="search-result-row__add" ${alreadyAdded ? 'disabled' : ''}>${alreadyAdded ? '✓ In Products' : '+ Add'}</button>
+    `;
+
+    const addBtn = row.querySelector('.search-result-row__add');
+    addBtn.addEventListener('click', () => {
+      const outcome = addSearchResultToCatalog(result, store);
+      if (outcome.added) {
+        addBtn.textContent = '✓ Added';
+        addBtn.disabled = true;
+      }
+    });
+
+    searchResultsWrap.appendChild(row);
+  });
+}
+
+// Search Handler — in-app results for Woolworths, direct link-out for
+// stores that aren't wired up to server-side search yet (Coles/Aldi;
+// see claude/supermarket-search-plan in the project for why).
 if (searchApiBtn && liveSearchInput) {
-  searchApiBtn.addEventListener('click', () => {
+  searchApiBtn.addEventListener('click', async () => {
     const query = liveSearchInput.value.trim();
 
     if (!query) {
@@ -1400,19 +1500,25 @@ if (searchApiBtn && liveSearchInput) {
       return;
     }
 
-    let searchUrl = '';
-    const encodedQuery = encodeURIComponent(query);
+    const store = selectedSearchStore;
+    const fallbackUrl = storeSearchPageUrl(store, query);
 
-    if (selectedSearchStore === 'Woolworths') {
-      searchUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${encodedQuery}`;
-    } else if (selectedSearchStore === 'Coles') {
-      searchUrl = `https://www.coles.com.au/search?q=${encodedQuery}`;
-    } else if (selectedSearchStore === 'Aldi') {
-      searchUrl = `https://www.aldi.com.au/products/search?q=${encodedQuery}`;
+    if (store !== 'Woolworths') {
+      if (fallbackUrl) window.open(fallbackUrl, '_blank');
+      return;
     }
 
-    if (searchUrl) {
-      window.open(searchUrl, '_blank');
+    setSearchResultsStatus(`Searching ${store} for "${query}"…`);
+    searchApiBtn.disabled = true;
+
+    try {
+      const response = await fetch(`/api/search?store=${encodeURIComponent(store)}&q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      renderSearchResults(Array.isArray(data.results) ? data.results : [], store, fallbackUrl);
+    } catch (err) {
+      renderSearchResults([], store, fallbackUrl);
+    } finally {
+      searchApiBtn.disabled = false;
     }
   });
 }
